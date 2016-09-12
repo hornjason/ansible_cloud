@@ -1,4 +1,3 @@
-JTH
 ansible.git
 
 roles
