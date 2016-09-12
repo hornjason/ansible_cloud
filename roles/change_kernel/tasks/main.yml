@@ -1,0 +1,42 @@
+---
+- name: Checking Kernel version
+  shell: uname -r
+  register: kernel_version
+ 
+- name: Changing Kernel to RHCK
+  #shell: /usr/sbin/grub2-set-default 0
+  shell: /usr/sbin/grub2-set-default 'Oracle Linux Server (3.10.0-327.el7.x86_64 with Linux) 7.2'
+  register: kernel_changed
+  when: '"3.10.0-327" not in kernel_version.stdout'
+
+- name: Rebuild Grub
+  shell: /usr/sbin/grub2-mkconfig -o /boot/grub2/grub.cfg
+  register: grub_rebuilt
+  when: '"3.10.0-327" not in kernel_version.stdout'
+
+- name: reboot
+  command: systemd-run --on-active=10 systemctl reboot
+  async: 0
+  poll: 0
+  when:
+    - kernel_changed|success
+    - grub_rebuilt|success 
+    - '"3.10.0-327" not in kernel_version.stdout'
+  tags:
+    - reboot
+
+- name: Waiting for blade to come back after installation reboot
+  become: false
+  local_action:
+    wait_for
+      host={{ inventory_hostname }}
+      state=started
+      port=22
+      delay=60
+      timeout=400
+  when:
+    - kernel_changed|success
+    - grub_rebuilt|success 
+    - '"3.10.0-327" not in kernel_version.stdout'
+  tags:
+    - reboot

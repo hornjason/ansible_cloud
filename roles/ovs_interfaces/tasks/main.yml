@@ -1,0 +1,42 @@
+---
+- name: load subnet variables
+  include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
+  run_once: true
+
+- name: Adding OVS options to labmgmt external interface on {{ ext_management_interface }}.{{ infrastructure.vlans.ext_management_vlan.vlan_id }}
+  template: src=tagged_management_interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ ext_management_interface }}.{{ infrastructure.vlans.ext_management_vlan.vlan_id }} owner=root group=root mode=0644 force=yes
+  when: infrastructure.vlans.ext_management_vlan.vlan_id is defined and infrastructure.vlans.ext_management_vlan.tagged_traffic_needed
+  tags: labmgmt
+
+- name: Adding OVS options to labmgmt external interface on {{ ext_management_interface }}
+  template: src=untagged_management_interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ ext_management_interface }} owner=root group=root mode=0644 force=yes
+  #template: src=untagged_management_interface.j2 dest=/tmp/ifcfg-{{ management_interface }} owner=root group=root mode=0644
+  when: not infrastructure.vlans.ext_management_vlan.tagged_traffic_needed
+  tags: labmgmt
+
+- name: Adding OVS options to labmgmt external interface on {{ ext_management_interface }} when tagged
+  template: src=ext_management_interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ ext_management_interface }} owner=root group=root mode=0644 force=yes
+  when: infrastructure.vlans.ext_management_vlan.vlan_id is defined and infrastructure.vlans.ext_management_vlan.tagged_traffic_needed
+  tags: labmgmt
+
+- name: Adding br-ex when tagged
+  template: src=br-ex.j2 dest=/etc/sysconfig/network-scripts/ifcfg-br-ex owner=root group=root mode=0644 force=yes
+  tags: labmgmt
+  when: infrastructure.vlans.ext_management_vlan.vlan_id is defined and infrastructure.vlans.ext_management_vlan.tagged_traffic_needed
+
+- name: Adding br-ex when NOT tagged
+  template: src=untagged_br-ex.j2 dest=/etc/sysconfig/network-scripts/ifcfg-br-ex owner=root group=root mode=0644 force=yes
+  tags: labmgmt
+  when: not infrastructure.vlans.ext_management_vlan.tagged_traffic_needed
+
+- name: Removing dummy interface from the OVS br-ex
+  openvswitch_port: bridge=br-ex port={{ dummy_physical_port_for_neutron }} state=absent
+  when: inventory_hostname in groups.controller
+
+- name: Bringing down dummy interface
+  shell: "/usr/sbin/ifdown {{ dummy_physical_port_for_neutron }}"
+
+- name: Removing the dummy interface ifcfg file
+  file: path=/etc/sysconfig/network-scripts/ifcfg-{{ dummy_physical_port_for_neutron }} state=absent
+
+#- pause:

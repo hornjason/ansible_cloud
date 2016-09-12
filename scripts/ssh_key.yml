@@ -1,0 +1,7 @@
+#!/usr/bin/ansible-playbook
+---
+- hosts: [all]
+  gather_facts: no
+  become: false
+  roles:
+    - { role: ssh_key, tags: ssh_key }

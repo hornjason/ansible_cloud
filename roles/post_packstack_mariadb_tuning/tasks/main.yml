@@ -1,0 +1,12 @@
+---
+# tuning mysqld / mariadb
+- name: tuning mariadb mysqld
+  ini_file:
+    dest=/etc/my.cnf
+    section=mysqld
+    option=innodb_buffer_pool_size
+    value=500M
+    backup=yes
+
+- name: Restarting mariadb service
+  service: name=mariadb state=restarted

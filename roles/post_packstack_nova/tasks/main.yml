@@ -1,0 +1,64 @@
+---
+- name: load subnet variables
+  include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"  
+  run_once: true
+
+- set_fact: ctr="{{ groups['controller'] }}"
+
+# NOVA
+#  crudini --set --existing $NOVA_CONF vnc novncproxy_base_url http://$CONTROLLER_LAB_IP:6080/vnc_auto.html
+#  openstack-config --set $NOVA_CONF DEFAULT  novncproxy_host 0.0.0.0
+#  openstack-config --set $NOVA_CONF DEFAULT  novncproxy_port 6080
+#  openstack-config --set $NOVA_CONF DEFAULT  vncserver_listen $(getip ens3f0.586)
+#  openstack-config --set $NOVA_CONF DEFAULT  vncserver_proxyclient_address $(getip ens3f0.586)
+#  openstack-config --set $NOVA_CONF DEFAULT  vnc_enabled True
+# crudini --set $NOVA_CONF DEFAULT force_config_drive True
+# crudini --set $NOVA_CONF DEFAULT flat_injected True
+
+- name: Updating novnc_procy_base_url in nova.conf
+  ini_file: dest={{ nova_conf_file }}     section=DEFAULT     option=novncproxy_host     value=0.0.0.0  backup=yes
+       
+- name: Updating novncproxy_port in nova.conf
+  ini_file:     dest={{ nova_conf_file }}     section=DEFAULT     option=novncproxy_port     value=6080  backup=yes
+
+- name: Updating vncserver_listen in nova.conf
+  ini_file:     dest={{ nova_conf_file }}     section=DEFAULT     option=vncserver_listen     value={{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ext_mgmt_ip }}  backup=yes
+  
+- name: Updating vncserver_proxyclient_address in nova.conf
+  ini_file:     dest={{ nova_conf_file }}      section=DEFAULT     option=vncserver_proxyclient_address     value={{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ext_mgmt_ip }} backup=yes
+    
+- name: Updating vnc_enabled in nova.conf
+  ini_file:     dest={{ nova_conf_file }}     section=DEFAULT     option=vnc_enabled     value="True"    backup=yes
+
+- name: Updating vncserver_proxyclient_address in nova.conf
+  ini_file:     dest={{ nova_conf_file }}     section=vnc     option=vncserver_proxyclient_address value={{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ext_mgmt_ip }}    backup=yes
+
+- name: Updating force_config_drive in nova.conf
+  ini_file:     dest={{ nova_conf_file }}     section=DEFAULT     option=force_config_drive     value="True"    backup=yes
+  
+- name: Updating flat_injected in nova.conf
+  ini_file:     dest={{ nova_conf_file }}     section=DEFAULT     option=flat_injected     value="True"    backup=yes
+
+# serial port from cli
+- name: Updating serial_console enabled in nova.conf
+  ini_file:     dest={{ nova_conf_file }}     section=serial_console  option=enabled     value="True"    backup=yes
+
+- name: Updating serial_console base_url in nova.conf
+  ini_file:     dest={{ nova_conf_file }}     section=serial_console  option=base_url   value="ws://{{ infrastructure.chassis[hostvars[ctr.0]['enclosure']].blades[ctr.0].blade_ext_mgmt_ip }}:6083/"    backup=yes
+
+- name: Updating serial_console proxyclient_address to localip in nova.conf
+  ini_file:     dest={{ nova_conf_file }}     section=serial_console  option=proxyclient_address value={{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ext_mgmt_ip }} backup=yes
+
+- name: Creating the interfaces.template file on the compute nodes
+  template: src=templates/interfaces.template.j2 dest={{ interfaces_template_file }} owner=root group=root mode=0755
+
+- name: Installing openstack-nova-serialproxy on the controller only
+  yum: name=openstack-nova-serialproxy enablerepo=openstack-mitaka state=installed
+  when: inventory_hostname in groups.controller
+
+- name: Starting and Enabling openstack-nova-serialproxy Service on the controller only
+  service: name=openstack-nova-serialproxy enabled=yes state=started
+  when: inventory_hostname in groups.controller
+
+- name: Restart nova
+  shell: "openstack-service restart nova"

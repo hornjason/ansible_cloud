@@ -1,0 +1,92 @@
+---
+- name: Loading subnet variables
+  include_vars: "{{ local_repo }}/macs"
+
+- name: Powering ON blades 
+  local_action:
+    shell ipmitool -I lanplus -H "{{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ilom_ip }}" -U root -P changeme sunoem cli 'start -script SYS'
+    #shell ipmitool -I lanplus -H "{{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ilom_ip }}" -U root -P changeme chassis power on
+  register: ipmi_status
+  when:
+    #- "off" in power_status.stdout
+    - wipe
+    - mac[enclosure+slot] is defined
+
+- pause: seconds={{ ilom_pause }}
+  when: wipe
+
+- name: Setting "pxe boot device "
+  local_action:
+    shell ipmitool -I lanplus -H "{{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ilom_ip }}" -U root -P changeme sunoem cli 'set  host boot_device=pxe'
+    #shell ipmitool -I lanplus -H "{{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ilom_ip }}" -U root -P changeme chassis bootdev pxe
+  when:
+    - wipe
+    - mac[enclosure+slot] is defined
+
+- pause: seconds={{ ilom_pause }}
+  when: wipe
+
+- name: Rebooting blades
+  local_action:
+    shell ipmitool -I lanplus -H "{{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ilom_ip }}" -U root -P changeme sunoem cli 'reset -script system'
+    #shell ipmitool -I lanplus -H "{{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ilom_ip }}" -U root -P changeme chassis power cycle
+  #async: 1
+  #poll:  0
+  #ignore_errors: true
+  register: reboot
+  when:
+    - wipe
+    - mac[enclosure+slot] is defined
+
+- pause: minutes={{ repave_wait_time }}
+  when: wipe
+
+- name: Waiting for blade to come back after installation reboot
+  become: false
+  wait_for:
+    host={{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_int_mgmt_ip }}
+    port=22
+    delay=30
+  register: repave_result
+  ignore_errors: true
+  when:
+    - wipe
+    - mac[enclosure+slot] is defined
+
+- pause: seconds={{ ilom_pause }}
+  when: repave_result|failed
+
+# We re-run the installation on blades that were not installed or crashed during installation
+- name: "Powering ON [FAILED] blades"
+  local_action:
+    shell ipmitool -I lanplus -H "{{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ilom_ip }}" -U root -P changeme sunoem cli 'start -script SYS'
+  when: repave_result|failed
+ 
+- pause: seconds={{ ilom_pause }}
+  when: repave_result|failed
+
+- name: "bootdev PXE ON [FAILED] blades"
+  local_action:
+    shell ipmitool -I lanplus -H "{{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ilom_ip }}" -U root -P changeme sunoem cli 'set  host boot_device=pxe'
+  when: repave_result|failed
+
+- pause: seconds={{ ilom_pause }}
+  when: repave_result|failed
+
+- name: "resetting ON [FAILED] blades"
+  local_action:
+    shell ipmitool -I lanplus -H "{{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ilom_ip }}" -U root -P changeme sunoem cli 'reset -script system'
+  when: repave_result|failed
+
+- pause: minutes={{ repave_wait_time }}
+  when: repave_result|failed
+
+- name: Waiting for blade to come back after installation reboot
+  become: false
+  wait_for:
+    host={{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_int_mgmt_ip }}
+    port=22
+    delay=30
+  ignore_errors: true
+  when: repave_result|failed
+ 

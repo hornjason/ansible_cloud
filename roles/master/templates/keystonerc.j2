@@ -1,0 +1,8 @@
+unset OS_SERVICE_TOKEN
+export OS_USERNAME=admin
+export OS_PASSWORD="{{ openstack_admin_password }}"
+export OS_AUTH_URL="http://{{ controller }}:{{ keystone_public_port }}/v2.0"
+export PS1='[\u@\h \W(keystone-admin)]\$ '
+
+export OS_TENANT_NAME=admin
+export OS_REGION_NAME=RegionOne

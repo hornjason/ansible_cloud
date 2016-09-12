@@ -1,0 +1,29 @@
+#!/bin/bash
+
+kollacli setdeploy remote
+kollacli property set keystone_public_port "{{ keystone_public_port }}"
+#kollacli property set docker_insecure_registry True
+kollacli property set docker_registry "{{ docker_registry_fqdn }}:{{ docker_registry_port }}"
+kollacli property set kolla_internal_address "{{ dhcp_hosts[controller].fixed_address }}"
+kollacli property set kolla_external_address {{ '"{{' }} kolla_internal_address {{ '}}"' }}
+kollacli property set network_interface eno3
+kollacli property set neutron_external_interface eno2
+#kollacli property set openstack_release 2.0.1
+kollacli property set enable_swift no
+kollacli property set enable_haproxy no
+
+{% for (key,value) in dhcp_hosts.iteritems() %}
+kollacli host add {{ value.fixed_address }}
+{% if key == controller %}
+kollacli group addhost control  {{ value.fixed_address }}
+kollacli group addhost database {{ value.fixed_address }}
+kollacli group addhost network  {{ value.fixed_address }}
+kollacli group addhost storage  {{ value.fixed_address }}
+{% else %}
+kollacli group addhost compute  {{ value.fixed_address }}
+{% endif %}
+{% endfor %}
+
+kollacli host setup --file "{{ remote_repo }}/kolla_hosts.yml"
+
+

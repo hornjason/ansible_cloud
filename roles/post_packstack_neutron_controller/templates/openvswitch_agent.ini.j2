@@ -1,0 +1,14 @@
+[DEFAULT]
+[agent]
+tunnel_types = vxlan
+l2_population = True
+prevent_arp_spoofing = True
+drop_flows_on_start = False
+[ovs]
+integration_bridge = br-int
+local_ip = {{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_vlan16_ip }}
+bridge_mappings = physnet1:br-ex
+enable_tunneling =  True
+[securitygroup]
+firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+enable_security_group = True

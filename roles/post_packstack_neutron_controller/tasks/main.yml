@@ -1,0 +1,18 @@
+---
+- name: load subnet variables
+  include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"  
+  run_once: true
+  
+- name: Templating OVS ini file
+  template: src=templates/openvswitch_agent.ini.j2 dest={{ ovs_agent_ini_file }} owner=root group=root mode=0644
+
+- name: Templating ML2 ini file
+  template: src=templates/ml2_conf.ini.j2 dest={{ ml2_ini_file }} owner=root group=root mode=0644
+
+#    ln -s $ML2_CONF_FILE /etc/neutron/plugin.ini
+- name: Create symlink from ml2 to plugin.ini
+  file: src={{ ml2_ini_file }} dest={{ plugin_ini_file }} state=link
+
+# restart openvswitch
+- name: restart openvswitch
+  service: name=neutron-openvswitch-agent state=restarted

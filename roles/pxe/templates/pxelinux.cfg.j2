@@ -1,0 +1,6 @@
+prompt 0
+default linux
+timeout 0
+label linux
+kernel vmlinuz
+append initrd=initrd.img inst.repo=nfs:{{ infrastructure.dhcp_subnets.info.next_server }}:{{ nfs_staging_dir }} inst.ks.sendmac inst.ks=nfs:{{ infrastructure.dhcp_subnets.info.next_server }}:{{ nfs_staging_dir }}/{{ kickstart_file }} ip={{ management_interface }}:dhcp

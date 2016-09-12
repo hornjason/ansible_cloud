@@ -1,0 +1,9 @@
+#!/bin/ansible-playbook
+- hosts: [compute2, controller2]
+  gather_facts: no
+  roles:
+    - { role: lab_custom, tags: lab_custom }
+    - { role: prime_os, tags: prime_os }
+    - { role: prepare_openstack, tags: prepare_openstack }
+    - { role: change_kernel, tags: change_kernel }
+

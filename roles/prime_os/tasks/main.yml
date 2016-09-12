@@ -1,0 +1,14 @@
+---
+ - name: load subnet variables
+   include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
+   run_once: true
+ 
+ - include: sshkey.yml
+
+ - include: packages.yml
+
+ - include: ntp.yml
+
+ - include: hosts.yml
+
+

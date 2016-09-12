@@ -1,0 +1,8 @@
+DEVICE={{ storage_interface }}.{{ infrastructure.vlans.storage.id }}
+BOOTPROTO=static
+ONBOOT=yes
+VLAN=yes
+DELAY=0
+IPADDR={{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_vlan30_ip }}
+NETMASK={{ infrastructure.vlans.storage.netmask }}
+NM_CONTROLLED=no

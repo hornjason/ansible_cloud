@@ -1,0 +1,72 @@
+#!/usr/bin/ansible-playbook
+---
+- hosts: [pxe]
+  remote_user: root
+  roles:
+    - { role: generate_vars, tags: vars }    
+
+# openstack prep
+- hosts: [compute, controller]
+  gather_facts: no
+  roles:
+    - { role: repave, tags: repave }
+
+# build local epel and rdo repo and have them mounted to all nodes
+- hosts: [pxe]
+  remote_user: root
+  roles:
+    - { role: build_local_repos, tags: build_local_repos }
+
+#- hosts: [compute, controller]
+#  gather_facts: no
+#  roles:
+#    - { role: expose_repos, tags: expose_repos }
+
+# start customizing systems based on lab specifics
+- hosts: [compute, controller]
+  gather_facts: no
+  roles:
+    - { role: lab_custom, tags: lab_custom }
+    - { role: prime_os, tags: prime_os }
+    - { role: prepare_openstack, tags: prepare_openstack }
+    - { role: change_kernel, tags: change_kernel }
+
+# controller ssh key distribution to the openstack nodes
+- hosts: [controller]
+  roles:
+    - { role: collect_controller_key, tags: collect_controller_key }
+
+- hosts: [controller, compute]
+  roles:
+    - { role: distribute_controller_key, tags: distribute_controller_key }
+
+# openstack installation
+- hosts: [controller]
+  roles:
+    - { role: install_openstack, tags: install_openstack }
+
+- hosts: [controller]
+  roles:
+     - { role: run_packstack, tags: run_packstack }
+
+- hosts: [controller,compute]
+  roles:
+     - { role: ovs_interfaces, tags: ovs_interfaces }
+
+# openstack post-installation and customization
+- hosts: [compute, controller]
+  roles:
+    - { role: post_packstack_nova, tags: post_packstack_nova }
+
+- hosts: [compute]
+  roles:
+    - { role: post_packstack_neutron_compute, tags: post_packstack_neutron_compute }
+
+- hosts: [controller]
+  roles:
+    - { role: post_packstack_neutron_controller, tags: post_packstack_neutron_controller }
+    - { role: post_packstack_mariadb_tuning, tags: post_packstack_mariadb_tuning }
+
+- hosts: [compute, controller]
+  roles:
+    - { role: post_packstack_all, tags: post_packstack_all }

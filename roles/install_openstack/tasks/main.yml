@@ -1,0 +1,27 @@
+---
+- name: loading infra file
+  include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
+   
+- name: Installing openstack-packstack rpm
+  yum: enablerepo=ol7_optional_latest name=openstack-packstack state=installed
+  register: packstack_rpm_installed
+    
+# Preparing packstack answers    
+- name: Creating Packstack Working Driectory
+  file: path="{{ packstack_dir }}" state=directory mode=0755
+  
+- name: Templating Packstack answers file
+  template: src=packstack_answers.txt.j2 dest="{{ packstack_answer_file }}" owner=root group=root mode=0644
+  register: packstack_answers_file_created
+
+- name: Installing packages wanted by packstack
+  yum: name={{ item }} state=installed
+  with_items:
+    - openstack-neutron-ml2
+    - openstack-neutron-openvswitch
+    - deltarpm
+
+#- name: restart network
+#  service: name=network state=restarted
+
+

@@ -1,0 +1,73 @@
+---
+- name: load subnet variables
+  include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"  
+  run_once: true
+  
+# NEUTRON, rpm installation
+- name: Enabling ol7_optional_latest Repository
+  ini_file:
+    dest=/etc/yum.repos.d/public-yum-ol7.repo
+    section={{ item }}
+    option=enabled
+    value=1
+  with_items:
+    - ol7_optional_latest
+  tags:
+    - enable_ol7_optional_latest_repo
+
+##DEPRECATED##
+- name: Enabling Epel Repos
+  ini_file:
+    dest=/etc/yum.repos.d/epel.repo
+    section={{ item }}
+    option=enabled
+    value=1
+  with_items:
+    - epel
+  tags:
+    - enable_epel_repo
+
+- name: Enabling rdo-release {{ openstack_release }} Repos
+  ini_file:
+    dest=/etc/yum.repos.d/rdo-release.repo
+    section={{ item }}
+    option=enabled
+    value=1
+  with_items:
+    - openstack-{{ openstack_release }}
+  tags:
+    - enable_openstack_repo
+
+- name: Installing openstack-neutron-ml2
+  yum: 
+    name=openstack-neutron-ml2 
+    state=present 
+    update_cache=yes
+
+## create br-ex on each node 
+#     /usr/bin/ovs-vsctl add-br br-ex 
+#     /usr/bin/ovs-vsctl add-port br-ex ens3f1
+
+- name: Creating br-ex for provider networking
+  openvswitch_bridge: bridge=br-ex state=present
+  
+- name: Removing physical interface to br-ex
+  openvswitch_port: bridge=br-ex port={{ provider_interface }} state=absent
+  ignore_errors: True
+
+- name: Adding physical interface to br-ex
+  openvswitch_port: bridge=br-ex port={{ provider_interface }} state=present
+
+- name: Templating OVS ini file
+  template: src=templates/openvswitch_agent.ini.j2 dest={{ ovs_agent_ini_file }} owner=root group=root mode=0644
+
+- name: Templating ML2 ini file
+  template: src=templates/ml2_conf.ini.j2 dest={{ ml2_ini_file }} owner=root group=root mode=0644
+
+#    ln -s $ML2_CONF_FILE /etc/neutron/plugin.ini
+- name: Create symlink from ml2 to plugin.ini
+  file: src={{ ml2_ini_file }} dest={{ plugin_ini_file }} state=link
+  
+# restart openvswitch
+- name: restart openvswitch
+  service: name=neutron-openvswitch-agent state=restarted

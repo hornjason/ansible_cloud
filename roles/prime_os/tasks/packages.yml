@@ -1,0 +1,140 @@
+---
+ - lineinfile:
+     dest=/etc/ssh/sshd_config
+     regexp="UseDNS"
+     line="UseDNS no"
+     state=present
+   register: use_dns
+
+# Fixes broken pipe issue when restarting network
+ - lineinfile:
+     dest=/etc/ssh/sshd_config
+     regexp="ClientAliveInterval"
+     line="ClientAliveInterval 5"
+     state=present
+   register: ssh_alive
+  
+ - name: Restarting sshd
+   service: name=sshd state=restarted
+   when: use_dns|changed or ssh_alive|changed
+ 
+ - name: Setting up resolv.conf
+   template:
+     backup=yes
+     src=resolv.conf.j2
+     dest=/etc/resolv.conf
+     owner=root
+   tags:
+     - resolve
+   register: resolv
+
+ - pause:  seconds={{ resolv_pause }}
+   when: resolv|changed
+     
+# setup repos
+ - name: Downloading public-yum-ol7.repo
+   get_url: 
+     url={{ public_yum_ol7_repo_url }}
+     dest=/etc/yum.repos.d/public-yum-ol7.repo
+     force=yes
+     #use_proxy=yes
+   tags:
+     - yum
+
+ - name: Enabling ol7 repos optional_latest, addons, UEKR4
+   ini_file:
+     dest=/etc/yum.repos.d/public-yum-ol7.repo
+     section={{ item }}
+     option=enabled
+     value=1
+   with_items:
+#     - ol7_openstack20
+     - ol7_optional_latest
+     - ol7_addons
+     - ol7_UEKR4
+   tags:
+     - yum
+
+# DEPRECATED # Retesting EPEL...
+ - name: Installing epel repo
+   yum: name={{ epel_rpm }} state=present
+
+ - pause: seconds={{ after_epel_pause }}
+
+ - name: Removing mirrorlist in epel yum repo
+   lineinfile:
+     dest=/etc/yum.repos.d/epel.repo
+     regexp="^mirrorlist.*$"
+     state=absent
+
+ - name: Enabling baseurl in epel repo
+   replace:
+     dest=/etc/yum.repos.d/epel.repo
+     regexp="^.baseurl.*$"
+     replace="baseurl={{ epel_baseurl }}"
+
+ - name: Installing python-libguestfs,libselinux-python and rsync
+   yum:
+     name={{ item }}
+     state=installed
+   with_items:
+     - rsync
+     - python-libguestfs
+     - libselinux-python
+
+ # disable services
+ - name: Disabling services
+   service:
+     name=NetworkManager
+     state=stopped
+     enabled=no
+   ignore_errors: true
+   with_items:
+     - NetworkManager
+   tags:
+     - service
+
+ - name: Disabling selinux
+   selinux: state=disabled
+   tags:
+     - service
+
+ - name: Starting libvirtd
+   service:
+     name=libvirtd
+     state=started
+     enabled=yes
+   ignore_errors: true
+   register: result
+   tags:
+     - service
+
+ - name: Upgrading all packages to latest OL
+   yum: disablerepo=* enablerepo=ol7_u2_base name=* state=latest
+   register: yum_upgrade
+   tags:
+     - yum
+
+ - name: Restarting Hosts
+   shell: shutdown -r -t 10
+   #async: 1
+   poll: 0
+   ignore_errors: true
+   register: rebooted
+   tags:
+     - reboot
+   when: yum_upgrade|changed
+
+ - pause: minutes={{ reboot_wait_time }}
+   when: yum_upgrade|changed
+
+ - name: Waiting for Hosts to come back up online
+   local_action:
+     wait_for
+     host={{ inventory_hostname }}
+     port=22
+     timeout=600
+   tags:
+     - wait
+   when: yum_upgrade|changed
+

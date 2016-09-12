@@ -1,0 +1,13 @@
+---
+  - include_vars: group_vars/lab_specifics.yml
+    
+  - name: Retrieveing all blades that have vlan586
+    shell: "echo key: {{ item.key }} value: {{ item.value }} >> /tmp/output"
+    with_dict: '{{ lab_specifics.vlans.management_vlan.blades }}'
+    
+  - name: Collecting gateway info
+    shell: "echo gateway: {{ item.key }} = {{ item.value }} >> /tmp/output"
+    with_dict: '{{ lab_specifics.vlans.management_vlan }}'
+    when: item.key == "gateway"
+    
+  

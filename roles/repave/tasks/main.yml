@@ -1,0 +1,14 @@
+---
+- name: load subnet variables
+  include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
+  run_once: true
+  tags:
+    - dhcp
+
+- include: dhcp.yml
+  tags:
+    - dhcp
+
+- include: wipe.yml
+
+- include: post_repave.yml

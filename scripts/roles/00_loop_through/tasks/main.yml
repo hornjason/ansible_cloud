@@ -1,0 +1,47 @@
+---
+    
+  - name: Deleting file
+    file: path=/tmp/output state=absent
+
+#  - name: Collecting nem information on cmm 00
+#    shell: "echo key: {{ item.key }},  ilom_ip: {{ item.value.nem_ilom_ip }} >> /tmp/output"
+#    with_dict: '{{ infrastructure. }}'
+#    
+#  - name: Collecting infra ID
+#    shell: "echo infrastructure.infra_id: {{ infrastructure.infra_id }} >> /tmp/output"
+#
+#  - name: Collecting nem information on cmm 00
+#    shell: "echo key: {{ item.key }},  ilom_ip: {{ item.value.nem_ilom_ip }} >> /tmp/output"
+#    with_dict: '{{ infrastructure.chassis.c00.nems }}'
+#    
+#  - name: Collecting blades information on cmm 01
+#    shell: "echo key: {{ item.key }},  blade_hostname: {{ item.value.blade_hostname }},  blade_ilom_ip: {{ item.value.blade_ilom_ip }} >> /tmp/output"
+#    with_dict: '{{ infrastructure.chassis.c01.blades }}'
+#    
+#  - name: Collecting utility servers
+#    shell: "echo key: {{ item.key }},  userv_id: {{ item.value.userv_id }} >> /tmp/output"
+#    with_dict: '{{ infrastructure.utility_servers }}'
+#    
+#  - name: Collecting utility servers
+#    shell: "echo key: {{ item.key }},  zfs virtual ip: {{ item.value.zfs_storage_virtual_ip }} >> /tmp/output"
+#    with_dict: '{{ infrastructure.zfs }}'
+#    
+#  - name: Collecting es2
+#    shell: "echo key: {{ item.key }}, ilom_ip: {{ item.value.es2_72_ilom_ip }} >> /tmp/output"
+#    with_dict: '{{ infrastructure.switches }}'
+#    
+#  - name: Collecting zfs
+#    shell: "echo key: {{ item.key }},  userv_id: {{ item.value.zfs_storage_head00_ip }} >> /tmp/output"
+#    with_dict: '{{ infrastructure.zfs }}'
+#    
+#  - name: Collecting dhcp subnets
+#    shell: "echo key: {{ item.key }},  userv_id: {{ item.value.netmask }} >> /tmp/output"
+#    with_dict: '{{ infrastructure.dhcp_subnets }}'
+#    when: item.key == "private_untagged"
+#    
+  - name: Collecting vlans
+    shell: "echo key: {{ item.key }},  defined in which switches? {{ item.value.defined }} >> /tmp/output"
+    with_dict: '{{ infrastructure.vlans }}'
+    when: item.value.defined is defined
+    
+  

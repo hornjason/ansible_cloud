@@ -1,0 +1,9 @@
+DEVICE={{ management_interface }}
+BOOTPROTO=none
+ONBOOT=yes
+TYPE=Ethernet
+NAME={{ management_interface }}
+IPADDR={{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_int_mgmt_ip }}
+NETMASK={{ infrastructure.vlans.int_management_vlan.netmask }}
+HWADDR={{ mac[enclosure+slot] }}
+

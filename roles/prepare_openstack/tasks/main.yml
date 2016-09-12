@@ -1,0 +1,51 @@
+---
+  - name: Configuring Proxy for YUM
+    lineinfile:
+      dest=/etc/yum.conf
+      insertafter=EOF
+      line="proxy={{ proxy_env.http_proxy }}"
+      regexp="proxy"
+      backup=yes
+      state=present
+    when: proxy_env.http_proxy is defined
+    register: bashrc_configured
+ 
+  - name: Configuring Proxy for WGET
+    lineinfile:
+      dest=/etc/wgetrc
+      insertafter=EOF
+      line="http_proxy={{ proxy_env.http_proxy }}"
+      regexp="proxy"
+      backup=yes
+      state=present
+    when: proxy_env.http_proxy is defined
+    register: bashrc_configured
+
+  - name: Enabling several services
+    service: name={{ item }} enabled=yes state=started
+    with_items: "{{ service_to_enable }}"
+ 
+  - name: Disabling several services
+    service: name={{ item }} enabled=no state=stopped
+    with_items: "{{ service_to_disable }}"
+
+# DEPRECATED #
+  # installing rpms
+  - name: Installing rdo-release rpm
+    yum: name={{ rdo_release_rpm }} state=present
+    register: rdo_release_rpm_installed
+
+  - name: Retrying when failed rdo-release rpm
+    yum: name={{ rdo_release_rpm }} state=present update_cache=yes
+    when: rdo_release_rpm_installed|failed
+   
+# Experimental: Pre-installing the packages packstack requires
+  - name: Installing packstack pre-packages
+    yum: name={{ item.name }}  enablerepo={{ item.repo }} state=installed
+    with_items:
+      - { name: puppet,     repo: epel }
+      - { name: hiera,      repo: epel }
+      - { name: openssh-clients, repo: ol7_latest }
+      - { name: tar,        repo: ol7_latest }
+      - { name: nmap-ncat,  repo: ol7_latest }
+      - { name: rubygem-json, repo: ol7_latest }

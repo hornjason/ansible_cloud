@@ -1,0 +1,7 @@
+---
+- name: Generate ssh key
+  user: name={{ user|default('root') }}  state=present generate_ssh_key=yes
+
+- name: fetch pub key from controller
+  fetch: src=/root/.ssh/id_rsa.pub dest=/tmp/controller_id_rsa.pub flat=yes
+  

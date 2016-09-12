@@ -1,0 +1,52 @@
+---
+- name: Loading Infra Variables
+  include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
+  tags:
+    - post_repave
+
+- name: Loading MAC Variables
+  include_vars: "{{ local_repo }}/macs"
+  tags:
+    - post_repave
+
+
+- name: Templating internal management ifcfg
+  template:
+    src=interface.j2
+    dest=/etc/sysconfig/network-scripts/ifcfg-{{ management_interface }}
+  register: ifcfg
+  when:
+    #- wipe
+    - mac[enclosure+slot] is defined
+  tags:
+    - post_repave
+
+
+- name: Restarting network
+  service: name=network state=restarted
+  when: ifcfg|changed
+  tags:
+    - post_repave
+
+
+- lineinfile:
+    dest=/etc/ssh/sshd_config
+    regexp="UseDNS"
+    line="UseDNS no"
+    state=present
+  register: use_dns
+  when:
+    #- wipe
+    - mac[enclosure+slot] is defined
+  tags:
+    - post_repave
+
+
+- name: Restarting sshd
+  service: name=sshd state=restarted
+  when: use_dns|changed
+  tags:
+    - post_repave
+
+
+

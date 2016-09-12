@@ -1,0 +1,11 @@
+DEVICE={{ ext_management_interface }}.{{ infrastructure.vlans.ext_management_vlan.vlan_id }}
+BOOTPROTO=static
+ONBOOT=yes
+IPADDR={{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ext_mgmt_ip }}
+NETMASK={{ infrastructure.vlans.ext_management_vlan.netmask }}
+GATEWAY={{ infrastructure.vlans.ext_management_vlan.gateway }}
+# ovs
+DEVICETYPE=ovs
+TYPE=OVSIntPort
+OVS_BRIDGE=br-ex
+OVS_OPTIONS="tag={{ infrastructure.vlans.ext_management_vlan.vlan_id }}"

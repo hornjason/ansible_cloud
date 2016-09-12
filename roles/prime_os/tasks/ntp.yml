@@ -1,0 +1,12 @@
+---
+- name: be sure ntp is installed
+  yum: name=ntp state=installed
+  tags: ntp
+
+- name: be sure ntp is configured
+  template: src=ntp.conf.j2 dest=/etc/ntp.conf
+  tags: ntp
+
+- name: restart ntpd
+  service: name=ntpd state=restarted enabled=yes
+  tags: ntp

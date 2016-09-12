@@ -1,0 +1,7 @@
+source /var/lib/openstack/keystonerc_cloud_admin
+neutron quota-update --port 10000
+nova quota-update --instances 10000 --cores 100000 --ram 51200000 --fixed-ips 10000 --metadata-items 102400 --injected-files 5000 admin
+neutron quota-update --tenant-id admin --network 2000 --subnet 5000 --port 10000
+ID=$(neutron net-list| awk '/ext-net/{print $2}')
+nova boot --min-count 200 --flavor m1.medium --image testVMimage --nic net-id=$ID vxlan-vm
+

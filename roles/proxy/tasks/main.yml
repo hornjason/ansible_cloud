@@ -1,0 +1,49 @@
+---
+- name: load subnet variables
+  include_vars: "{{ item }}"
+  run_once: true
+  with_items:
+    - "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
+  tags: labmgmt
+
+- name: Configuring no Proxy for bashrc
+  lineinfile:
+    dest=/root/.bashrc
+    insertafter=EOF
+    line="export no_proxy=us.oracle.com,oracle.com,localhost,127.0.0.1"
+    regexp="no_proxy"
+    backup=yes
+    state=present
+  when: proxy_env.http_proxy is defined
+
+- name: Configuring Proxy for YUM
+  lineinfile:
+    dest=/etc/yum.conf
+    insertafter=EOF
+    line="proxy={{ proxy_env.http_proxy }}"
+    regexp="proxy"
+    backup=yes
+    state=present
+  when: proxy_env.http_proxy is defined
+
+- name: Configuring Http Proxy for bashrc
+  lineinfile:
+    dest=/root/.bashrc
+    insertafter=EOF
+    line="export http_proxy={{ proxy_env.http_proxy }}"
+    regexp="http_proxy"
+    backup=yes
+    state=present
+  when: proxy_env.http_proxy is defined
+
+- name: Configuring Https Proxy for bashrc
+  lineinfile:
+    dest=/root/.bashrc
+    insertafter=EOF
+    line="export https_proxy={{ proxy_env.http_proxy }}"
+    regexp="https_proxy"
+    backup=yes
+    state=present
+  when: proxy_env.http_proxy is defined
+
+

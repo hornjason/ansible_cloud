@@ -1,0 +1,21 @@
+---
+- name: Generate ssh key
+  user: name={{ user|default('root') }}  state=present generate_ssh_key=yes
+
+- name: add host public key to authorized_keys
+  authorized_key:
+    user=root
+    state=present
+    key={{ lookup('file', "~/.ssh/id_rsa.pub") }}
+
+- name: install ipmi tool
+  local_action:
+    yum
+      name={{ role_path }}/files/ipmitool-1.8.15-1.x86_64.rpm
+      state=installed
+
+- name: template infra yaml script
+  local_action: template src=infra_def.py dest={{ role_path }}/files/infra_def.py
+
+- name: create infrastructure dictionary
+  local_action: script {{ role_path }}/files/infra_def.py {{ project }} {{ num_chassis }} {{ num_utility_servers }} {{ num_zfs }} {{ num_es2_72 }}

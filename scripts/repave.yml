@@ -1,0 +1,9 @@
+#!/usr/bin/ansible-playbook
+---
+# repave
+ - hosts: [controller,compute]
+   gather_facts: no
+   roles:
+     - { role: repave, tags: repave }
+     - { role: lab_custom, tags: lab_custom }
+     - { role: prime_os, tags: prime_os }

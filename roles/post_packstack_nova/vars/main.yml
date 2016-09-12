@@ -1,0 +1,3 @@
+---
+nova_conf_file: "/etc/nova/nova.conf"
+interfaces_template_file: "/usr/share/nova/interfaces.template"

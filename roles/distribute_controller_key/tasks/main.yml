@@ -1,0 +1,15 @@
+---
+- name: Generate ssh key
+  user: name={{ user|default('root') }}  state=present generate_ssh_key=yes
+
+- name: Disabling StrictHostKeyChecking
+  lineinfile: dest=/etc/ssh/ssh_config line="StrictHostKeyChecking no" backup=yes
+  
+- name: Disabling ssh warning messages
+  lineinfile: dest=/etc/ssh/ssh_config line="UserKnownHostsFile /dev/null" backup=yes
+  
+- name: Make ssh quiet
+  lineinfile: dest=/etc/ssh/ssh_config line="LogLevel=quiet" backup=yes
+  
+- name: Distruting controller ssh keys to openstack nodes
+  copy: src=/tmp/controller_id_rsa.pub dest=/root/.ssh/authorized_keys mode=0600 owner=root group=root

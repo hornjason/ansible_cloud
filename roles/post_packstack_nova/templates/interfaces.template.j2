@@ -1,0 +1,13 @@
+{% raw %}{% for ifc in interfaces %}
+DEVICE="{{ ifc.name }}"
+NM_CONTROLLED=no
+ONBOOT=yes
+TYPE=Ethernet
+BOOTPROTO=none
+IPADDR={{ ifc.address }}
+NETMASK={{ ifc.netmask }}
+BROADCAST={{ ifc.broadcast }}
+GATEWAY={{ ifc.gateway }}
+DNS= {{ ifc.dns }}
+{% endfor %}
+{% endraw %}

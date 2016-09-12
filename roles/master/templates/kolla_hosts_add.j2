@@ -1,0 +1,5 @@
+---
+{% for (key,value) in dhcp_hosts.iteritems() %}
+{{ value.fixed_address }}:
+  password: {{ openstack_admin_password }}
+{% endfor %}

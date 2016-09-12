@@ -1,0 +1,26 @@
+---
+# cleanup br-tun before we restart neutron
+- name: Removing br-tun so openstack recreates it
+  openvswitch_bridge: bridge=br-tun state=absent
+
+#- name: Restarting Openstack Services
+#  shell: /usr/bin/openstack-service restart
+
+- name: reboot
+  command: systemd-run --on-active=10 systemctl reboot
+  async: 0
+  poll: 0
+  tags:
+    - reboot
+
+- name: Waiting for blade to come back after installation reboot
+  become: false
+  local_action:
+    wait_for
+      host={{ inventory_hostname }}
+      state=started
+      port=22
+      delay=60
+      timeout=400
+  tags:
+    - reboot

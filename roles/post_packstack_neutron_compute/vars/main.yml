@@ -1,0 +1,5 @@
+---
+ovs_agent_ini_file:  "/etc/neutron/plugins/ml2/openvswitch_agent.ini"
+ml2_ini_file: "/etc/neutron/plugins/ml2/ml2_conf.ini"
+plugin_ini_file: "/etc/neutron/plugin.ini"
+
