@@ -3,8 +3,8 @@
 ####################
 # disalbe sslVerificitaion for git
 # git config --global http.proxy http://rmdc-proxy.oracle.com:80
-# git config --global https.proxy http://rmdc-proxy.oracle.com:80
-# git config --global http.
+# edit ~/.gitconfig and add below to allow cloning of git repo from https
+# sslVerify = false
 ####################
 # enable proxy for this server
 ####################
