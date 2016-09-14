@@ -6,6 +6,8 @@
 
 - name: Loading MAC Variables
   include_vars: "{{ local_repo }}/macs"
+  when:
+    - wipe
   tags:
     - post_repave
 

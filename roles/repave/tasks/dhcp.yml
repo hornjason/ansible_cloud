@@ -52,18 +52,24 @@
 - name: Add mac header
   local_action: lineinfile dest={{ local_repo }}/macs insertbefore=BOF line="mac:"
   run_once: true
+  when:
+    - wipe
   tags:
     - dhcp
   
 - name: load subnet variables
   include_vars: "{{ local_repo }}/macs"
   run_once: true
+  when:
+    - wipe
   tags:
     - dhcp
 
 - name: Generate dhcpd.conf
   local_action: template src=dhcpd.conf.j2 dest=/etc/dhcp/dhcpd.conf owner=root group=root mode=0644 #validate='/usr/sbin/dhcpd -t -cf %s'
   run_once: true
+  when:
+    - wipe
   tags:
     - dhcp
     - dhcp_templating

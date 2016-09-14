@@ -37,7 +37,7 @@
      url={{ public_yum_ol7_repo_url }}
      dest=/etc/yum.repos.d/public-yum-ol7.repo
      force=yes
-     #use_proxy=yes
+     use_proxy=yes
    tags:
      - yum
 

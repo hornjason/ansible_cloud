@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 
-
+####################
+# disalbe sslVerificitaion for git
+# git config --global http.proxy http://rmdc-proxy.oracle.com:80
+# git config --global https.proxy http://rmdc-proxy.oracle.com:80
+# git config --global http.
 ####################
 # enable proxy for this server
 ####################
-ENABLE_PROXY="false"
+ENABLE_PROXY="true"
 
 ####################
 # vnc port
@@ -21,7 +25,7 @@ git gcc libffi-devel openssl-devel"
 ####################
 # packages to remove
 ####################
-package_remove_list="firewalld NetworkManager"
+package_remove_list="firewalld NetworkManager gnome-packagekit"
 
 ####################
 yum_conf="/etc/yum.conf"

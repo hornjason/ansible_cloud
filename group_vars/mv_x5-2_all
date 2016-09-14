@@ -31,8 +31,9 @@ iso_name: OracleLinux-R7-U2-Server-x86_64-dvd.iso
 iso_url: http://kernel.us.oracle.com/osinstall/OracleLinux/OL7/u2/x86_64/{{ iso_name }}
 
 # proxy_env used to identify a proxy if required. Leave undefined if not needed
-#proxy_env: 
-#  http_proxy: http://www-proxy.us.oracle.com:80
+proxy_env: 
+  http_proxy: http://www-proxy.us.oracle.com:80
+  no_proxy: "tekelec.com,localhost,127.0.0.1,us.oracle.com"
 
 # openstack release
 # Tested with liberty && mitaka

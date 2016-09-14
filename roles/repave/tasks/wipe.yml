@@ -1,6 +1,8 @@
 ---
 - name: Loading subnet variables
   include_vars: "{{ local_repo }}/macs"
+  when:
+    - wipe
 
 - name: Powering ON blades 
   local_action:

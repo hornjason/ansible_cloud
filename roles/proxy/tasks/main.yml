@@ -10,7 +10,7 @@
   lineinfile:
     dest=/root/.bashrc
     insertafter=EOF
-    line="export no_proxy=us.oracle.com,oracle.com,localhost,127.0.0.1"
+    line="export no_proxy={{ proxy_env.no_proxy }}"
     regexp="no_proxy"
     backup=yes
     state=present
@@ -45,5 +45,3 @@
     backup=yes
     state=present
   when: proxy_env.http_proxy is defined
-
-
