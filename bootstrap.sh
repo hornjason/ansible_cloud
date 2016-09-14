@@ -54,7 +54,7 @@ if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
   export http_proxy="http://www-proxy.us.oracle.com:80"
   export https_proxy="http://www-proxy.us.oracle.com:80"
   printf -v no_proxy '%s,' 172.31.2.{1..255};
-  export no_proxy="localhost,127.0.0.1,us.oracle.com,$no_proxy"
+  export no_proxy="localhost,127.0.0.1,us.oracle.com,$no_proxy,10.75.138.39"
 
 #git_proxy="git config --global http.proxy http://www-proxy.us.oracle.com:80"
 #git_proxys="git config --global https.proxy http://www-proxy.us.oracle.com:443"

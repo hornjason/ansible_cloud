@@ -33,7 +33,7 @@ iso_url: http://kernel.us.oracle.com/osinstall/OracleLinux/OL7/u2/x86_64/{{ iso_
 # proxy_env used to identify a proxy if required. Leave undefined if not needed
 proxy_env: 
   http_proxy: http://www-proxy.us.oracle.com:80
-  no_proxy: "tekelec.com,localhost,127.0.0.1,us.oracle.com"
+  no_proxy: "tekelec.com,localhost,127.0.0.1,us.oracle.com 10.75.138.39"
 
 # openstack release
 # Tested with liberty && mitaka

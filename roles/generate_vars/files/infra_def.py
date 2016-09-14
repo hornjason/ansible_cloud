@@ -316,9 +316,9 @@ x6sp =  "      "
 x8sp =  "        "
 x10sp = "          "
 
-lab_specifics_file_name = "/root/onap21/group_vars/lab_specifics.yml"
-infra_file_name = "/root/onap21/roles/generate_vars/vars/main.yml"
-hosts_file_name = "/root/onap21/repo/hosts"
+lab_specifics_file_name = "/root/git/ansible_rdo/group_vars/lab_specifics.yml"
+infra_file_name = "/root/git/ansible_rdo/roles/generate_vars/vars/main.yml"
+hosts_file_name = "/root/git/ansible_rdo/repo/hosts"
 infra_file = open(infra_file_name, 'w')
 hosts_file = open(hosts_file_name, 'w')
 

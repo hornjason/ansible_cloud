@@ -23,41 +23,41 @@ infrastructure:
       broadcast: 172.31.255.255
       host_min: 172.31.2.1
       host_max: 172.31.2.254
-      gateway: 172.31.0.1
+      gateway: 172.31.254.254
       ntp_server: 10.250.32.10
-      name_server: 10.250.32.180
+      name_server: 10.209.76.197
       name_server_search: labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com.
       defined: ['nem0']
     ext_management_vlan:
       vlan_id: 1
       tagged_traffic_needed: False
-      network: 10.250.65.0
-      netmask: 255.255.255.0
-      broadcast: 10.250.65.255
-      host_min: 10.250.65.105
-      host_max: 10.250.65.111
-      gateway: 10.250.65.1
+      network: 10.75.138.0
+      netmask: 255.255.254.0
+      broadcast: 10.75.139.255
+      host_min: 10.75.138.38
+      host_max: 10.75.138.49
+      gateway: 10.75.138.1
       ntp_server: 10.250.32.10
-      name_server: 10.250.32.180
+      name_server: 10.209.76.197
       name_server_search: labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com.
       defined: ['nem0']
     ilom_vlan:
-      vlan_id: 3005
+      vlan_id: None
       tagged_traffic_needed: False
-      network: 10.250.56.0
+      network: 10.75.129.0
       netmask: 255.255.255.0
-      broadcast: 10.250.65.255
+      broadcast: 10.75.129.255
     openstack_provider_vlan:
       vlan_id: None
       tagged_traffic_needed: False
-      network: 10.250.65.0
-      netmask: 255.255.255.0
-      broadcast: 10.250.65.255
-      host_min: 10.250.65.105
-      host_max: 10.250.65.111
-      gateway: 10.250.65.1
+      network: 10.75.138.0
+      netmask: 255.255.254.0
+      broadcast: 10.75.139.255
+      host_min: 10.75.138.41
+      host_max: 10.75.138.49
+      gateway: 10.75.138.1
       ntp_server: 10.250.32.10
-      name_server: 10.250.32.180
+      name_server: 10.209.76.197
       name_server_search: labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com.
       defined: ['nem1']
 
@@ -69,7 +69,7 @@ infrastructure:
     info:
       base: 172.31.0.0
       netmask: 255.255.0.0
-      routers: 172.31.0.1
+      routers: 172.31.254.254
       next_server: 172.31.254.254
 
   utility_servers:
@@ -78,7 +78,7 @@ infrastructure:
       userv_ilom_ip:  172.31.50.240
       userv_int_mgmt_ip: 172.31.254.254
       userv_int_mgmt_vlan_id: None
-      userv_ext_mgmt_ip: 10.250.65.104
+      userv_ext_mgmt_ip: 10.75.138.38
       userv_ext_mgmt_vlan_id: 1
 
   chassis:
@@ -96,20 +96,20 @@ infrastructure:
         c00b00:
           blade_id: c00b00
           blade_hostname: c00b00
-          blade_ilom_ip: 10.250.56.121
-          blade_ilom_vlan_id: 3005
+          blade_ilom_ip: 10.75.129.45
+          blade_ilom_vlan_id: None
           blade_int_mgmt_ip: 172.31.2.110
-          blade_ext_mgmt_ip: 10.250.65.102
+          blade_ext_mgmt_ip: 10.75.138.39
           blade_ext_mgmt_vlan_id: 1
           blade_vlan16_ip: 172.16.0.110
           blade_vlan30_ip: 172.30.0.110
         c00b01:
           blade_id: c00b01
           blade_hostname: c00b01
-          blade_ilom_ip: 10.250.56.123
-          blade_ilom_vlan_id: 3005
+          blade_ilom_ip: 10.75.129.47
+          blade_ilom_vlan_id: None
           blade_int_mgmt_ip: 172.31.2.111
-          blade_ext_mgmt_ip: 10.250.65.103
+          blade_ext_mgmt_ip: 10.75.138.40
           blade_ext_mgmt_vlan_id: 1
           blade_vlan16_ip: 172.16.0.111
           blade_vlan30_ip: 172.30.0.111
