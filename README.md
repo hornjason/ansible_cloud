@@ -33,12 +33,16 @@ To execute the Ansible Roles provided in this repository, the Cloud Administrato
 -	At least 1 Install Server, 1 Controller/Network node and 1 Compute node
 -	The Install server must be installed with OL 7.2 (not tested with other version although it may work)
 -	All nodes have access to the Internet to pull packages from Oracle Public Yum, EPEL and OpenStack RDO
--	The Install server is physically connected to the same network as the OpenStack nodes through the External and Internal networks
+-	The Install server is physically connected to the same network as the OpenStack nodes through the External and Internal networks - the minimal number of physical NICs must be reached
+
+Then, execute the bootstrap.sh script to have the rest of the software requirements deployed.
 
 ## Contributors
 
-Oracle CGBU  Platform Group
+Oracle CGBU - Platform Group
+
 Jason Horn: jason.horn@oracle.com
+
 JB Broccard: j.b.broccard@oracle.com
 
 ## License
