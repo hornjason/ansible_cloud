@@ -1,0 +1,34 @@
+---
+app_image: "DSR-7.3.0.0.0_73.14.0"
+seagull_image: "MEATOS6.106.0"
+
+
+networks:
+  - xmi:
+    net_name: "{{ project }}-{{ app }}-xmi-net"
+    subnet_name: "{{ project }}-{{ app }}-xmi-subnet"
+    cidr: 192.168.0.0/24
+    allocation_pool_start: 192.168.0.10
+    allocation_pool_end: 192.168.0.254
+    gateway: 192.168.0.1
+  
+  - imi:
+    net_name: "{{ project }}-{{ app }}-imi-net"
+    subnet_name: "{{ project }}-{{ app }}-imi-subnet"
+    cidr: 192.168.1.0/24
+    allocation_pool_start: 192.168.1.10
+    allocation_pool_end: 192.168.1.254
+    gateway: 192.168.1.1
+
+sites:
+  - site1:
+    - mp11: {flavor: "dsr.damp.small", image: "{{ app_image }}", network: [xmi, imi]}
+    - mp12: {flavor: "dsr.damp.small", image: "{{ app_image }}", network: [xmi, imi]}
+  
+  - site2:
+    - mp21: {flavor: "dsr.damp.small", image: "{{ app_image }}", network: [xmi, imi]}
+    - mp22: {flavor: "dsr.damp.small", image: "{{ app_image }}", network: [xmi, imi]}
+
+
+
+  

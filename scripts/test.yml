@@ -1,41 +1,10 @@
 #!/bin/ansible-playbook
-- hosts: [controller,compute]
-  #connection: local
+
+- hosts: [localhost]
+  connection: local
   gather_facts: no
   tasks:
-    - include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
-    #- name: get mac
-      #local_action: shell "ipmitool -U root -Pchangeme -H {{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ilom_ip }} sunoem cli 'show System host_primary_mac_address'| awk '/address =/ {print \"  {{ inventory_hostname }}\: \" $3}' 
-    #  local_action: shell ipmitool -Ilanplus -U root -Pchangeme -H {{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ilom_ip }} sunoem cli 'show System host_primary_mac_address' | awk '/address =/ {print "  {{ inventory_hostname }}_ " $3}' | tr '_' ':' >> {{ local_repo }}/macs
-
-    - name: get mac (X5-2)
-      local_action: shell ipmitool -Ilanplus -U root -Pchangeme -H {{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ilom_ip }} sunoem cli 'show System host_primary_mac_address' | awk -F":"  --non-decimal-data 'BEGIN{ORS=""} /address =/ {intmac=(("0x"$NF)+0)+1 ; print "  {{ inventory_hostname }}_ "substr( $1, length($1) - 2, length($1) )"_"$2"_"$3"_"$4"_"$5"_" ; printf("%x\n", intmac)}'  | tr '_' ':' >> /tmp/macs
-
-    #  register: temp
-
-    #- debug: var=temp.stdout
-    #- debug: msg=" {{ inventory_hostname }}{{:}} temp"
-      #local_action: shell "true"
-    
-    #- debug: msg=" TEST {{ infrastructure.chassis[hostvars[ctr.0]['enclosure']].blades[ctr.0].blade_ext_mgmt_ip }}"
-
-#    - name: reboot
-#      command: systemd-run --on-active=10 systemctl reboot
-#      async: 0
-#      poll: 0
-#      tags:
-#        - reboot
-#    
-#    - name: Waiting for blade to come back after installation reboot
-#      become: false
-#      local_action:
-#        wait_for
-#          host={{ inventory_hostname }}
-#          state=started
-#          port=22
-#          delay=60
-#          timeout=400
-#      tags:
-#        - reboot
-#    
-##
+  - include_vars: "{{ playbook_dir }}/site.yml"
+    #- name: Loop through site
+      #debug: msg="{{ item.key }} is {{ item.value.flavor }} ({{ item.value.networks }})"
+      #with_dict: site1
