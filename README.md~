@@ -1,0 +1,40 @@
+## Synopsis
+
+This repository contains the Ansible Roles for deploying a full infrastructure from Operating System provisioning to running a VM in the OpenStack Cloud.
+
+## Code Example
+
+To deploy a full Cloud infrastructure certain requirements must be met (we'll go into those details later) and the Infrastructure must be described before running the actual deployment commands. These Ansible Roles can be modulated to achieve certain tasks, in this repository we have put together three sets of roles: Prepare the environment, Deploy the Systems and Provision the Cloud. Obviously it is possible to re-order those roles to fit a different environment.
+Here are the Scripts and Roles provided for the Cloud Administrator.
+-	Bootstrap the Install server (includes installing Ansible)
+{Ansible_playbooks_directory}/bootstrap.sh
+-	Configure the Ansible environment on the Install Server
+{Ansible_playbooks_directory}/deploy_utils_server.yml
+-	Install the Operating System and 
+{Ansible_playbooks_directory}/deploy_utils_server.yml
+Show what the library does as concisely as possible, developers should be able to figure out **how** your project solves their problem by looking at the code example. Make sure the API you are showing off is obvious, and that your code is short and concise.
+
+## Motivation
+
+A short description of the motivation behind the creation and maintenance of the project. This should explain **why** the project exists.
+
+## Installation
+
+Provide code examples and explanations of how to get the project.
+
+## API Reference
+
+Depending on the size of the project, if it is small and simple enough the reference docs can be added to the README. For medium size to larger projects it is important to at least provide a link to where the API reference docs live.
+
+## Tests
+
+Describe and show how to run the tests with code examples.
+
+## Contributors
+
+Let people know how they can dive into the project, include important links to things like issue trackers, irc, twitter accounts if applicable.
+
+## License
+
+A short snippet describing the license (MIT, Apache, etc.)
+

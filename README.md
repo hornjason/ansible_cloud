@@ -1,31 +1,39 @@
 ## Synopsis
 
-At the top of the file there should be a short introduction and/ or overview that explains **what** the project is. This description should match descriptions added for package managers (Gemspec, package.json, etc.)
+This repository contains the Ansible Roles for deploying a full infrastructure from Operating System provisioning to running a VM in the OpenStack Cloud.
 
 ## Code Example
 
-Show what the library does as concisely as possible, developers should be able to figure out **how** your project solves their problem by looking at the code example. Make sure the API you are showing off is obvious, and that your code is short and concise.
+To deploy a full Cloud infrastructure certain requirements must be met (we'll go into those details later) and the Infrastructure must be described before running the actual deployment commands. These Ansible Roles can be modulated to achieve certain tasks, in this repository we have put together three sets of roles: Prepare the environment, Deploy the Systems and Provision the Cloud. Obviously it is possible to re-order those roles to fit a different environment.
+Here are the Scripts and Roles provided for the Cloud Administrator.
+-	Bootstrap the Install server (includes installing Ansible)
+{Ansible_playbooks_directory}/bootstrap.sh
+-	Configure the Ansible environment on the Install Server
+{Ansible_playbooks_directory}/deploy_utils_server.yml
+-	Install the Operating System and OpenStack
+{Ansible_playbooks_directory}/deploy_infrastructure.yml
+-	Provision the installed Cloud with external network, VXlan network, an image and two VMs
+{Ansible_playbooks_directory}/provision_cloud.yml
 
 ## Motivation
 
-A short description of the motivation behind the creation and maintenance of the project. This should explain **why** the project exists.
+As OpenStack Clouds need to be created in our environment, we need to ensure to have a reproducible and robust way to deploy OpenStack in a consistent manner. These Ansible Roles allow the Cloud Administrator to easily deploy Clouds with customizable parameters such as: type of networking (vlan, non-vlan, flat, etc.), type of systems (so far netra6000 blades and X5-2 servers are supported).
 
 ## Installation
 
-Provide code examples and explanations of how to get the project.
-
-## API Reference
-
-Depending on the size of the project, if it is small and simple enough the reference docs can be added to the README. For medium size to larger projects it is important to at least provide a link to where the API reference docs live.
-
-## Tests
-
-Describe and show how to run the tests with code examples.
+To execute the Ansible Roles provided in this repository, the Cloud Administrator must fulfill the following requirements:
+-	At least 1 Install Server, 1 Controller/Network node and 1 Compute node
+-	The Install server must be installed with OL 7.2 (not tested with other version although it may work)
+-	All nodes have access to the Internet to pull packages from Oracle Public Yum, EPEL and OpenStack RDO
+-	The Install server is physically connected to the same network as the OpenStack nodes through the External and Internal networks
 
 ## Contributors
 
-Let people know how they can dive into the project, include important links to things like issue trackers, irc, twitter accounts if applicable.
+Oracle CGBU  Platform Group
+Jason Horn: jason.horn@oracle.com
+JB Broccard: j.b.broccard@oracle.com
 
 ## License
 
-A short snippet describing the license (MIT, Apache, etc.)
+This repository is intended only for Oracle CGBU use. Any use other than Oracle CGBU must be validated by Oracle CGBU Management.
+
