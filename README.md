@@ -37,6 +37,8 @@ To execute the Ansible Roles provided in this repository, the Cloud Administrato
 
 Then, execute the bootstrap.sh script to have the rest of the software requirements deployed.
 
+If you recieve a error relating trusted certificates:
+  git config --global  http.sslVerify false
 ## Contributors
 
 Oracle CGBU - Platform Group
