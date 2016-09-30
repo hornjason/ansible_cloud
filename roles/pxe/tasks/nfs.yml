@@ -28,7 +28,6 @@
   file: path=/var/lib/images state=directory
 
 - name: check for iSO /var/lib/images/{{ iso_name }}
-  #stat: path={{ local_repo }}/{{ iso_name }} get_checksum=yes get_md5=no
   stat: path=/var/lib/images/{{ iso_name }} get_checksum=yes get_md5=no
   register: isochk
 
@@ -37,7 +36,7 @@
     #url=http://kernel.us.oracle.com/osinstall/OracleLinux/OL7/u1/x86_64/{{ iso_name }}
     url=http://kernel.us.oracle.com/osinstall/OracleLinux/OL7/u2/x86_64/{{ iso_name }}
     dest=/var/lib/images/
-    use_proxy=yes
+    use_proxy=no
     force=no
   when: isochk.stat.exists == False
 
@@ -46,8 +45,8 @@
 
 - name: "copy {{ iso_name }} to {{ nfs_staging_dir }}"
   local_action:
-    copy src=/mnt/ dest={{ nfs_staging_dir }} 
-  when: isochk.stat.exists == False
+    copy src=/mnt/ dest={{ nfs_staging_dir }} force=no
+#  when: isochk.stat.exists == False
 
 - name: copy {{ kickstart_file }} to {{ nfs_staging_dir }}/{{ kickstart_file }}/{{ kickstart_file }}
   template: src={{ kickstart_file }}  dest={{ nfs_staging_dir }}/{{ kickstart_file }}/{{ kickstart_file }}

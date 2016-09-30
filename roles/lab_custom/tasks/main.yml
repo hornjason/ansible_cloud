@@ -6,8 +6,14 @@
     - "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
   tags: labmgmt
 
-- name: adding Tennant network interface {{ tenant_interface }}.{{ infrastructure.vlans.openstack_vxlan_tenant.id }}
-  template: src=tenant_interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ tenant_interface }}.{{ infrastructure.vlans.openstack_vxlan_tenant.id }} owner=root group=root mode=0644
+- name: adding Tennant network interface {{ tenant_interface }}.{{ infrastructure.vlans.openstack_vxlan_tenant.vlan_id }}
+  template: src=tenant_interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ tenant_interface }}.{{ infrastructure.vlans.openstack_vxlan_tenant.vlan_id }} owner=root group=root mode=0644
+  when: infrastructure.vlans.openstack_vxlan_tenant.vlan_id is defined and infrastructure.vlans.openstack_vxlan_tenant.tagged_traffic_needed
+
+- name: adding Tennant network interface {{ tenant_interface }}
+  template: src=tenant_interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ tenant_interface }} owner=root group=root mode=0644
+  when: not infrastructure.vlans.openstack_vxlan_tenant.tagged_traffic_needed
+
 
 - name: adding Storage network interface {{ storage_interface }}.{{ infrastructure.vlans.storage.id }}
   template: src=storage_interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ storage_interface }}.{{ infrastructure.vlans.storage.id }} owner=root group=root mode=0644

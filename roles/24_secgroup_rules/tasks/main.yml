@@ -6,8 +6,9 @@
   - name: Creating a security group rule for ping
     os_security_group_rule:
       cloud: cloud-admin
-      #security_group: "{{ secgroup_id.stdout }}"
-      security_group: default
+      security_group: "{{ secgroup_id.stdout }}"
+      state: present
+      #security_group: default
       protocol: icmp
       port_range_min: -1
       port_range_max: -1
@@ -16,8 +17,9 @@
   - name: Creating a security group rule for ssh
     os_security_group_rule:
       cloud: cloud-admin
-      #security_group: "{{ secgroup_id.stdout }}"
-      security_group: default
+      security_group: "{{ secgroup_id.stdout }}"
+      state: present
+      #security_group: default
       protocol: tcp
       port_range_min: 22
       port_range_max: 22
@@ -26,8 +28,9 @@
   - name: Creating a security group rule for http
     os_security_group_rule:
       cloud: cloud-admin
-      #security_group: "{{ secgroup_id.stdout }}"
-      security_group: default
+      security_group: "{{ secgroup_id.stdout }}"
+      #security_group: default
+      state: present
       protocol: tcp
       port_range_min: 80
       port_range_max: 80

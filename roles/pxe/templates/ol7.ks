@@ -77,3 +77,11 @@ tcpdump
 -libvirt-daemon
 
 %end
+
+
+%post
+
+echo "PERSISTENT_DHCLIENT=1 " >> /etc/sysconfig/network-scripts/ifcfg-{{ management_interface }}
+
+%end
+

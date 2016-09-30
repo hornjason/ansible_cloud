@@ -20,14 +20,14 @@ def _print_infrastructure(infra_id, infra_file):
 def _print_vlans(infra_file, lab_specifics_data):
   infra_file.write(x2sp + "vlans:" + "\n")
     
-  infra_file.write(x4sp + "openstack_vxlan_tenant:" + "\n")
-  infra_file.write(x6sp + "id: 16" + "\n")
-  infra_file.write(x6sp + "network: 172.16.0.0" + "\n")
-  infra_file.write(x6sp + "netmask: 255.255.0.0" + "\n")
-  infra_file.write(x6sp + "defined:" + "\n")
-  infra_file.write(x8sp + "- nem0" + "\n")
-  infra_file.write(x8sp + "- es2_72_tenant" + "\n")
-  
+  #infra_file.write(x4sp + "openstack_vxlan_tenant:" + "\n")
+  #infra_file.write(x6sp + "id: 16" + "\n")
+  #infra_file.write(x6sp + "network: 172.16.0.0" + "\n")
+  #infra_file.write(x6sp + "netmask: 255.255.0.0" + "\n")
+  #infra_file.write(x6sp + "defined:" + "\n")
+  #infra_file.write(x8sp + "- nem0" + "\n")
+  #infra_file.write(x8sp + "- es2_72_tenant" + "\n")
+  #
   infra_file.write(x4sp + "storage:" + "\n")
   infra_file.write(x6sp + "id: 30" + "\n")
   infra_file.write(x6sp + "network: 172.30.0.0" + "\n")
@@ -36,7 +36,7 @@ def _print_vlans(infra_file, lab_specifics_data):
   infra_file.write(x8sp + "- nem1" + "\n")
   infra_file.write(x8sp + "- es2_72_storage" + "\n")
   
-  vlan_name = ["int_management_vlan", "ext_management_vlan", "ilom_vlan", "openstack_provider_vlan"]
+  vlan_name = ["openstack_vxlan_tenant", "int_management_vlan", "ext_management_vlan", "ilom_vlan", "openstack_provider_vlan"]
   net_element = ["vlan_id", "tagged_traffic_needed", "network", "netmask", "broadcast", "host_min", "host_max", "gateway", "ntp_server", "name_server", "name_server_search", "defined"]
   for v in vlan_name:
     infra_file.write(x4sp + v + ":" + "\n")
@@ -316,9 +316,9 @@ x6sp =  "      "
 x8sp =  "        "
 x10sp = "          "
 
-lab_specifics_file_name = "/root/git/ansible_rdo/group_vars/lab_specifics.yml"
-infra_file_name = "/root/git/ansible_rdo/roles/generate_vars/vars/main.yml"
-hosts_file_name = "/root/git/ansible_rdo/repo/hosts"
+lab_specifics_file_name = "/root/ansible_rdo/group_vars/lab_specifics.yml"
+infra_file_name = "/root/ansible_rdo/roles/generate_vars/vars/main.yml"
+hosts_file_name = "/root/ansible_rdo/repo/hosts"
 infra_file = open(infra_file_name, 'w')
 hosts_file = open(hosts_file_name, 'w')
 

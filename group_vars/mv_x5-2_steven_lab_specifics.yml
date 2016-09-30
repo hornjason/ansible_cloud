@@ -1,7 +1,13 @@
 ---
 lab_specifics:
   lab_id: 101
-  vlans:
+  vlans: 
+    openstack_vxlan_tenant:
+      vlan_id: 138
+      tagged_traffic_needed: true
+      network: 172.16.0.0
+      netmask: 255.255.0.0
+
     openstack_provider_vlan:
       vlan_id: 130
       tagged_traffic_needed: true
@@ -43,7 +49,7 @@ lab_specifics:
         c00b07: 10.75.165.42
         c00b08: 10.75.165.43
       utility_servers:
-        x5-200: 10.75.165.34
+        y5-200: 10.75.165.34
 
     int_management_vlan:
       vlan_id: 
@@ -60,7 +66,7 @@ lab_specifics:
       defined:
        - nem0
       utility_servers:
-        x5-200: 172.31.254.254
+        y5-200: 172.31.254.254
       blades:
         c00b00: 172.31.0.110
         c00b01: 172.31.0.111
@@ -94,7 +100,7 @@ lab_specifics:
         c00b07: 10.75.129.56
         c00b08: 10.75.129.57
       utility_servers:
-        x5-200: 10.75.129.48
+        y5-200: 10.75.129.48
 
   dhcp_subnets:
     info:

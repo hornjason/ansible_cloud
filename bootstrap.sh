@@ -8,7 +8,7 @@
 ####################
 # enable proxy for this server
 ####################
-ENABLE_PROXY="true"
+ENABLE_PROXY="false"
 
 ####################
 # vnc port
@@ -93,7 +93,7 @@ cat > /.bash_profile << EOF
 # Get the aliases and functions
 if [ -f ~/.bashrc ]; then
         . ~/.bashrc
-fi
+fi0.110
 
 # User specific environment and startup programs
 
@@ -154,7 +154,7 @@ if [[ $(yum repolist | grep -ic epel ) == 0 ]]; then
 fi
 
 echo "waiting for yum to clean up"
-sleep 60
+#sleep 60
 
 echo "Removing packages not needed"
   $SUDO systemctl disable firewalld

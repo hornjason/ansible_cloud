@@ -1,0 +1,5 @@
+*.log
+*.retry
+roles/generate_vars/vars/main.yml
+roles/generate_vars/files/infra_def.py
+.ansible*
