@@ -1,3 +1,5 @@
 ---
 nova_conf_file: "/etc/nova/nova.conf"
 interfaces_template_file: "/usr/share/nova/interfaces.template"
+nova_policy_file: "/etc/nova/policy.json"
+heat_policy_file: "/etc/heat/policy.json"

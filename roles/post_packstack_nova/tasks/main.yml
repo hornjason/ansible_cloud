@@ -60,5 +60,30 @@
   service: name=openstack-nova-serialproxy enabled=yes state=started
   when: inventory_hostname in groups.controller
 
+- name: allow all tenants to create flavors with HEAT
+  lineinfile:
+    "dest={{ heat_policy_file }}
+    regexp=resource_types:OS::Nova::Flavor
+    line='    \"resource_types:OS::Nova::Flavor\":  \"\" '
+    state=present"
+  when: inventory_hostname in groups.controller
+
+- name: allow all tenants to create flavors with NOVA
+  lineinfile:
+    "dest={{ nova_policy_file }}
+    regexp=os_compute_api:os-flavor-manage
+    line='    \"os_compute_api:os-flavor-manage\": \"\", '
+    state=present"
+  when: inventory_hostname in groups.controller
+
+- name: allow all tenants to create flavors with NOVA
+  lineinfile:
+    "dest={{ nova_policy_file }}
+    regexp=compute_extension:flavormanage
+    line='    \"compute_extension:flavormanage\": \"\", '
+    state=present"
+  when: inventory_hostname in groups.controller
+
+
 - name: Restart nova
   shell: "openstack-service restart nova"
