@@ -70,7 +70,7 @@ passwd="changeme"
 # set vncpasswd
 
 $SUDO cp /lib/systemd/system/vncserver@.service /etc/systemd/system/vncserver@.service
-$SUDO sed -i "s/<USER>/$whobei/g" /etc/systemd/system/vncserver@.service
+$SUDO sed -i "s/\/home\/<USER>/\/$whobei/g" /etc/systemd/system/vncserver@.service
 $SUDO sed -i 's/vncserver %i"/vncserver %i -geometry 1280x1024"/' /etc/systemd/system/vncserver@.service
 
 $SUDO mkdir ~/.vnc
