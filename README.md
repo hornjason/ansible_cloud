@@ -1,6 +1,7 @@
 ## Synopsis
 
 This repository contains the Ansible Roles for deploying a full infrastructure from Operating System provisioning to running a VM in the OpenStack Cloud.
+.
 
 ## Code Example
 
