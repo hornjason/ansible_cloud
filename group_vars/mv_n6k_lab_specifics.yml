@@ -3,6 +3,7 @@ lab_specifics:
   lab_id: mvl
   vlans:
     openstack_provider_vlan:
+      tagged_traffic_needed: true
       vlan_id: 586
       network: 10.240.121.0
       netmask: 255.255.255.192
