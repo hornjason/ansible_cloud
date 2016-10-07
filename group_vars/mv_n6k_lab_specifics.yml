@@ -2,6 +2,12 @@
 lab_specifics:
   lab_id: mvl
   vlans:
+    openstack_vxlan_tenant:
+      vlan_id: 16
+      tagged_traffic_needed: true
+      network: 172.16.0.0
+      netmask: 255.255.0.0
+
     openstack_provider_vlan:
       tagged_traffic_needed: true
       vlan_id: 586
