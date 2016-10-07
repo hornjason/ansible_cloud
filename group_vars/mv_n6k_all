@@ -41,7 +41,7 @@ resolv_pause: 10
 ilom_pause: 10
 reboot_wait_time: 5
 after_epel_pause: 10
-repave_wait_time: 20
+repave_wait_time: 30
 
 # Environment preparation
 #proxy_env:
