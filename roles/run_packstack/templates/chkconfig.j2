@@ -1,0 +1,14 @@
+#!/bin/bash
+LOG=/tmp/chkconfig.log
+DATE=`date`
+
+if [[ $1  =~ "add" ]];
+then
+        echo "$DATE" >> $LOG
+        echo "systemctl enable $2" >> $LOG
+        systemctl enable $2
+else
+	echo "$DATE" >> $LOG
+        echo "/sbin/chkconfig.dontuse $@" >> $LOG
+        /sbin/chkconfig.dontuse $@
+fi

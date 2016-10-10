@@ -3,6 +3,7 @@
   include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
   tags: run_packstack
   
+### hacks ####
 - name: Removing Http Proxy from bashrc to avoid "Bad Gateway" issue during Packstack
   lineinfile:
     dest=/root/.bashrc
@@ -10,16 +11,11 @@
     state=absent
   tags: run_packstack
     
-#- name: Removing Https Proxy from bashrc to avoid "Bad Gateway" issue during Packstack
-#  lineinfile:
-#    dest=/root/.bashrc
-#    regexp="^export https_proxy.*$"
-#    state=absent
-#  tags: run_packstack
+- name: Renaming chkconfig 
+  copy: src=/usr/sbin/chkconfig dest=/usr/sbin/chkconfig.dontuse remote_src=True
 
-# Installing nmap to track latest installed packages
-- name: Installing nmap
-  yum: name=nmap state=installed
+- name: Creating chkconfig wrapper
+  template: src=chkconfig.j2 dest=/usr/sbin/chkconfig mode=0755 
 
 # DEPRECATED # for local repos only
 - name: Removing conflicting mariadb-server-galera
@@ -34,27 +30,16 @@
     - mysql-community-libs
     - mysql-community-common
 
-
 - name: Running Packstack
   shell: /usr/bin/packstack --answer-file="{{ packstack_answer_file }}" > "{{ packstack_output_file }}" 2>&1
   ignore_errors: yes
   register: packstack_run
   tags: run_packstack
     
-#  - name: Cleaning up Yum if it failed
-#    shell: /usr/bin/yum clean all
-#    when: packstack_run|failed
-#    tags: run_packstack
-
-#  - name: Cleaning up Yum if it failed
-#    shell: /usr/bin/yum clean metadata
-#    when: packstack_run|failed
-#    tags: run_packstack
-#
-#    
 # DEPRECATED # for local repos only
 - name: Removing conflicting mariadb-server-galera
   yum: name=mariadb-server-galera state=absent
+  when: packstack_run|failed
 
 - name: restart network before second packstack attempt
   service: name=network state=restarted
@@ -64,3 +49,6 @@
   ignore_errors: no
   when: packstack_run|failed
   tags: run_packstack
+
+- name: Restoring chkconfig to original state
+  copy: src=/usr/sbin/chkconfig.dontuse dest=/usr/sbin/chkconfig remote_src=True
