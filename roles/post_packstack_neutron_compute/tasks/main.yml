@@ -15,7 +15,9 @@
   tags:
     - enable_ol7_optional_latest_repo
 
-##DEPRECATED##
+- name: install epel repo
+  yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
+
 - name: Enabling Epel Repos
   ini_file:
     dest=/etc/yum.repos.d/epel.repo
