@@ -11,12 +11,6 @@
     state=absent
   tags: run_packstack
     
-- name: Renaming chkconfig 
-  copy: src=/usr/sbin/chkconfig dest=/usr/sbin/chkconfig.dontuse remote_src=True
-
-- name: Creating chkconfig wrapper
-  template: src=chkconfig.j2 dest=/usr/sbin/chkconfig mode=0755 
-
 # DEPRECATED # for local repos only
 - name: Removing conflicting mariadb-server-galera
   yum: name={{ item }} state=absent
@@ -50,5 +44,3 @@
   when: packstack_run|failed
   tags: run_packstack
 
-- name: Restoring chkconfig to original state
-  copy: src=/usr/sbin/chkconfig.dontuse dest=/usr/sbin/chkconfig remote_src=True

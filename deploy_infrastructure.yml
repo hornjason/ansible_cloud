@@ -41,6 +41,7 @@
 - hosts: [controller, compute]
   roles:
     - { role: distribute_controller_key, tags: distribute_controller_key }
+    - { role: hack_chkconfig, tags: hack_chkconfig }
 
 # openstack installation
 - hosts: [controller]
@@ -53,6 +54,7 @@
 
 - hosts: [controller,compute]
   roles:
+     - { role: unhack_chkconfig, tags: unhack_chkconfig }
      - { role: ovs_interfaces, tags: ovs_interfaces }
 
 # openstack post-installation and customization

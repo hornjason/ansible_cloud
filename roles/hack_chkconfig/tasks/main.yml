@@ -1,0 +1,16 @@
+---
+- name: Loading Infrastructure File
+  include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
+  tags: hack_chkconfig
+    
+- name: Renaming chkconfig 
+  copy: src=/usr/sbin/chkconfig dest=/usr/sbin/chkconfig.dontuse remote_src=True
+  tags: hack_chkconfig
+
+- name: Making chkconfig.dontuse executable
+  file: path=/usr/sbin/chkconfig.dontuse mode=0755
+  tags: hack_chkconfig
+
+- name: Creating chkconfig wrapper
+  template: src=chkconfig.j2 dest=/usr/sbin/chkconfig mode=0755 
+  tags: hack_chkconfig

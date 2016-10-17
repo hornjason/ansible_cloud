@@ -43,8 +43,10 @@
   - name: Installing packstack pre-packages
     yum: name={{ item.name }}  enablerepo={{ item.repo }} state=installed
     with_items:
-      - { name: puppet,     repo: epel }
-      - { name: hiera,      repo: epel }
+      #- { name: puppet,     repo: epel }
+      #- { name: hiera,      repo: epel }
+      - { name: puppet,     repo: openstack-mitaka }
+      - { name: hiera,      repo: openstack-mitaka }
       - { name: openssh-clients, repo: ol7_latest }
       - { name: tar,        repo: ol7_latest }
       - { name: nmap-ncat,  repo: ol7_latest }
