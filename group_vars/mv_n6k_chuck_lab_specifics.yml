@@ -1,0 +1,149 @@
+---
+lab_specifics:
+  lab_id: orion
+  vlans:
+    openstack_vxlan_tenant:
+      vlan_id: 4
+      tagged_traffic_needed: true
+      network: 172.16.0.0
+      netmask: 255.255.0.0
+
+    openstack_provider_vlan:
+      tagged_traffic_needed: true
+      vlan_id: 3
+      network: 10.240.119.0
+      netmask: 255.255.255.0
+      broadcast: 10.240.119.255
+      host_min: 10.240.119.24
+      host_max: 10.240.119.254
+      #openstack_reserved_first_address: 10.240.121.90
+      #openstack_reserved_last_address: 10.240.121.100
+      gateway: 10.240.119.1
+      ntp_server: 10.250.32.10
+      name_server: 10.250.32.10
+      name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
+      defined:
+       - nem0
+      utility_servers:
+        orion0100: 10.240.119.10
+    ext_management_vlan:
+      tagged_traffic_needed: true
+      vlan_id: 3
+      network: 10.240.119.0
+      netmask: 255.255.255.0
+      broadcast: 10.240.119.255
+      host_min: 10.240.119.6
+      host_max: 10.240.119.23
+      gateway: 10.240.119.1
+      ntp_server: 10.250.32.10
+      name_server: 10.250.32.10
+      name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
+      defined:
+       - nem0
+      utility_servers:
+        orion0100: 10.240.119.10
+      zfs:
+        zfs00:
+          head00: 10.250.54.111
+          head01: 10.250.54.112
+      blades:
+        c00b00: 10.240.119.6
+        c00b01: 10.240.119.7
+        c00b02: 10.240.119.8
+        c00b03: 10.240.119.9
+        c00b04: 10.240.119.10
+        c00b05: 10.240.119.11
+        c00b06: 10.240.119.12
+        c00b07: 10.240.119.13
+        c00b08: 10.240.119.14
+        c00b09: 10.240.119.15
+        c00b10: 10.240.119.16
+        c00b11: 10.240.119.17
+        c00b12: 10.240.119.18
+        c00b13: 10.240.119.19
+        c00b14: 10.240.119.20
+        c00b15: 10.240.119.21
+        c00b16: 10.240.119.22
+        c00b17: 10.240.119.23
+    int_management_vlan:
+      vlan_id:
+      tagged_traffic_needed: false
+      network: 172.31.0.0
+      netmask: 255.255.0.0
+      broadcast: 172.31.255.255
+      host_min: 172.31.0.110
+      host_max: 10.31.0.127
+      gateway: 172.31.0.1
+      ntp_server: 10.250.32.10
+      name_server: 10.250.32.10
+      name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
+      defined:
+       - nem1
+      utility_servers:
+        orion0100: 172.31.254.254
+      blades:
+        # chassis onap2
+        c00b00: 172.31.0.110
+        c00b01: 172.31.0.111
+        c00b02: 172.31.0.112
+        c00b03: 172.31.0.113
+        c00b04: 172.31.0.114
+        c00b05: 172.31.0.115
+        c00b06: 172.31.0.116
+        c00b07: 172.31.0.117
+        c00b08: 172.31.0.118
+        c00b09: 172.31.0.119
+        c00b10: 172.31.0.120
+        c00b11: 172.31.0.121
+        c00b12: 172.31.0.122
+        c00b13: 172.31.0.123
+        c00b14: 172.31.0.124
+        c00b15: 172.31.0.125
+        c00b16: 172.31.0.126
+        c00b17: 172.31.0.127
+
+    ilom_vlan:
+      vlan_id: 588
+      tagged_traffic_needed: false
+      network: 10.250.57.0
+      netmask: 255.255.255.0
+      broadcast: 10.250.57.255
+      host_min: 10.250.57.11
+      host_max: 10.250.57.28
+      gateway: 10.250.57.1
+      ntp_server: 10.250.32.10
+      zfs:
+        zfs00:
+          head00: 10.250.56.170
+          head01: 10.250.56.171
+      cmms:
+        c00: 10.240.121.130
+      nems:
+        c00n00: 10.240.121.131
+        c00n01: 10.240.121.132
+      blades:
+        c00b00: 10.250.57.11
+        c00b01: 10.250.57.12
+        c00b02: 10.250.57.13
+        c00b03: 10.250.57.14
+        c00b04: 10.250.57.15
+        c00b05: 10.250.57.16
+        c00b06: 10.250.57.17
+        c00b07: 10.250.57.18
+        c00b08: 10.250.57.19
+        c00b09: 10.250.57.20
+        c00b10: 10.250.57.21
+        c00b11: 10.250.57.22
+        c00b12: 10.250.57.23
+        c00b13: 10.250.57.24
+        c00b14: 10.250.57.25
+        c00b15: 10.250.57.26
+        c00b16: 10.250.57.27
+        c00b17: 10.250.57.28
+     
+  dhcp_subnets:
+    info:
+      base: 172.31.0.0
+      netmask: 255.255.0.0
+      routers: 172.31.1.1
+ 

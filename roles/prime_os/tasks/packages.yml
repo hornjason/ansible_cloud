@@ -57,7 +57,8 @@
 
 # DEPRECATED # Retesting EPEL...
  - name: Installing epel repo
-   yum: name={{ epel_rpm }} state=present update_cache=yes
+   #yum: name={{ epel_rpm }} state=present update_cache=yes
+   yum: name={{ epel_rpm }} state=present
 
  - pause: seconds={{ after_epel_pause }}
 
@@ -77,11 +78,46 @@
    yum:
      name={{ item }}
      state=present
+     #update_cache=yes
+   with_items:
+     - rsync
+     - python-libguestfs
+     - libselinux-python
+   register: epel_stuff
+   ignore_errors: yes
+   until: epel_stuff.failed is not defined or epel_stuff.failed ==false
+   retries: 5
+   delay: 15
+
+ - pause: minutes=1
+   when: epel_stuff|failed
+
+ - name: Re-trying(2) to install python-libguestfs,libselinux-python and rsync
+   yum:
+     name={{ item }}
+     state=present
      update_cache=yes
    with_items:
      - rsync
      - python-libguestfs
      - libselinux-python
+   when: epel_stuff|failed
+   register: epel_stuff2
+   ignore_errors: yes
+
+ - pause: minutes=1
+   when: epel_stuff2|failed
+
+ - name: Re-trying(3) to install python-libguestfs,libselinux-python and rsync
+   yum:
+     name={{ item }}
+     state=present
+     update_cache=yes
+   with_items:
+     - rsync
+     - python-libguestfs
+     - libselinux-python
+   when: epel_stuff2|failed
 
  # disable services
  - name: Disabling services

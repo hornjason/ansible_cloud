@@ -1,0 +1,53 @@
+# 02_preboot_preinstall
+---      
+  - name: loading infra file
+    include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
+
+  - name: Configuring Proxy for YUM
+    lineinfile:
+      dest=/etc/yum.conf
+      insertafter=EOF
+      line="proxy={{ proxy_env.http_proxy }}"
+      regexp="proxy"
+      backup=yes
+      state=present
+    when: proxy_env.http_proxy is defined
+
+  - name: Configuring Http Proxy for bashrc
+    lineinfile:
+      dest=/root/.bashrc
+      insertafter=EOF
+      line="export http_proxy={{ proxy_env.http_proxy }}"
+      regexp="http_proxy"
+      backup=yes
+      state=present
+    when: proxy_env.http_proxy is defined
+    
+  - name: Configuring Https Proxy for bashrc
+    lineinfile:
+      dest=/root/.bashrc
+      insertafter=EOF
+      line="export https_proxy={{ proxy_env.http_proxy }}"
+      regexp="https_proxy"
+      backup=yes
+      state=present
+    when: proxy_env.http_proxy is defined
+    
+  - name: Installing python-devel
+    yum: enablerepo=ol7_u2_base name=python-devel state=installed
+    register: python_dev_installed
+
+  - name: Installing pip
+    easy_install: name=pip state=latest
+
+  - name: installing gcc
+    yum: name=gcc enablerepo=ol7_u2_base state=present
+    
+  - name: Installing shade
+    pip: name=shade extra_args='--proxy http://www-proxy.us.oracle.com:80'
+    when: proxy_env.http_proxy is defined
+
+  - name: Installing shade
+    pip: name=shade
+    when: proxy_env.http_proxy is undefined
+

@@ -1,0 +1,53 @@
+---
+ - name: load subnet variables
+   include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
+   run_once: true
+ 
+ - set_fact:
+     ssh_key: "{{ local_repo }}/master_root_ssh_key.pub"
+
+ - name: check for master ssh key
+   become: false
+   local_action: stat path={{ ssh_key }}
+   register: results
+
+ - name: copy groups['master'] ssh key
+   fetch: src=/root/.ssh/id_rsa.pub dest={{ ssh_key }} flat=yes
+   when: results.stat.exists == false
+ 
+ - name: install openstack-kollacli
+   yum: name=openstack-kollacli state=present
+
+ - name: install OpenStack CLI Docker TOolKiT
+   yum: name=openstack-kolla-utils state=present
+
+ - name: check for {{ remote_repo }}
+   file: path={{ remote_repo }} state=directory
+
+ - name: copy {{ local_repo }} -> {{ remote_repo }}
+   #become: false
+   #local_action: synchronize src={{ local_repo }} dest=/root/ recursive=no
+   copy: src={{ local_repo }}/ dest={{ remote_repo }} force=yes 
+
+ - name: set owner:group on {{ remote_repo }}
+   file: path={{ remote_repo }} owner=root group=kolla recurse=yes 
+
+ - name: change admin password for openstack
+   lineinfile:
+     dest=/etc/kolla/passwords.yml
+     regexp="keystone_admin_password"
+     state=present
+     line="keystone_admin_password{{ ":" }} \"{{ openstack_admin_password }}\" "
+   register: docker
+
+ - name: template kolla_deploy
+   template: src=kolla_deploy.sh.j2 dest={{ remote_repo }}/kolla_deploy.sh
+
+ - name: template kolla_hosts_add
+   template: src=kolla_hosts_add.j2 dest={{ remote_repo }}/kolla_hosts.yml
+
+ - name: template keystonerc_admin
+   template: src=keystonerc.j2 dest={{ remote_repo}}/keystonerc-admin
+
+ - name: install epel repo
+   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present

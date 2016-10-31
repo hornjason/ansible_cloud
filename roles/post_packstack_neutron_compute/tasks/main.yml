@@ -44,7 +44,11 @@
   yum: 
     name=openstack-neutron-ml2 
     state=present 
-    update_cache=yes
+    #update_cache=yes
+  register: install_neutron
+  until: install_neutron.failed is not defined or install_neutron.failed == false
+  retries: 5
+  delay: 15
 
 ## create br-ex on each node 
 #     /usr/bin/ovs-vsctl add-br br-ex 

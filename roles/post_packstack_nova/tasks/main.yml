@@ -60,6 +60,9 @@
   service: name=openstack-nova-serialproxy enabled=yes state=started
   when: inventory_hostname in groups.controller
 
+- name: Installing openstack-utils
+  yum: name=openstack-utils enablerepo=openstack-mitaka state=installed
+
 - name: allow all tenants to create flavors with HEAT
   lineinfile:
     "dest={{ heat_policy_file }}

@@ -1,0 +1,7 @@
+---
+- name: Creating Backup Directory
+  file: path=/var/lib/backup state=directory
+
+- name: Dumping the Database
+  mysql_db: state=dump name=all target=/tmp/{{ inventory_hostname }}.sql
+

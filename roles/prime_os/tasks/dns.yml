@@ -1,0 +1,4 @@
+---
+- name: Adding a name server
+  shell: echo nameserver {{ secondary_dns }} >> /etc/resolv.conf
+  when: secondary_dns is defined

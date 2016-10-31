@@ -1,0 +1,10 @@
+#!/usr/bin/ansible-playbook
+---
+ - hosts: [pxe]
+   remote_user: root
+   roles:
+     - { role: generate_vars, tags: vars }    
+     - { role: proxy, tags: proxy }
+     - { role: prime_os, tags: prime_os }
+     - { role: pxe, tags: pxe }    
+

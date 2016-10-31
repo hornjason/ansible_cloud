@@ -1,0 +1,80 @@
+---
+domain: sanbux
+networks:
+  ext-net:
+    type: network
+    access: provider
+    network_type: vlan
+    physical_network: physnet1
+    segmentation_id: '{{ lab_vlan }}'
+    shared: yes
+    external: yes
+    subnet:
+      type: subnet
+      name: ext-subnet
+      gateway: '{{ lab_gateway }}'
+      dns_nameserver: '{{ lab_dns1 }}'
+      ip_version: 4
+      dhcp: disable
+      cidr: '{{ lab_cidr }}'
+      allocation_pool_start: '{{ lab_first_ip }}'
+      allocation_pool_end: '{{ lab_last_ip }}'
+  
+#  net-16:
+#    type: network
+#    access: provider
+#    network_type: vlan
+#    physical_network: physnet1
+#    segmentation_id: 16
+#    shared: yes
+#    external: yes
+#    subnet:
+#      type: subnet
+#      name: subnet-16
+#      ip_version: 4
+#      dhcp: disable
+#      cidr: 192.168.16.0/24
+#      allocation_pool_start: 192.168.16.101
+#      allocation_pool_end: 192.168.16.200
+#  
+#  net-18:
+#    type: network
+#    access: provider
+#    network_type: vlan
+#    physical_network: physnet1
+#    segmentation_id: 18
+#    shared: yes
+#    external: yes
+#    subnet:
+#      type: subnet
+#      name: subnet-18
+#      ip_version: 4
+#      dhcp: disable
+#      cidr: 192.168.18.0/24
+#      allocation_pool_start: 192.168.18.101
+#      allocation_pool_end: 192.168.18.200
+
+  demo-vxlan-net:
+    type: network
+    access: vxlan-tenant
+    network_type: vxlan
+    physical_network: none
+    segmentation_id: none
+    shared: no
+    external: no
+    subnet:
+      type: subnet
+      name: demo-vxlan-subnet
+      gateway: 192.168.200.1
+      dns_nameserver: none
+      ip_version: 4
+      dhcp: disable
+      cidr: 192.168.200.0/24
+      allocation_pool_start: 192.168.200.101
+      allocation_pool_end: 192.168.200.200
+    router:
+      name: demo-vxlan-router
+      interface: demo-vxlan-subnet
+      external_network: ext-net
+  
+      
