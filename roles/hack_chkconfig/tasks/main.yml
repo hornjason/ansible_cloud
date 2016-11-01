@@ -2,6 +2,10 @@
 - name: Loading Infrastructure File
   include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
   tags: hack_chkconfig
+
+- name: Making sure chkconfig is installed
+  command: yum reinstall chkconfig-1.3.61-5.el7.x86_64 -y
+  tags: restore_chkconfig
     
 - name: Renaming chkconfig 
   copy: src=/usr/sbin/chkconfig dest=/usr/sbin/chkconfig.dontuse remote_src=True

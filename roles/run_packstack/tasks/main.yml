@@ -30,7 +30,7 @@
   register: packstack_run
   tags: run_packstack
   until: packstack_run.failed is not defined or packstack_run.failed == false
-  retries: 5
+  retries: 10
   delay: 15
 
 # DEPRECATED # for local repos only
