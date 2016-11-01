@@ -4,7 +4,10 @@
   run_once: true
 
 - name: Installing openstack-nova-serialproxy
-  yum: name=openstack-nova-serialproxy enablerepo=openstack-mitaka state=installed
+  yum: name=openstack-nova-serialproxy
+
+### - name: Installing openstack-nova-serialproxy
+###   yum: name=openstack-nova-serialproxy enablerepo=openstack-mitaka state=installed
 
 - name: Starting and Enabling openstack-nova-serialproxy Service
   service: name=openstack-nova-serialproxy enabled=yes state=started

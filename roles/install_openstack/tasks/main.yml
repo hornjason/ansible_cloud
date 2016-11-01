@@ -21,6 +21,6 @@
     - openstack-neutron-openvswitch
     - deltarpm
 
-- name: install epel repo
-  yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
+### - name: install epel repo
+###   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
 

@@ -29,43 +29,52 @@
     service: name={{ item }} enabled=no state=stopped
     with_items: "{{ service_to_disable }}"
 
-# DEPRECATED #
-  # installing rpms
-  - name: Installing rdo-release rpm
-    yum: name={{ rdo_release_rpm }} state=present
-    register: rdo_release_rpm_installed
+###   # installing rpms
+###   - name: Installing rdo-release rpm
+###     yum: name={{ rdo_release_rpm }} state=present
+###     register: rdo_release_rpm_installed
+### 
+###   - name: Retrying when failed rdo-release rpm
+###     yum: name={{ rdo_release_rpm }} state=present update_cache=yes
+###     when: rdo_release_rpm_installed|failed
 
-  - name: Retrying when failed rdo-release rpm
-    yum: name={{ rdo_release_rpm }} state=present update_cache=yes
-    when: rdo_release_rpm_installed|failed
-   
-# Experimental: Pre-installing the packages packstack requires
   - name: Installing packstack pre-packages
-    yum: name={{ item.name }}  enablerepo={{ item.repo }} state=installed
+    yum: name={{ item.name }} enablerepo=rdolocal state=installed
     with_items:
-      - { name: puppet,     repo: openstack-mitaka }
-      - { name: hiera,      repo: openstack-mitaka }
-      - { name: openssh-clients, repo: ol7_latest }
-      - { name: tar,        repo: ol7_latest }
-      - { name: nmap-ncat,  repo: ol7_latest }
-      - { name: rubygem-json, repo: ol7_latest }
-    register: packpp_stuff
-    ignore_errors: yes
-    until: packpp_stuff.failed is not defined or packpp_stuff.failed == false
-    retries: 5
-    delay: 15
+      - { name: puppet }
+      - { name: hiera }
+      - { name: openssh-clients }
+      - { name: tar }
+      - { name: nmap-ncat }
+      - { name: rubygem-json }
 
-  - pause: minutes=1
-    when: packpp_stuff|failed
-
-  - name: Installing(2) packstack pre-packages
-    yum: name={{ item.name }}  enablerepo={{ item.repo }} state=installed
-    with_items:
-      - { name: puppet,     repo: openstack-mitaka }
-      - { name: hiera,      repo: openstack-mitaka }
-      - { name: openssh-clients, repo: ol7_latest }
-      - { name: tar,        repo: ol7_latest }
-      - { name: nmap-ncat,  repo: ol7_latest }
-      - { name: rubygem-json, repo: ol7_latest }
-    when: packpp_stuff|failed
-
+### # Experimental: Pre-installing the packages packstack requires
+###   - name: Installing packstack pre-packages
+###     yum: name={{ item.name }}  enablerepo={{ item.repo }} state=installed
+###     with_items:
+###       - { name: puppet,     repo: openstack-mitaka }
+###       - { name: hiera,      repo: openstack-mitaka }
+###       - { name: openssh-clients, repo: ol7_latest }
+###       - { name: tar,        repo: ol7_latest }
+###       - { name: nmap-ncat,  repo: ol7_latest }
+###       - { name: rubygem-json, repo: ol7_latest }
+###     register: packpp_stuff
+###     ignore_errors: yes
+###     until: packpp_stuff.failed is not defined or packpp_stuff.failed == false
+###     retries: 5
+###     delay: 15
+### 
+###   - pause: minutes=1
+###     when: packpp_stuff|failed
+### 
+###   - name: Installing(2) packstack pre-packages
+###     yum: name={{ item.name }}  enablerepo={{ item.repo }} state=installed
+###     with_items:
+###       - { name: puppet,     repo: openstack-mitaka }
+###       - { name: hiera,      repo: openstack-mitaka }
+###       - { name: openssh-clients, repo: ol7_latest }
+###       - { name: tar,        repo: ol7_latest }
+###       - { name: nmap-ncat,  repo: ol7_latest }
+###       - { name: rubygem-json, repo: ol7_latest }
+###     when: packpp_stuff|failed
+### 

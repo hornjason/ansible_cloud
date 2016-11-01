@@ -56,23 +56,23 @@
      - yum
 
 # DEPRECATED # Retesting EPEL...
- - name: Installing epel repo
+ #- name: Installing epel repo
    #yum: name={{ epel_rpm }} state=present update_cache=yes
-   yum: name={{ epel_rpm }} state=present
+   #yum: name={{ epel_rpm }} state=present
 
- - pause: seconds={{ after_epel_pause }}
+ #- pause: seconds={{ after_epel_pause }}
 
- - name: Removing mirrorlist in epel yum repo
-   lineinfile:
-     dest=/etc/yum.repos.d/epel.repo
-     regexp="^mirrorlist.*$"
-     state=absent
+ #- name: Removing mirrorlist in epel yum repo
+   #lineinfile:
+     #dest=/etc/yum.repos.d/epel.repo
+     #regexp="^mirrorlist.*$"
+     #state=absent
 
- - name: Enabling baseurl in epel repo
-   replace:
-     dest=/etc/yum.repos.d/epel.repo
-     regexp="^.baseurl.*$"
-     replace="baseurl={{ epel_baseurl }}"
+ #- name: Enabling baseurl in epel repo
+   #replace:
+     #dest=/etc/yum.repos.d/epel.repo
+     #regexp="^.baseurl.*$"
+     #replace="baseurl={{ epel_baseurl }}"
 
  - name: Installing python-libguestfs,libselinux-python and rsync
    yum:
@@ -88,36 +88,6 @@
    until: epel_stuff.failed is not defined or epel_stuff.failed ==false
    retries: 5
    delay: 15
-
- - pause: minutes=1
-   when: epel_stuff|failed
-
- - name: Re-trying(2) to install python-libguestfs,libselinux-python and rsync
-   yum:
-     name={{ item }}
-     state=present
-     update_cache=yes
-   with_items:
-     - rsync
-     - python-libguestfs
-     - libselinux-python
-   when: epel_stuff|failed
-   register: epel_stuff2
-   ignore_errors: yes
-
- - pause: minutes=1
-   when: epel_stuff2|failed
-
- - name: Re-trying(3) to install python-libguestfs,libselinux-python and rsync
-   yum:
-     name={{ item }}
-     state=present
-     update_cache=yes
-   with_items:
-     - rsync
-     - python-libguestfs
-     - libselinux-python
-   when: epel_stuff2|failed
 
  # disable services
  - name: Disabling services

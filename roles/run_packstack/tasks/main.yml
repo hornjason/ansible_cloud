@@ -32,18 +32,3 @@
   until: packstack_run.failed is not defined or packstack_run.failed == false
   retries: 10
   delay: 15
-
-# DEPRECATED # for local repos only
-- name: Removing conflicting mariadb-server-galera
-  yum: name=mariadb-server-galera state=absent
-  when: packstack_run|failed
-
-- name: restart network before second packstack attempt
-  service: name=network state=restarted
-  
-- name: Running Packstack a second if it failed(2)
-  shell: /usr/bin/packstack --answer-file="{{ packstack_answer_file }}" > "{{ packstack_output_file }}" 2>&1
-  ignore_errors: no
-  when: packstack_run|failed
-  tags: run_packstack
-

@@ -2,29 +2,17 @@
 - name: ensure createrepo is installed
   yum: name=createrepo state=latest
 
-- name: create local repo dir /var/lib/repos
-  file: path=/var/lib/repos/{{ item }}  state=directory owner=root mode=0777
-  with_items:
-    - epel
-    - rdo-mitaka
-
-#- name: wget mitaka repo
-#  shell:  wget --mirror --no-parent --no-host-directories --timestamping --quiet --cut-dirs=5  --reject=index.html*,*\.css,*\.png,*\.gif,*.sh http://mirror.centos.org/centos/7/cloud/x86_64/openstack-mitaka
-#
-#- name: create local EPEL repo
-#  shell:  wget --mirror --no-parent --no-host-directories --timestamping --quiet --cut-dirs=4  --reject=index.html*,*\.css,*\.png,*\.gif,*\.sh -X /pub/epel/7/x86_64/debug,/pub/epel/7/x86_64/repodata http://ftp.linux.ncsu.edu/pub/epel/7/x86_64/
-#
-#-name: add check for repodata dir before running below createrepo
-#
-#- name: createrepo /var/lib/repos/epel /var/lib/repos/rdo-mitaka
-#  shell: createrepo /var/lib/repos/{{ item }}
-#  with_items:
-#    - epel
-#    - rdo-mitaka
-#
-
-- name: set permissions on repo directories 
-  file: state=directory path=/var/lib/repos recurse=yes owner=root mode=0777
+###- name: Installing RDO Repo
+###  yum: name=https://repos.fedorapeople.org/repos/openstack/openstack-{{ openstack_release }}/rdo-release-{{ openstack_release }}-5.noarch.rpm state=present
+###
+###- name: set permissions on repo directories
+###  file: state=directory path=/var/lib/repos/rdolocal recurse=yes owner=root mode=0777
+###
+###- name: Downloading Packages
+###  shell: "{{ playbook_dir }}/repo/packages.list"
+###
+###- name: createrepo /var/lib/repos/rdolocal
+###  shell: createrepo /var/lib/repos/rdolocal
 
 - name: setup nfs exports for epel and rdo-mitaka repos
   lineinfile:
@@ -33,8 +21,7 @@
     insertafter=EOF
     line="{{ item }}      *(ro,async)"
   with_items:
-    - "/var/lib/repos/epel"
-    - "/var/lib/repos/rdo-mitaka"
+    - "/var/lib/repos"
   register: nfs_exports
 
 - name: restart NFS

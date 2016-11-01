@@ -53,7 +53,8 @@
   template: src=templates/interfaces.template.j2 dest={{ interfaces_template_file }} owner=root group=root mode=0755
 
 - name: Installing openstack-nova-serialproxy on the controller only
-  yum: name=openstack-nova-serialproxy enablerepo=openstack-mitaka state=installed
+  yum: name=openstack-nova-serialproxy enablerepo=rdolocal state=installed
+  ###yum: name=openstack-nova-serialproxy enablerepo=openstack-mitaka state=installed
   when: inventory_hostname in groups.controller
 
 - name: Starting and Enabling openstack-nova-serialproxy Service on the controller only
@@ -61,7 +62,8 @@
   when: inventory_hostname in groups.controller
 
 - name: Installing openstack-utils
-  yum: name=openstack-utils enablerepo=openstack-mitaka state=installed
+  yum: name=openstack-utils enablerepo=rdolocal state=installed
+  ###yum: name=openstack-utils enablerepo=openstack-mitaka state=installed
 
 - name: allow all tenants to create flavors with HEAT
   lineinfile:

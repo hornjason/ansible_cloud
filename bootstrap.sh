@@ -20,7 +20,7 @@ VNC_PORT="99"
 ####################
 package_list="vim virt-install libvirt libguestfs-tools libguestfs git asciidoc rpm-build python2-devel \
 python-pip python-devel sshpass python-httplib2 python-paramiko python-keyczar tigervnc-server pexpect  \
-git gcc libffi-devel openssl-devel"
+gcc libffi-devel openssl-devel createrepo"
 
 ####################
 # packages to remove
@@ -30,7 +30,6 @@ package_remove_list="firewalld NetworkManager gnome-packagekit"
 ####################
 yum_conf="/etc/yum.conf"
 ####################
-
 
 ####################
 # proxy server
@@ -161,8 +160,33 @@ echo "Removing packages not needed"
   $SUDO iptables -F
   $SUDO yum --enablerepo=epel,ol7_optional_latest -y remove $package_remove_list
 
+echo "Installing createrepo rpm"
+  $SUDO yum --enablerepo=ol7_latest -y install createrepo
+
+echo "Downloading extra packages from RDO EPEL ..."
+  $SUDO mkdir -p /var/lib/repos/rdolocal
+  $SUDO cat ./packages.list | while read rpm ; do
+          /usr/bin/yum  -y install --downloaddir=/var/lib/repos/rdolocal --downloadonly $rpm | grep Installed || \
+          /usr/bin/yum  -y reinstall --downloaddir=/var/lib/repos/rdolocal --downloadonly $rpm
+        done
+  $SUDO sed -i "s/enabled=1/enabled=0/g" /etc/yum.repos.d/*
+  $SUDO ln -s /var/lib/repos/rdolocal /rdolocal
+  $SUDO cat > /etc/yum.repos.d/rdolocal.repo << EOF
+[rdolocal]
+baseurl = file:///rdolocal
+enabled = 1
+gpgcheck = 0
+name = local rdolocal repo
+EOF
+  $SUDO createrepo /var/lib/repos/rdolocal
+
 echo "Installing package list"
-  $SUDO yum --enablerepo=epel,ol7_optional_latest -y install $package_list
+  $SUDO yum clean all
+  $SUDO yum --enablerepo=rdolocal -y install $package_list
+
+echo "Exporting local repo /var/lib/repos"
+  $SUDO grep "/var/lib/repos" /etc/exports || echo "/var/lib/repos      *(ro,async)" >> /etc/exports
+  $SUDO /sbin/exportfs -av
 
 ################################
 # setup git globals

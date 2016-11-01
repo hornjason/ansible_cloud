@@ -11,27 +11,21 @@
 #  roles:
 #    - { role: repave, tags: repave }
 
-# build local epel and rdo repo and have them mounted to all nodes
-#- hosts: [pxe]
-#  remote_user: root
-#  roles:
-#    - { role: build_local_repos, tags: build_local_repos }
-
-#- hosts: [compute, controller]
-#  gather_facts: no
-#  roles:
-#    - { role: expose_repos, tags: expose_repos }
+- hosts: [compute, controller]
+  gather_facts: no
+  roles:
+    - { role: expose_repos, tags: expose_repos }
 
 # start customizing systems based on lab specifics
 - hosts: [compute, controller]
   gather_facts: no
   roles:
-#    - { role: lab_custom, tags: lab_custom }
-#    - { role: prime_os, tags: prime_os }
+    - { role: lab_custom, tags: lab_custom }
+    - { role: prime_os, tags: prime_os }
     - { role: prepare_openstack, tags: prepare_openstack }
     - { role: change_kernel, tags: change_kernel }
-  environment:  
-    http_proxy: http://www-proxy.us.oracle.com:80
+  #environment:  
+    #http_proxy: http://www-proxy.us.oracle.com:80
 
 # controller ssh key distribution to the openstack nodes
 - hosts: [controller]
