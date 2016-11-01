@@ -1,6 +1,0 @@
-SSHCMD="sshpass -p changeme ssh  -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-CMD="cat /etc/oracle-release"
-IPMI="ipmitool -I lanplus -Uroot -Pchangeme chassis power cycle "
-#CMD="$1"
-#echo -en "\n - c00b00"; echo -en " 10.133.1.130 result --> "; r=$($SSHCMD 10.133.1.130 $CMD || echo UNREACHABLE) ; printf "$r"
-echo -en "\n - c00b08"; echo -en " 10.133.1.138 result --> "; r=$($SSHCMD 10.133.1.138 $CMD  || echo UNREACHABLE; echo -e "\t$IPMI -H10.133.1.138") ; printf "$r"

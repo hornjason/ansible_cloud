@@ -16,6 +16,16 @@ ENABLE_PROXY="false"
 VNC_PORT="99"
 
 ####################
+# master repo that contains rdo packages
+####################
+MASTER_REPO="10.240.121.66"
+
+####################
+# OpenStack Release
+####################
+OPENSTACK_RELEASE=mitaka
+
+####################
 # packages to install
 ####################
 package_list="vim virt-install libvirt libguestfs-tools libguestfs git asciidoc rpm-build python2-devel \
@@ -163,12 +173,13 @@ echo "Removing packages not needed"
 echo "Installing createrepo rpm"
   $SUDO yum --enablerepo=ol7_latest -y install createrepo
 
-echo "Downloading extra packages from RDO EPEL ..."
+echo "Downloading extra packages from RDO EPEL ... this can take few minutes"
   $SUDO mkdir -p /var/lib/repos/rdolocal
-  $SUDO cat ./packages.list | while read rpm ; do
-          /usr/bin/yum  -y install --downloaddir=/var/lib/repos/rdolocal --downloadonly $rpm | grep Installed || \
-          /usr/bin/yum  -y reinstall --downloaddir=/var/lib/repos/rdolocal --downloadonly $rpm
-        done
+  $SUDO wget  -nd -q -P /var/lib/repos/rdolocal/ -r ${MASTER_REPO}/rdolocal/${OPENSTACK_RELEASE}
+#  $SUDO cat ./packages.list | while read rpm ; do
+#          /usr/bin/yum  -y install --downloaddir=/var/lib/repos/rdolocal --downloadonly $rpm | grep Installed || \
+#          /usr/bin/yum  -y reinstall --downloaddir=/var/lib/repos/rdolocal --downloadonly $rpm
+#        done
   $SUDO sed -i "s/enabled=1/enabled=0/g" /etc/yum.repos.d/*
   $SUDO ln -s /var/lib/repos/rdolocal /rdolocal
   $SUDO cat > /etc/yum.repos.d/rdolocal.repo << EOF
