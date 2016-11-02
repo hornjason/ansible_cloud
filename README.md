@@ -36,6 +36,14 @@ To execute the Ansible Roles provided in this repository, the Cloud Administrato
 -	All nodes have access to the Internet to pull packages from Oracle Public Yum, EPEL and OpenStack RDO
 -	The Install server is physically connected to the same network as the OpenStack nodes through the External and Internal networks - the minimal number of physical NICs must be reached
 
+Typical workflow:
+- export https_proxy=rmdc-proxy.oracle.com:80
+- git config --global http.sslVerify false
+- git clone https://slc10vrt.us.oracle.com/jahorn/ansible_rdo.git
+- cd ansible_rdo
+- edit bootstrap.sh (enable proxy etc..)
+- ./bootstrap.sh
+
 Then, execute the bootstrap.sh script to have the rest of the software requirements deployed.
 
 If you recieve a error relating trusted certificates:
