@@ -1,0 +1,14 @@
+#!/bin/ansible-playbook
+
+- hosts: [localhost]
+  connection: local
+  gather_facts: no
+  tasks:
+  - include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
+
+  - name: Loop through site
+    #debug: msg="{{ item.key }} is {{ item.value.flavor }} ({{ item.value.networks }})"
+    #debug: var="infrastructure.utility_servers[0].userv_int_mgmt_ip"
+    debug: var=infrastructure.dhcp_subnets.info.next_server
+    #debug: msg="{{ item[0].value.userv_int_mgmt_ip }}"
+    #with_dict: infrastructure.utility_servers
