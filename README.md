@@ -37,7 +37,8 @@ To execute the Ansible Roles provided in this repository, the Cloud Administrato
 -	The Install server is physically connected to the same network as the OpenStack nodes through the External and Internal networks - the minimal number of physical NICs must be reached
 
 Typical workflow:
-- export https_proxy=rmdc-proxy.oracle.com:80
+- export https_proxy=adc-proxy.oracle.com:80
+- export http_proxy=adc-proxy.oracle.com:80
 - git config --global http.sslVerify false
 - git clone https://slc10vrt.us.oracle.com/jahorn/ansible_rdo.git
 - cd ansible_rdo
