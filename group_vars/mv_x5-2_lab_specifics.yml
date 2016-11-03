@@ -1,83 +1,85 @@
 ---
-lab_specifics:
-  lab_id: 3603
-  vlans:
-    openstack_provider_vlan:
-      vlan_id: 
-      tagged_traffic_needed: false
-      network: 10.75.138.0
-      netmask: 255.255.254.0
-      broadcast: 10.75.139.255
-      host_min: 10.75.138.41
-      host_max: 10.75.138.49
-      gateway: 10.75.138.1
-      ntp_server: 10.250.32.10
-      name_server: 10.209.76.197
-      name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
-      defined:
-       - nem1
+# wipe: default value used to determine if OS is to be installed
+wipe: "True"
 
-    ext_management_vlan:
-      vlan_id: 1
-      tagged_traffic_needed: false
-      network: 10.75.138.0
-      netmask: 255.255.254.0
-      broadcast: 10.75.139.255
-      host_min: 10.75.138.38
-      host_max: 10.75.138.49
-      gateway: 10.75.138.1
-      ntp_server: 10.250.32.10
-      name_server: 10.209.76.197
-      name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
-      defined:
-       - nem0
-      blades:
-        # chassis onap2
-        c00b00: 10.75.138.39
-        c00b01: 10.75.138.40
-      utility_servers:
-        x5-200: 10.75.138.38
+# Project: Used to indentify unique openstack project and hostname of the install server 
+project: big_cloud
 
-    int_management_vlan:
-      vlan_id: 
-      tagged_traffic_needed: false
-      network: 172.31.0.0
-      netmask: 255.255.0.0
-      broadcast: 172.31.255.255
-      host_min: 172.31.2.1
-      host_max: 172.31.2.254
-      gateway: 172.31.254.254
-      ntp_server: 10.250.32.10
-      name_server: 10.209.76.197
-      name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
-      defined:
-       - nem0
-      utility_servers:
-        x5-200: 172.31.254.254
-      blades:
-        c00b00: 172.31.2.110
-        c00b01: 172.31.2.111
+# n6k chassis determines if installation is n6k hardware based
+n6k: false
 
-    ilom_vlan:
-      vlan_id:
-      tagged_traffic_needed: false
-      network: 10.75.129.0
-      netmask: 255.255.255.0
-      broadcast: 10.75.129.255
-      cmms:
-        c00: 172.31.2.253
-      nems:
-        c00n00: 172.31.2.251
-        c00n01: 172.31.2.252
-      blades:
-        c00b00: 10.75.129.45
-        c00b01: 10.75.129.47
-      utility_servers:
-        x5-200: 10.75.129.46
+# interfaces
+# management_interface = pxe/tftp/ansible automation
+management_interface: eno2
+# ext_manangement_interface = openstack services networking
+ext_management_interface: eno1
+# storage_interface
+storage_interface: eno2
+# tenant_interface = vxlan overlay network
+tenant_interface: eno2
+# provider_interface = openstack provider vlan or flat if no vlan defined
+provider_interface: eno1
+# dummy_* = used only for installing openstack via packstack so connection isn't lost
+dummy_physical_port_for_neutron: "{{ provider_interface }}.1"
 
-  dhcp_subnets:
-    info:
-      base: 172.31.0.0
-      netmask: 255.255.0.0
-      routers: 172.31.254.254
+# NFS staging directory of iso_name, content is copied here
+nfs_staging_dir: /stage
+# boot_device in kicsktart file
+kickstart_file: ol7.ks
+boot_dev: sda
+iso_name: OracleLinux-R7-U2-Server-x86_64-dvd.iso
+iso_url: http://kernel.us.oracle.com/osinstall/OracleLinux/OL7/u2/x86_64/{{ iso_name }}
 
+# proxy_env used to identify a proxy if required. Leave undefined if not needed
+proxy_env: 
+  http_proxy: http://rmdc-proxy.oracle.com:80
+  https_proxy: http://rmdc-proxy.oracle.com:80
+  no_proxy: "tekelec.com,localhost,127.0.0.1,10.75.183.3,10.75.183.4
+
+# openstack release
+# Tested with liberty && mitaka
+openstack_release: mitaka
+
+################################
+# Do not change related to ansible automation internals
+local_repo: "{{ playbook_dir }}/repo"
+remote_repo: /root/scripts
+
+# Number of chassis
+num_chassis: 1
+# Number of utility servers
+num_utility_servers: 1
+# Number of Storage Head Pairs
+num_zfs: 0
+# Number of es2 72 Pairs (Storage/Tenant)
+num_es2_72: 0
+
+# Pause duration
+# seconds
+resolv_pause: 10
+ilom_pause: 10
+after_epel_pause: 10
+#minutes
+reboot_wait_time: 5
+repave_wait_time: 20
+
+# Oracle Linux 7.x repo
+public_yum_ol7_repo_url: "http://public-yum.oracle.com/public-yum-ol7.repo"
+
+# Openstack RDO RPM 
+rdo_release_rpm: "https://repos.fedorapeople.org/repos/openstack/openstack-{{ openstack_release }}/rdo-release-{{ openstack_release }}-5.noarch.rpm"
+# EPEL RPM 
+epel_rpm: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+epel_baseurl: "http://ftp.linux.ncsu.edu/pub/epel/7/$basearch"
+
+# Packstack 
+packstack_dir: "/var/lib/packstack"
+packstack_answer_file: "{{ packstack_dir }}/answers.txt"
+packstack_output_file: "{{ packstack_dir }}/packstack.out"
+
+# Glance
+#image_url: http://10.133.96.27/image/myOL6image.qcow2
+image_url: http://10.75.138.38/images/baseOEL6imageVM.qcow2
+image_file_dir: /var/lib/openstack
+image_file_name: myOL6image.qcow2
+cloud_init_image_ol66: testVMimage
