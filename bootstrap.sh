@@ -8,7 +8,7 @@
 ####################
 # enable proxy for this server
 ####################
-ENABLE_PROXY="false"
+ENABLE_PROXY="true"
 
 ####################
 # vnc port
@@ -23,7 +23,7 @@ MASTER_REPO="10.240.121.66"
 ####################
 # proxy server
 ####################
-proxy="http://rmdc-proxy.oracle.com:80"
+proxy="http://adc-proxy.oracle.com:80"
 
 ####################
 # OpenStack Release
@@ -67,8 +67,8 @@ if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
   fi
   export http_proxy=$proxy
   export https_proxy=$proxy
-  printf -v no_proxy '%s,' 172.31.2.{1..255};
-  export no_proxy="localhost,127.0.0.1,us.oracle.com,$no_proxy,10.75.183.3"
+  #printf -v no_proxy '%s,' 172.31.2.{1..255};
+  export no_proxy="localhost,127.0.0.1,us.oracle.com,$no_proxy,$MASTER_REPO"
 
 #git_proxy="git config --global http.proxy http://www-proxy.us.oracle.com:80"
 #git_proxys="git config --global https.proxy http://www-proxy.us.oracle.com:443"
@@ -139,6 +139,7 @@ if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
 cat >> ~/.bashrc << EOF
 export http_proxy=$proxy
 export https_proxy=$proxy
+export no_proxy="localhost,127.0.0.1,us.oracle.com,$no_proxy,$MASTER_REPO"
 EOF
 fi
 
@@ -263,3 +264,17 @@ fi
 #sed -i "s/172.31.254.254/$pxe_ip/g" hosts
 #sed -i "s/pxe_boot_server:.*/pxe_boot_server: $pxe_ip/" group_vars/all
 source ~/.bashrc
+
+################################
+# update pxe interface
+################################
+echo "Creating internal PXE interface"
+
+$SUDO ifdown 
+DEVICE={{ management_interface }}
+BOOTPROTO=static
+ONBOOT=yes
+IPADDR={{ infrastructure.dhcp_subnets.info.next_server }}
+NETMASK={{ infrastructure.vlans.int_management_vlan.netmask }}
+MTU={{ mtu }}
+

@@ -2,25 +2,27 @@
 wipe: "True"
 
 # Project
-project: mvl01
+project: big_cloud
 
 # n6k chassis
-n6k: true
+n6k: false
 
 # interfaces
-management_interface: ens3f1
-ext_management_interface: ens3f0
-storage_interface: ens3f1
+management_interface: eno2
+ext_management_interface: eno1
+storage_interface: eno2
 tenant_interface: "{{ storage_interface }}"
-provider_interface: ens3f0
+provider_interface: eno1
 dummy_physical_port_for_neutron: "{{ provider_interface }}.1"
+
+mtu: 9000
 
 #PXE
 #pxe_boot_server: 
 nfs_staging_dir: /stage
 boot_dev: sda
 iso_name: OracleLinux-R7-U2-Server-x86_64-dvd.iso
-iso_url: http://kernel.us.oracle.com/osinstall/OracleLinux/OL7/u2/x86_64/{{ iso_name }}
+iso_url: http://10.240.121.66/images/{{ iso_name }}
 kickstart_file: ol7.ks
 
 local_repo: "{{ playbook_dir }}/repo"
@@ -59,9 +61,6 @@ packstack_answer_file: "{{ packstack_dir }}/answers.txt"
 packstack_output_file: "{{ packstack_dir }}/packstack.out"
 
 # Glance
-#http://10.240.121.66/images/baseOEL6imageVM.qcow2
-#image_url: http://10.240.199.2/image/myOL6image.qcow2
-#image_url: http://10.133.96.27/image/myOL6image.qcow2
 image_url: http://10.240.121.66/images/baseOEL6imageVM.qcow2
 image_file_dir: /var/lib/openstack
 image_file_name: myOL6image.qcow2

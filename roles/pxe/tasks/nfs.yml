@@ -52,7 +52,8 @@
   tags: ks
 
 - name: copy isolinux.cfg to {{ nfs_staging_dir }}/isolinux/
-  copy: src={{ local_repo }}/isolinux.cfg  dest={{ nfs_staging_dir }}/isolinux/
+  #copy: src={{ local_repo }}/isolinux.cfg  dest={{ nfs_staging_dir }}/isolinux/
+  copy: src=isolinux.cfg  dest={{ nfs_staging_dir }}/isolinux/
   tags: ks
 
 - name: unmount iso

@@ -3,12 +3,5 @@
   include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
   run_once: true
 
-- include: nfs.yml
+- include: pxe_interface.yml
   run_once: true
-
-- include: dhcp.yml
-  run_once: true
-
-- include: tftp.yml
-  run_once: true
-

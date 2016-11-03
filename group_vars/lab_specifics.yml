@@ -1,62 +1,64 @@
 ---
 lab_specifics:
-  lab_id: mvl
+  lab_id: big_cloud
   vlans:
     openstack_vxlan_tenant:
-      vlan_id: 16
+      vlan_id: 11
       tagged_traffic_needed: true
       network: 172.16.0.0
       netmask: 255.255.0.0
 
     openstack_provider_vlan:
       tagged_traffic_needed: true
-      vlan_id: 586
-      network: 10.240.121.0
-      netmask: 255.255.255.192
-      broadcast: 10.240.121.63
-      host_min: 10.240.121.40
-      host_max: 10.240.121.62
+      vlan_id: 10
+      network: 10.75.183.0
+      netmask: 255.255.255.128
+      broadcast: 10.75.183.127 
+      host_min: 10.75.183.65
+      host_max: 10.75.183.126
       #openstack_reserved_first_address: 10.240.121.90
       #openstack_reserved_last_address: 10.240.121.100
-      gateway: 10.240.121.1
+      gateway: 10.75.183.1
       ntp_server: 10.250.32.10
       name_server: 10.250.32.180
       name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
       defined:
        - nem0
       utility_servers:
-        mvl0100: 10.240.121.66
+        big_cloud_dm0100: 10.75.183.3
     ext_management_vlan:
-      tagged_traffic_needed: true
-      vlan_id: 586
-      network: 10.240.121.0
-      netmask: 255.255.255.192
-      broadcast: 10.240.121.63
-      host_min: 10.240.121.1
-      host_max: 10.240.121.19
-      gateway: 10.240.121.1
+      tagged_traffic_needed: false
+      vlan_id: 
+      network: 10.75.183.0
+      netmask: 255.255.255.128
+      broadcast: 10.75.183.127
+      host_min: 10.75.183.4
+      host_max: 10.75.183.64
+      gateway: 10.75.183.1
       ntp_server: 10.250.32.10
       name_server: 10.250.32.180
       name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
       defined:
        - nem0
       utility_servers:
-        mvl0100: 10.240.121.2
+        big_cloud_dm0100: 10.75.183.3
       zfs:
         zfs00:
           head00: 10.250.54.111
           head01: 10.250.54.112
       blades:
-        c00b00: 10.240.121.10
-        c00b01: 10.240.121.11
-        c00b02: 10.240.121.12
-        c00b03: 10.240.121.13
-        c00b04: 10.240.121.14
-        c00b05: 10.240.121.15
-        c00b06: 10.240.121.16
-        c00b07: 10.240.121.17
-        c00b08: 10.240.121.18
-        c00b09: 10.240.121.19
+        c00b00: 10.75.183.4
+        c00b01: 10.75.183.5
+        c00b02: 10.75.183.6
+        c00b03: 10.75.183.7
+        c00b04: 10.75.183.8
+        c00b05: 10.75.183.9
+        c00b06: 10.75.183.10
+        c00b07: 10.75.183.11
+        c00b08: 10.75.183.12
+        c00b09: 10.75.183.13
+        c00b10: 10.75.183.14
+        c00b11: 10.75.183.15
     int_management_vlan:
       vlan_id:
       tagged_traffic_needed: false
@@ -72,9 +74,8 @@ lab_specifics:
       defined:
        - nem1
       utility_servers:
-        onap2100: 172.31.254.254
+        big_cloud_dm0100: 172.31.254.254
       blades:
-        # chassis onap2
         c00b00: 172.31.0.110
         c00b01: 172.31.0.111
         c00b02: 172.31.0.112
@@ -85,16 +86,18 @@ lab_specifics:
         c00b07: 172.31.0.117
         c00b08: 172.31.0.118
         c00b09: 172.31.0.119
+        c00b10: 172.31.0.120
+        c00b11: 172.31.0.121
 
     ilom_vlan:
-      vlan_id: 588
-      tagged_traffic_needed: true
-      network: 10.240.121.128
-      netmask: 255.255.255.224
-      broadcast: 10.240.121.129
-      host_min: 10.240.121.129
-      host_max: 10.240.121.158
-      gateway: 10.240.121.129
+      vlan_id: 
+      tagged_traffic_needed: false
+      network: 10.75.128.0
+      netmask: 255.255.252.0
+      broadcast: 10.75.131.255
+      host_min: 10.75.128.2
+      host_max: 10.75.131.254
+      gateway: 10.75.128.1
       ntp_server: 198.211.106.151
       zfs:
         zfs00:
@@ -106,16 +109,20 @@ lab_specifics:
         c00n00: 10.240.121.131
         c00n01: 10.240.121.132
       blades:
-        c00b00: 10.240.121.133
-        c00b01: 10.240.121.134
-        c00b02: 10.240.121.135
-        c00b03: 10.240.121.136
-        c00b04: 10.240.121.137
-        c00b05: 10.240.121.138
-        c00b06: 10.240.121.139
-        c00b07: 10.240.121.140
-        c00b08: 10.240.121.141
-        c00b09: 10.240.121.142
+        c00b00: 10.75.129.142
+        c00b01: 10.75.129.143
+        c00b02: 10.75.129.144
+        c00b03: 10.75.129.145
+        c00b04: 10.75.129.146
+        c00b05: 10.75.129.147
+        c00b06: 10.75.129.148
+        c00b07: 10.75.129.149
+        c00b08: 10.75.129.150
+        c00b09: 10.75.129.151
+        c00b10: 10.75.129.152
+        c00b11: 10.75.129.153
+     
+     
      
   dhcp_subnets:
     info:
