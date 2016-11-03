@@ -20,7 +20,7 @@ lab_specifics:
       #openstack_reserved_last_address: 10.240.121.100
       gateway: 10.75.183.1
       ntp_server: 10.250.32.10
-      name_server: 10.250.32.180
+      name_server: 10.250.32.10
       name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
       defined:
        - nem0
@@ -36,7 +36,7 @@ lab_specifics:
       host_max: 10.75.183.64
       gateway: 10.75.183.1
       ntp_server: 10.250.32.10
-      name_server: 10.250.32.180
+      name_server: 10.250.32.10
       name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
       defined:
        - nem0
@@ -69,7 +69,7 @@ lab_specifics:
       host_max: 10.31.0.119
       gateway: 172.31.0.1
       ntp_server: 10.250.32.10
-      name_server: 10.250.32.180
+      name_server: 10.250.32.10
       name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
       defined:
        - nem1
