@@ -1,15 +1,15 @@
 #!/usr/bin/ansible-playbook
 ---
-#- hosts: [pxe]
-#  remote_user: root
-#  roles:
-#    - { role: generate_vars, tags: vars }    
-#
-## openstack prep
-#- hosts: [compute, controller]
-#  gather_facts: no
-#  roles:
-#    - { role: repave, tags: repave }
+- hosts: [pxe]
+  remote_user: root
+  roles:
+    - { role: generate_vars, tags: vars }    
+
+# openstack prep
+- hosts: [compute, controller]
+  gather_facts: no
+  roles:
+    - { role: repave, tags: repave }
 
 - hosts: [compute, controller]
   gather_facts: no

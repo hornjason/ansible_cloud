@@ -3,5 +3,5 @@ clouds:
     auth:
       auth_url: http://10.240.119.6:5000/v2.0/
       username: admin
-      password: changeme
+      password: 
       project_name: admin

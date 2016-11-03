@@ -1,18 +1,25 @@
 #!/usr/bin/ansible-playbook
 ---
-- hosts: [pxe]
+- hosts: [additional_compute]
   remote_user: root
+  connection: local
   roles:
     - { role: generate_vars, tags: vars }    
+    - { role: pxe, tags: pxe }    
 
 # openstack prep
-- hosts: [compute, controller]
+- hosts: [additional_compute]
   gather_facts: no
   roles:
     - { role: repave, tags: repave }
 
+- hosts: [additional_compute]
+  gather_facts: no
+  roles:
+    - { role: expose_repos, tags: expose_repos }
+
 # start customizing systems based on lab specifics
-- hosts: [compute, controller]
+- hosts: [additional_compute]
   gather_facts: no
   roles:
     - { role: lab_custom, tags: lab_custom }
@@ -22,44 +29,32 @@
   #environment:  
     #http_proxy: http://www-proxy.us.oracle.com:80
 
-# controller ssh key distribution to the openstack nodes
-- hosts: [controller]
-  roles:
-    - { role: collect_controller_key, tags: collect_controller_key }
-
-- hosts: [controller, compute]
+- hosts: [additional_compute]
+  gather_facts: no
   roles:
     - { role: distribute_controller_key, tags: distribute_controller_key }
     - { role: hack_chkconfig, tags: hack_chkconfig }
 
-# openstack installation
-- hosts: [controller]
-  roles:
-    - { role: install_openstack, tags: install_openstack }
+- hosts: [additional_compute]
+  tasks:
+     - name: Run Packstack Manually
+       pause: 
 
-- hosts: [controller]
-  roles:
-     - { role: run_packstack, tags: run_packstack }
-
-- hosts: [controller,compute]
+- hosts: [additional_compute]
   roles:
      - { role: unhack_chkconfig, tags: unhack_chkconfig }
      - { role: ovs_interfaces, tags: ovs_interfaces }
 
 # openstack post-installation and customization
-- hosts: [compute, controller]
+- hosts: [additional_compute]
   roles:
     - { role: post_packstack_nova, tags: post_packstack_nova }
 
-- hosts: [compute]
+- hosts: [additional_compute]
   roles:
     - { role: post_packstack_neutron_compute, tags: post_packstack_neutron_compute }
 
-- hosts: [controller]
-  roles:
-    - { role: post_packstack_neutron_controller, tags: post_packstack_neutron_controller }
-    - { role: post_packstack_mariadb_tuning, tags: post_packstack_mariadb_tuning }
-
-- hosts: [compute, controller]
+- hosts: [additional_compute]
   roles:
     - { role: post_packstack_all, tags: post_packstack_all }
+
