@@ -3,7 +3,7 @@
 wipe: "True"
 
 # Project: Used to indentify unique openstack project and hostname of the install server 
-project: y5-2
+project: big_cloud
 
 # n6k chassis determines if installation is n6k hardware based
 n6k: false
@@ -28,13 +28,13 @@ nfs_staging_dir: /stage
 kickstart_file: ol7.ks
 boot_dev: sda
 iso_name: OracleLinux-R7-U2-Server-x86_64-dvd.iso
-iso_url: http://kernel.us.oracle.com/osinstall/OracleLinux/OL7/u2/x86_64/{{ iso_name }}
+iso_url: http://10.240.121.2/images/{{ iso_name }}
 
 # proxy_env used to identify a proxy if required. Leave undefined if not needed
 proxy_env: 
-  http_proxy: http://www-proxy.us.oracle.com:80
-  https_proxy: http://www-proxy.us.oracle.com:80
-  no_proxy: "tekelec.com,localhost,127.0.0.1,10.75.165.35,10.75.138.38"
+  http_proxy: http://adc-proxy.oracle.com:80
+  https_proxy: http://adc-proxy.oracle.com:80
+  no_proxy: "10.240.121.2,tekelec.com,localhost,127.0.0.1,10.75.183.3,10.75.183.4"
 
 # openstack release
 # Tested with liberty && mitaka
@@ -79,7 +79,7 @@ packstack_output_file: "{{ packstack_dir }}/packstack.out"
 
 # Glance
 #image_url: http://10.133.96.27/image/myOL6image.qcow2
-image_url: http://10.75.138.38/images/baseOEL6imageVM.qcow2
+image_url: http://10.240.121.2/images/baseOEL6imageVM.qcow2
 image_file_dir: /var/lib/openstack
 image_file_name: myOL6image.qcow2
 cloud_init_image_ol66: testVMimage

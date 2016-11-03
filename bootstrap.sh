@@ -8,7 +8,7 @@
 ####################
 # enable proxy for this server
 ####################
-ENABLE_PROXY="false"
+ENABLE_PROXY="true"
 
 ####################
 # vnc port
@@ -21,9 +21,18 @@ VNC_PORT="99"
 MASTER_REPO="10.240.121.66"
 
 ####################
+# proxy server
+####################
+proxy="http://rmdc-proxy.oracle.com:80"
+
+####################
 # OpenStack Release
 ####################
 OPENSTACK_RELEASE=mitaka
+
+####################
+# END OF CONFIG
+####################
 
 ####################
 # packages to install
@@ -42,11 +51,6 @@ yum_conf="/etc/yum.conf"
 ####################
 
 ####################
-# proxy server
-####################
-proxy=" proxy=http://www-proxy.us.oracle.com:80"
-
-####################
 # whoami
 ####################
 whobei=`whoami`
@@ -56,14 +60,15 @@ if [[ $whobei == "root" ]];then SUDO="";else SUDO=`which sudo`;fi
 # setup oracle proxy for yum
 ################################
 if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
+  PROXY=$proxy
   if [[ $(grep -c proxy $yum_conf) == 0 ]]; then
       echo "Adding proxy $proxy to $yum_conf"
       $SUDO sed -ie "\$a$proxy" $yum_conf
   fi
-  export http_proxy="http://www-proxy.us.oracle.com:80"
-  export https_proxy="http://www-proxy.us.oracle.com:80"
+  export http_proxy=$proxy
+  export https_proxy=$proxy
   printf -v no_proxy '%s,' 172.31.2.{1..255};
-  export no_proxy="localhost,127.0.0.1,us.oracle.com,$no_proxy,10.75.138.39"
+  export no_proxy="localhost,127.0.0.1,us.oracle.com,$no_proxy,10.75.183.3"
 
 #git_proxy="git config --global http.proxy http://www-proxy.us.oracle.com:80"
 #git_proxys="git config --global https.proxy http://www-proxy.us.oracle.com:443"
@@ -80,6 +85,7 @@ passwd="changeme"
 
 $SUDO cp /lib/systemd/system/vncserver@.service /etc/systemd/system/vncserver@.service
 $SUDO sed -i "s/\/home\/<USER>/\/$whobei/g" /etc/systemd/system/vncserver@.service
+$SUDO sed -i "s/<USER>/$whobei/g" /etc/systemd/system/vncserver@.service
 $SUDO sed -i 's/vncserver %i"/vncserver %i -geometry 1280x1024"/' /etc/systemd/system/vncserver@.service
 
 $SUDO mkdir ~/.vnc
@@ -130,8 +136,8 @@ EOF
 
 if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
 cat >> ~/.bashrc << EOF
-export http_proxy=http://www-proxy.us.oracle.com:80
-export https_proxy=http://www-proxy.us.oracle.com:80
+export http_proxy=$proxy
+export https_proxy=$proxy
 EOF
 fi
 
@@ -170,6 +176,11 @@ echo "Removing packages not needed"
   $SUDO iptables -F
   $SUDO yum --enablerepo=epel,ol7_optional_latest -y remove $package_remove_list
 
+echo "Installing package list"
+  $SUDO yum clean all
+  $SUDO yum --enablerepo=epel,ol7_latest,ol7_optional_latest -y install $package_list
+
+
 echo "Installing createrepo rpm"
   $SUDO yum --enablerepo=ol7_latest -y install createrepo
 
@@ -207,7 +218,8 @@ echo "Exporting local repo /var/lib/repos"
 ################################
 # install ansible 2.0 from git
 ################################
-pip install ansible==2.1.1
+echo "Installing ansible 2.1.1"
+$SUDO pip --proxy $PROXY install ansible==2.1.1
 
 #if [[ $(rpm -qa |grep -c ansible) == 0 ]]; then
 #    cd /usr/src
@@ -221,11 +233,11 @@ pip install ansible==2.1.1
 # pip install 
 ################################
 echo "PIP: Installing shade"
-pip install shade
+$SUDO pip --proxy $PROXY install shade
 ################################
 # update pxe ansible_host= 
 ################################
 #pxe_ip=$(/sbin/ifconfig|awk '/172.31.51/ {print $2}') 
 #sed -i "s/172.31.254.254/$pxe_ip/g" hosts
 #sed -i "s/pxe_boot_server:.*/pxe_boot_server: $pxe_ip/" group_vars/all
-
+source `/.bashrc

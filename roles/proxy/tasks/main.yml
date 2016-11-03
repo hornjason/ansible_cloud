@@ -45,3 +45,6 @@
     backup=yes
     state=present
   when: proxy_env.http_proxy is defined
+
+- name: loading proxyies
+  shell: source ~/.bashrc

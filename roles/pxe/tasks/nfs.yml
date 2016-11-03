@@ -33,11 +33,9 @@
 
 - name: download iso {{ iso_name }}
   get_url: 
-    #url=http://kernel.us.oracle.com/osinstall/OracleLinux/OL7/u1/x86_64/{{ iso_name }}
-    url=http://kernel.us.oracle.com/osinstall/OracleLinux/OL7/u2/x86_64/{{ iso_name }}
+    url="{{ iso_url }}"
     dest=/var/lib/images/
-    use_proxy=no
-    force=no
+    # use_proxy=yes
   when: isochk.stat.exists == False
 
 - name: mount iso "/var/lib/images/{{ iso_name}} => {{ nfs_staging_dir }}"
