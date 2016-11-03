@@ -8,7 +8,7 @@
 ####################
 # enable proxy for this server
 ####################
-ENABLE_PROXY="true"
+ENABLE_PROXY="false"
 
 ####################
 # vnc port
@@ -108,7 +108,7 @@ cat > /.bash_profile << EOF
 # Get the aliases and functions
 if [ -f ~/.bashrc ]; then
         . ~/.bashrc
-fi0.110
+fi
 
 # User specific environment and startup programs
 
@@ -132,6 +132,7 @@ force_color_prompt=yes
 
     export PS1="[\u@\[\e[00;31m\]\h\[\e[0m\]:\[\e[00;36m\]UTILITY\[\e[0m\]:\t: \w]# "
 unset color_prompt force_color_prompt
+alias ll='ls -lh --color'
 EOF
 
 if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
@@ -184,30 +185,47 @@ echo "Installing package list"
 echo "Installing createrepo rpm"
   $SUDO yum --enablerepo=ol7_latest -y install createrepo
 
+echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
 echo "Downloading extra packages from RDO EPEL ... this can take few minutes"
   $SUDO mkdir -p /var/lib/repos/rdolocal
-  $SUDO wget  -nd -q -P /var/lib/repos/rdolocal/ -r ${MASTER_REPO}/rdolocal/${OPENSTACK_RELEASE}
+  size=$(du -sm /var/lib/repos/rdolocal|awk '{print $1}')
+  if [[ $size -lt 240 ]] ; then
+    \rm -rf /var/lib/repos/rdolocal/*
+    $SUDO wget  -nd -q -P /var/lib/repos/rdolocal/ -r ${MASTER_REPO}/rdolocal/${OPENSTACK_RELEASE}
 #  $SUDO cat ./packages.list | while read rpm ; do
 #          /usr/bin/yum  -y install --downloaddir=/var/lib/repos/rdolocal --downloadonly $rpm | grep Installed || \
 #          /usr/bin/yum  -y reinstall --downloaddir=/var/lib/repos/rdolocal --downloadonly $rpm
 #        done
-  $SUDO sed -i "s/enabled=1/enabled=0/g" /etc/yum.repos.d/*
-  $SUDO ln -s /var/lib/repos/rdolocal /rdolocal
-  $SUDO cat > /etc/yum.repos.d/rdolocal.repo << EOF
+    $SUDO createrepo /var/lib/repos/rdolocal
+    $SUDO cat > /etc/yum.repos.d/rdolocal.repo << EOF
 [rdolocal]
 baseurl = file:///rdolocal
 enabled = 1
 gpgcheck = 0
 name = local rdolocal repo
 EOF
-  $SUDO createrepo /var/lib/repos/rdolocal
+  fi
+
+  $SUDO sed -i "s/enabled=1/enabled=0/g" /etc/yum.repos.d/*
+  $SUDO cd /
+  if [[ ! -h /rdolocal ]] ; then
+    $SUDO ln -s /var/lib/repos/rdolocal rdolocal
+  fi
+echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
 
 echo "Installing package list"
   $SUDO yum clean all
   $SUDO yum --enablerepo=rdolocal -y install $package_list
 
 echo "Exporting local repo /var/lib/repos"
-  $SUDO grep "/var/lib/repos" /etc/exports || echo "/var/lib/repos      *(ro,async)" >> /etc/exports
+  $SUDO grep "/var/lib/repos " /etc/exports || echo "/var/lib/repos      *(ro,async)" >> /etc/exports
   $SUDO /sbin/exportfs -av
 
 ################################
@@ -218,8 +236,6 @@ echo "Exporting local repo /var/lib/repos"
 ################################
 # install ansible 2.0 from git
 ################################
-echo "Installing ansible 2.1.1"
-$SUDO pip --proxy $PROXY install ansible==2.1.1
 
 #if [[ $(rpm -qa |grep -c ansible) == 0 ]]; then
 #    cd /usr/src
@@ -232,12 +248,18 @@ $SUDO pip --proxy $PROXY install ansible==2.1.1
 ################################
 # pip install 
 ################################
-echo "PIP: Installing shade"
-$SUDO pip --proxy $PROXY install shade
+echo "PIP: Installing ansible and shade"
+if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
+  $SUDO pip --proxy $PROXY install ansible==2.1.1
+  $SUDO pip --proxy $PROXY install shade
+else
+  $SUDO pip install ansible==2.1.1
+  $SUDO pip install shade
+fi
 ################################
 # update pxe ansible_host= 
 ################################
 #pxe_ip=$(/sbin/ifconfig|awk '/172.31.51/ {print $2}') 
 #sed -i "s/172.31.254.254/$pxe_ip/g" hosts
 #sed -i "s/pxe_boot_server:.*/pxe_boot_server: $pxe_ip/" group_vars/all
-source `/.bashrc
+source ~/.bashrc

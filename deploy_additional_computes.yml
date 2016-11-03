@@ -40,6 +40,16 @@
      - name: Run Packstack Manually
        pause: 
 
+###
+- hosts: [controller]
+  roles:
+    - { role: install_openstack_for_additional_compute, tags: install_openstack_for_additional_compute }
+
+- hosts: [controller]
+  roles:
+     - { role: run_packstack_for_additional_compute, tags: run_packstack_for_additional_compute }
+###
+
 - hosts: [additional_compute]
   roles:
      - { role: unhack_chkconfig, tags: unhack_chkconfig }
