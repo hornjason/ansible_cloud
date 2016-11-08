@@ -2,29 +2,8 @@
 - name: Loading Infrastructure File
   include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
   tags: run_packstack
-  
-### hacks ####
-- name: Removing Http Proxy from bashrc to avoid "Bad Gateway" issue during Packstack
-  lineinfile:
-    dest=/root/.bashrc
-    regexp="^export http_proxy.*$"
-    state=absent
-  tags: run_packstack
-    
-# DEPRECATED # for local repos only
-- name: Removing conflicting mariadb-server-galera
-  yum: name={{ item }} state=absent
-  with_items:
-    - mariadb-server-galera
 
-- name: Removing conflicting liberty packages
-  yum: name={{ item }} state=absent
-  when: openstack_release == 'liberty'
-  with_items:
-    - mysql-community-libs
-    - mysql-community-common
-
-- name: Running Packstack(1)
+- name: Running Packstack
   shell: /usr/bin/packstack --answer-file="{{ packstack_answer_file }}" > "{{ packstack_output_file }}" 2>&1
   ignore_errors: yes
   register: packstack_run

@@ -35,12 +35,6 @@
     - { role: distribute_controller_key, tags: distribute_controller_key }
     - { role: hack_chkconfig, tags: hack_chkconfig }
 
-- hosts: [additional_compute]
-  tasks:
-     - name: Run Packstack Manually
-       pause: 
-
-###
 - hosts: [controller]
   roles:
     - { role: install_openstack_for_additional_compute, tags: install_openstack_for_additional_compute }
@@ -48,7 +42,6 @@
 - hosts: [controller]
   roles:
      - { role: run_packstack_for_additional_compute, tags: run_packstack_for_additional_compute }
-###
 
 - hosts: [additional_compute]
   roles:

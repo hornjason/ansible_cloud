@@ -4,12 +4,13 @@
   run_once: true
   
 # NEUTRON, rpm installation
-- name: Enabling ol7_optional_latest Repository
+# REMOVE
+- name: Disabling ol7_optional_latest Repository
   ini_file:
     dest=/etc/yum.repos.d/public-yum-ol7.repo
     section={{ item }}
     option=enabled
-    value=1
+    value=0
   with_items:
     - ol7_optional_latest
   tags:

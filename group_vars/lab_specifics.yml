@@ -9,8 +9,8 @@ lab_specifics:
       netmask: 255.255.0.0
 
     openstack_provider_vlan:
-      tagged_traffic_needed: true
-      vlan_id: 10
+      tagged_traffic_needed: false
+      vlan_id: 
       network: 10.75.183.0
       netmask: 255.255.255.128
       broadcast: 10.75.183.127 

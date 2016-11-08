@@ -1,3 +1,6 @@
+#awk -F'-[[:digit:]]' '{print $1}' packages.list 
+python-ceilometermiddleware-0.5.0-1.el7.noarch
+yum-plugin-priorities
 vim
 virt-install
 libvirt
@@ -474,3 +477,22 @@ v8-3.14.5.10-25.el7.x86_64
 web-assets-filesystem-5-1.el7.noarch
 xinetd-2.3.15-12.el7.x86_64
 yaml-cpp-0.5.1-6.el7.x86_64
+rdo-release-newton
+python-setproctitle
+python2-cotyledon
+python-oslo-vmware-lang
+python-oslo-log-lang
+python-oslo-utils-lang
+python-oslo-concurrency-lang
+python-oslo-middleware-lang
+python2-keystoneclient
+python2-paramiko
+python-oslo-versionedobjects-lang
+python2-keystonemiddleware
+python2-osc-lib
+python-oslo-db-lang
+python2-microversion-parse
+python2-os-win
+python-oslo-privsep-lang
+python2-oslo-privsep
+python2-os-vif

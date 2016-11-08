@@ -24,8 +24,10 @@
     - { role: prime_os, tags: prime_os }
     - { role: prepare_openstack, tags: prepare_openstack }
     - { role: change_kernel, tags: change_kernel }
-  #environment:  
-    #http_proxy: http://www-proxy.us.oracle.com:80
+#  environment:  
+#    http_proxy: proxy_env.http_proxy 
+#    https_proxy: proxy_env.https_proxy 
+#    no_proxy: proxy_env.no_proxy
 
 # controller ssh key distribution to the openstack nodes
 - hosts: [controller]

@@ -1,34 +1,31 @@
 ---
-# remember to add alias here for utility server
-# .254.254 under {{ management_interface }}
 - name: Installing tftp-server
   yum: name=tftp-server state=present
 
 - name: Installing syslinux
   yum: name=syslinux state=latest
 
-- name: enable tftp under xinetd.d
+- name: Enabling tftp under xinetd.d
   lineinfile:
     dest=/etc/xinetd.d/tftp
     regexp=disable
     line="        disable                 = no"
     state=present
- # notify: restart xinetd
  
-- name: restart xinetd
+- name: Restarting xinetd
   service: name=tftp state=started enabled=yes
   tags: tftp
 
-- name: create tftp directory structure
+- name: Creating tftp directory structure
   file: path=/var/lib/tftpboot/linux-install-x86_64/pxelinux.cfg state=directory
 
-- name: copy boot files to tftp dir
+- name: Copying boot files to tftp dir
   command:  cp "{{ item.source }}" "{{ item.dest }}"
   with_items:
     - { source: '/stage/images/pxeboot/vmlinuz' ,    dest: '/var/lib/tftpboot/linux-install-x86_64/' }
     - { source: '/stage/images/pxeboot/initrd.img' , dest: '/var/lib/tftpboot/linux-install-x86_64/' }
     - { source: '/usr/share/syslinux/pxelinux.0' ,   dest: '/var/lib/tftpboot/linux-install-x86_64/' }
 
-- name: copy default boot file to tftp dir
+- name: Copying default boot file to tftp dir
   template: src=pxelinux.cfg.j2 dest=/var/lib/tftpboot/linux-install-x86_64/pxelinux.cfg/default
 

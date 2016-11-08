@@ -28,7 +28,8 @@ proxy="http://adc-proxy.oracle.com:80"
 ####################
 # OpenStack Release
 ####################
-OPENSTACK_RELEASE=mitaka
+#OPENSTACK_RELEASE=mitaka
+OPENSTACK_RELEASE=newton
 
 ####################
 # END OF CONFIG
@@ -68,7 +69,7 @@ if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
   export http_proxy=$proxy
   export https_proxy=$proxy
   #printf -v no_proxy '%s,' 172.31.2.{1..255};
-  export no_proxy="localhost,127.0.0.1,us.oracle.com,$no_proxy,$MASTER_REPO"
+  export no_proxy="localhost,127.0.0.1,us.oracle.com,$MASTER_REPO"
 
 #git_proxy="git config --global http.proxy http://www-proxy.us.oracle.com:80"
 #git_proxys="git config --global https.proxy http://www-proxy.us.oracle.com:443"
@@ -186,40 +187,34 @@ echo "Installing package list"
 echo "Installing createrepo rpm"
   $SUDO yum --enablerepo=ol7_latest -y install createrepo
 
-echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
-echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
-echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
-echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
-echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
-echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
-echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
-echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
 echo "Downloading extra packages from RDO EPEL ... this can take few minutes"
-  $SUDO mkdir -p /var/lib/repos/rdolocal
-  size=$(du -sm /var/lib/repos/rdolocal|awk '{print $1}')
+  $SUDO mkdir -p /var/lib/repos/rdolocal/$OPENSTACK_RELEASE
+
+  size=$(du -sm /var/lib/repos/rdolocal/$OPENSTACK_RELEASE|awk '{print $1}')
   if [[ $size -lt 240 ]] ; then
-    \rm -rf /var/lib/repos/rdolocal/*
-    $SUDO wget  -nd -q -P /var/lib/repos/rdolocal/ -r ${MASTER_REPO}/rdolocal/${OPENSTACK_RELEASE}
+    \rm -rf /var/lib/repos/rdolocal/$OPENSTACK_RELEASE
+    $SUDO wget  -nd -q -P /var/lib/repos/rdolocal/$OPENSTACK_RELEASE -r --no-parent ${MASTER_REPO}/rdolocal/${OPENSTACK_RELEASE}/
+
 #  $SUDO cat ./packages.list | while read rpm ; do
 #          /usr/bin/yum  -y install --downloaddir=/var/lib/repos/rdolocal --downloadonly $rpm | grep Installed || \
 #          /usr/bin/yum  -y reinstall --downloaddir=/var/lib/repos/rdolocal --downloadonly $rpm
 #        done
-    $SUDO createrepo /var/lib/repos/rdolocal
+    $SUDO createrepo /var/lib/repos/rdolocal/$OPENSTACK_RELEASE
     $SUDO cat > /etc/yum.repos.d/rdolocal.repo << EOF
 [rdolocal]
-baseurl = file:///rdolocal
+baseurl = file:///rdolocal/$OPENSTACK_RELEASE
 enabled = 1
 gpgcheck = 0
-name = local rdolocal repo
+name = local rdolocal repo for $OPENSTACK_RELEASE
+priority = 1
 EOF
   fi
 
   $SUDO sed -i "s/enabled=1/enabled=0/g" /etc/yum.repos.d/*
   $SUDO cd /
   if [[ ! -h /rdolocal ]] ; then
-    $SUDO ln -s /var/lib/repos/rdolocal rdolocal
+    $SUDO ln -s /var/lib/repos/rdolocal/$OPENSTACK_RELEASE rdolocal
   fi
-echo "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
 
 echo "Installing package list"
   $SUDO yum clean all
@@ -229,23 +224,7 @@ echo "Exporting local repo /var/lib/repos"
   $SUDO grep "/var/lib/repos " /etc/exports || echo "/var/lib/repos      *(ro,async)" >> /etc/exports
   $SUDO /sbin/exportfs -av
 
-################################
-# setup git globals
-################################
 
-
-################################
-# install ansible 2.0 from git
-################################
-
-#if [[ $(rpm -qa |grep -c ansible) == 0 ]]; then
-#    cd /usr/src
-#    #for stable checkout stable branch
-#    $SUDO git clone https://github.com/ansible/ansible.git --recursive -b stable-2.1
-#    cd ansible
-#    $SUDO make rpm
-#    $SUDO yum -y install rpm-build/*noarch.rpm
-#fi
 ################################
 # pip install 
 ################################
@@ -257,24 +236,5 @@ else
   $SUDO pip install ansible==2.1.1
   $SUDO pip install shade
 fi
-################################
-# update pxe ansible_host= 
-################################
-#pxe_ip=$(/sbin/ifconfig|awk '/172.31.51/ {print $2}') 
-#sed -i "s/172.31.254.254/$pxe_ip/g" hosts
-#sed -i "s/pxe_boot_server:.*/pxe_boot_server: $pxe_ip/" group_vars/all
+
 source ~/.bashrc
-
-################################
-# update pxe interface
-################################
-echo "Creating internal PXE interface"
-
-$SUDO ifdown 
-DEVICE={{ management_interface }}
-BOOTPROTO=static
-ONBOOT=yes
-IPADDR={{ infrastructure.dhcp_subnets.info.next_server }}
-NETMASK={{ infrastructure.vlans.int_management_vlan.netmask }}
-MTU={{ mtu }}
-

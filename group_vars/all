@@ -39,20 +39,23 @@ num_zfs: 0
 num_es2_72: 1
 
 # Pause duration
-resolv_pause: 10
+resolv_pause: 5
 ilom_pause: 10
 reboot_wait_time: 5
-after_epel_pause: 10
-repave_wait_time: 30
+after_epel_pause: 5
+repave_wait_time: 15
 
 # Environment preparation
-#proxy_env:
-#  http_proxy: http://www-proxy.us.oracle.com:80
+proxy_env:
+  #http_proxy: http://adc-proxy.oracle.com:80
+  #https_proxy: http://adc-proxy.oracle.com:80
+  no_proxy: localhost,us.oracle.com,10.240.121.66,10.240.121.2,10.75.183.4
 
 public_yum_ol7_repo_url: "http://public-yum.oracle.com/public-yum-ol7.repo"
 # Tested with liberty && mitaka
-openstack_release: mitaka
-rdo_release_rpm: "https://repos.fedorapeople.org/repos/openstack/openstack-{{ openstack_release }}/rdo-release-{{ openstack_release }}-5.noarch.rpm"
+openstack_release: newton
+openstack_rpmrelease: 3
+rdo_release_rpm: "https://repos.fedorapeople.org/repos/openstack/openstack-{{ openstack_release }}/rdo-release-{{ openstack_release }}-{{ openstack_rpmrelease }}.noarch.rpm"
 epel_rpm: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
 epel_baseurl: "http://ftp.linux.ncsu.edu/pub/epel/7/$basearch"
 
@@ -61,7 +64,13 @@ packstack_answer_file: "{{ packstack_dir }}/answers.txt"
 packstack_output_file: "{{ packstack_dir }}/packstack.out"
 
 # Glance
-image_url: http://10.240.121.66/images/baseOEL6imageVM.qcow2
+#image_url: http://10.240.121.66/images/baseOEL6imageVM.qcow2
+#image_url: http://10.240.121.66/images/myOL7image.qcow2
+image_url: http://10.240.121.66/images/DSR/DSR-80_12_0.vmdk
 image_file_dir: /var/lib/openstack
-image_file_name: myOL6image.qcow2
-cloud_init_image_ol66: testVMimage
+#image_file_name: myOL6image.qcow2
+#image_file_name: myOL7image.qcow2
+image_file_name: DSR-80_12_0.vmdk
+cloud_init_image_ol66: DSR8013
+#cloud_init_image_ol66: myOL7image
+#cloud_init_image_ol66: myOL6image

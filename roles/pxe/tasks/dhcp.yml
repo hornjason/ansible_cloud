@@ -4,12 +4,12 @@
   tags:
     - dhcp
 
-- name: remove /var/lib/dhcpd/dhcpd.leases 
+- name: Removing /var/lib/dhcpd/dhcpd.leases 
   local_action: file path=/var/lib/dhcpd/dhcpd.leases state=absent
   tags:
     - dhcp
 
-- name: recreate /var/lib/dhcpd/dhcpd.leases
+- name: Recreating /var/lib/dhcpd/dhcpd.leases
   local_action: file path=/var/lib/dhcpd/dhcpd.leases state=touch
   tags:
     - dhcp

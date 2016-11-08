@@ -1,6 +1,6 @@
 SSHCMD="sshpass -p changeme ssh  -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-CMD="uname -r"
-CMD="echo nameserver 10.250.33.2 >> /etc/resolv.conf"
+CMD="hostname"
+CMD=$1
 #CMD="pkill yum"
 #IPMI="ipmitool -I lanplus -Uroot -Pchangeme chassis power cycle "
 #CMD="yum install -y puppet hiera openssh-clients tar nc rubygem-json"
@@ -18,7 +18,4 @@ echo -en "\n - c00b08"; echo -en "  result --> "; r=$($SSHCMD c00b08 $CMD  || ec
 echo -en "\n - c00b09"; echo -en "  result --> "; r=$($SSHCMD c00b09 $CMD  || echo UNREACHABLE) ; printf "$r" 
 echo -en "\n - c00b10"; echo -en "  result --> "; r=$($SSHCMD c00b10 $CMD  || echo UNREACHABLE) ; printf "$r" 
 echo -en "\n - c00b11"; echo -en "  result --> "; r=$($SSHCMD c00b11 $CMD  || echo UNREACHABLE) ; printf "$r" 
-echo -en "\n - c00b12"; echo -en "  result --> "; r=$($SSHCMD c00b12 $CMD  || echo UNREACHABLE) ; printf "$r" 
-echo -en "\n - c00b13"; echo -en "  result --> "; r=$($SSHCMD c00b13 $CMD  || echo UNREACHABLE) ; printf "$r" 
-echo -en "\n - c00b14"; echo -en "  result --> "; r=$($SSHCMD c00b14 $CMD  || echo UNREACHABLE) ; printf "$r" 
 echo

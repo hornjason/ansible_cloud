@@ -5,7 +5,13 @@
     - epel-release
     - rdo-release-{{ openstack_release }}
 
-- name: create local repo directories /epel /rdo-mitaka
+- name: Disabling Oracle Linux YUM Repo
+  replace:
+    dest: /etc/yum.repos.d/public-yum-ol7.repo
+    regexp: '^enabled.*$'
+    replace: 'enabled=0'
+
+- name: create local repo directories 
   file: name=/rdolocal state=directory 
 
 - name: mounting rdolocal dir
@@ -23,11 +29,22 @@
     name: "rdolocal"
     state: present
     description: local rdolocal repo
-    file: "rdolocal.repo"
-    baseurl: file:///rdolocal
+    file: "rdolocal"
+    baseurl: "file:///rdolocal/{{ openstack_release }}"
     gpgcheck: no
     enabled: yes
+    priority: 1 
 
-#- name: Tryin epel repos by installing nmap    
-#  yum: name=nmap state=installed
-  
+- name: clean yum
+  command: yum clean all
+
+- name: installing yum priorities plugin
+  yum: name=yum-plugin-priorities state=present update_cache=yes
+
+- name: enabling yum plugins
+  ini_file:     
+    dest: /etc/yum.conf     
+    section: main  
+    option: plugins  
+    value: 1
+
