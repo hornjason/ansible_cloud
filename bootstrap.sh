@@ -213,7 +213,7 @@ EOF
   $SUDO sed -i "s/enabled=1/enabled=0/g" /etc/yum.repos.d/*
   $SUDO cd /
   if [[ ! -h /rdolocal ]] ; then
-    $SUDO ln -s /var/lib/repos/rdolocal/$OPENSTACK_RELEASE rdolocal
+    $SUDO ln -s /var/lib/repos/rdolocal rdolocal
   fi
 
 echo "Installing package list"
