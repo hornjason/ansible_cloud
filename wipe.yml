@@ -1,0 +1,28 @@
+#!/usr/bin/ansible-playbook
+---
+- hosts: [additional_compute]
+  remote_user: root
+  connection: local
+  roles:
+    - { role: generate_vars, tags: vars }    
+    - { role: pxe, tags: pxe }    
+
+# openstack prep
+- hosts: [additional_compute]
+  gather_facts: no
+  roles:
+    - { role: repave, tags: repave }
+
+- hosts: [additional_compute]
+  gather_facts: no
+  roles:
+    - { role: expose_repos, tags: expose_repos }
+
+# start customizing systems based on lab specifics
+- hosts: [additional_compute]
+  gather_facts: no
+  roles:
+    - { role: lab_custom, tags: lab_custom }
+    - { role: prime_os, tags: prime_os }
+    - { role: prepare_openstack, tags: prepare_openstack }
+    - { role: change_kernel, tags: change_kernel }

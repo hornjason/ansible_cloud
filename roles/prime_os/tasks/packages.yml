@@ -31,62 +31,10 @@
  - pause:  seconds={{ resolv_pause }}
    when: resolv|changed
      
-# - name: Disabling Oracle Linux YUM Repo
-#   replace:
-#     dest: /etc/yum.repos.d/public-yum-ol7.repo
-#     regexp: '^enabled.*$'
-#     replace: 'enabled=0'
-
-
-
-# setup repos
-# - name: Downloading public-yum-ol7.repo
-#   get_url: 
-#     url={{ public_yum_ol7_repo_url }}
-#     dest=/etc/yum.repos.d/public-yum-ol7.repo
-#     force=yes
-#     use_proxy=yes
-#   tags:
-#     - yum
-#
-# - name: Enabling ol7 repos optional_latest, addons, UEKR4
-#   ini_file:
-#     dest=/etc/yum.repos.d/public-yum-ol7.repo
-#     section={{ item }}
-#     option=enabled
-#     value=0
-#   with_items:
-##     - ol7_openstack20
-#     - ol7_optional_latest
-#     - ol7_addons
-#     - ol7_UEKR4
-#   tags:
-#     - yum
-#
-## DEPRECATED # Retesting EPEL...
- #- name: Installing epel repo
-   #yum: name={{ epel_rpm }} state=present update_cache=yes
-   #yum: name={{ epel_rpm }} state=present
-
- #- pause: seconds={{ after_epel_pause }}
-
- #- name: Removing mirrorlist in epel yum repo
-   #lineinfile:
-     
-     #regexp="^mirrorlist.*$"
-     #state=absent
-
- #- name: Enabling baseurl in epel repo
-   #replace:
-     #dest=/etc/yum.repos.d/epel.repo
-     #regexp="^.baseurl.*$"
-     #replace="baseurl={{ epel_baseurl }}"
-
  - name: Installing python-libguestfs,libselinux-python and rsync
    yum:
      name={{ item }}
      state=present
-     #update_cache=yes
    with_items:
      - rsync
      - python-libguestfs

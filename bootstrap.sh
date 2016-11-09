@@ -28,8 +28,7 @@ proxy="http://adc-proxy.oracle.com:80"
 ####################
 # OpenStack Release
 ####################
-OPENSTACK_RELEASE=mitaka
-#OPENSTACK_RELEASE=newton
+OPENSTACK_RELEASE=newton
 
 ####################
 # END OF CONFIG
