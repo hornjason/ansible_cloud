@@ -52,8 +52,8 @@ proxy_env:
   no_proxy: localhost,us.oracle.com,10.240.121.66,10.240.121.2,10.75.183.4
 
 public_yum_ol7_repo_url: "http://public-yum.oracle.com/public-yum-ol7.repo"
-# Tested with liberty && mitaka
-openstack_release: newton
+# Tested with liberty && mitaka && newton
+openstack_release: mitaka
 openstack_rpmrelease: 3
 rdo_release_rpm: "https://repos.fedorapeople.org/repos/openstack/openstack-{{ openstack_release }}/rdo-release-{{ openstack_release }}-{{ openstack_rpmrelease }}.noarch.rpm"
 epel_rpm: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
@@ -69,6 +69,6 @@ image_url: http://10.240.121.66/images/myOL7image.qcow2
 image_file_dir: /var/lib/openstack
 #image_file_name: myOL6image.qcow2
 image_file_name: myOL7image.qcow2
-image_file_name: DSR-80_12_0.vmdk
+#image_file_name: DSR-80_12_0.vmdk
 cloud_init_image_ol66: myOL7image
 #cloud_init_image_ol66: myOL6image

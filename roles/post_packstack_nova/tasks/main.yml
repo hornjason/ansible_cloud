@@ -80,21 +80,27 @@
   lineinfile:
     "dest={{ nova_policy_file }}
     regexp='os_compute_api:os-flavor-manage.*(\".*\")(.*)$'
-    line='    \"os_compute_api:os-flavor-manage\": \"\"\\2 '
-    state=present"
+    line='    \"os_compute_api:os-flavor-manage\": \"\"\\2'
+    state=present
+    backrefs=yes"
   when: 
     - inventory_hostname in groups.controller
     - openstack_release != 'newton'
+  tags:
+    - nova_flavor
 
 - name: allow all tenants to create flavors with NOVA
   lineinfile:
     "dest={{ nova_policy_file }}
     regexp='compute_extension:flavormanage.*(\".*\")(.*)$'
     line='    \"compute_extension:flavormanage\": \"\"\\2'
-    state=present"
+    state=present
+    backrefs=yes"
   when: 
     - inventory_hostname in groups.controller
     - openstack_release != 'newton'
+  tags:
+    - nova_flavor
 
 - name: Restart nova
   shell: "openstack-service restart nova"
