@@ -11,7 +11,7 @@
   tags: run_packstack
     
 - name: Running Packstack
-  shell: /usr/bin/packstack --answer-file="{{ packstack_answer_file }}" > "{{ packstack_output_file }}" 2>&1
+  shell: /usr/bin/packstack --answer-file="{{ packstack_dir }}/{{ packstack_answer_file }}" > "{{ packstack_output_file }}" 2>&1
   ignore_errors: yes
   register: packstack_run_for_additional_compute
   tags: run_packstack_for_additional_compute

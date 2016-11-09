@@ -4,5 +4,5 @@
    
 # Preparing packstack answers    
 - name: Templating Packstack answers file
-  template: src=packstack_answers.txt.j2 dest="{{ packstack_answer_file }}" owner=root group=root mode=0644
+  template: src=packstack_answers.txt.j2 dest="{{ packstack_dir }}/{{ packstack_answer_file }}" owner=root group=root mode=0644
   register: packstack_answers_file_created

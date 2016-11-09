@@ -13,8 +13,18 @@
     enabled=yes
   ignore_errors: true
 
-#- name: Restarting Openstack Services
-#  shell: /usr/bin/openstack-service restart
+- name: setting theme for horizon
+  lineinfile:
+    dest=/etc/openstack-dashboard/local_settings
+    regexp='CUSTOM_THEME_PATH'
+    line='CUSTOM_THEME_PATH = 'themes/material''
+    state=present
+  notify:
+    - restart httpd
+  when:
+    - inventory_hostname in groups.controller
+  tags:
+    - theme
 
 - name: reboot
   command: systemd-run --on-active=10 systemctl reboot

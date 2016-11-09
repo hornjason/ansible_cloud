@@ -6,8 +6,8 @@
 
 - name: Loading MAC Variables
   include_vars: "{{ local_repo }}/macs"
-  when:
-    - wipe
+  #when:
+  #  - wipe
   tags:
     - post_repave
 
@@ -26,6 +26,7 @@
 
 - name: Restarting network
   service: name=network state=restarted
+  #command: bash -c "ifdown {{ item.item.device }} && ifup {{ item.item.device }}"
   when: ifcfg|changed
   tags:
     - post_repave
