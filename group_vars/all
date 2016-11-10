@@ -45,11 +45,6 @@ reboot_wait_time: 5
 after_epel_pause: 5
 repave_wait_time: 15
 
-# Environment preparation
-proxy_env:
-  #http_proxy: http://adc-proxy.oracle.com:80
-  #https_proxy: http://adc-proxy.oracle.com:80
-  no_proxy: localhost,us.oracle.com,10.240.121.66,10.240.121.2,10.75.183.4
 
 public_yum_ol7_repo_url: "http://public-yum.oracle.com/public-yum-ol7.repo"
 # Tested with liberty && mitaka && newton
@@ -66,7 +61,10 @@ packstack_output_file: "{{ packstack_dir }}/packstack.out"
 # Glance
 image_url: http://10.240.121.66/images/myOL7image.qcow2
 image_file_dir: /var/lib/openstack
-image_file_name: myOL7image.qcow2
+#image_file_name: myOL7image.qcow2
+images: 
+  - myOL7image.qcow2
+  - DSR-80_12_0.vmdk
 #image_file_name: DSR-80_12_0.vmdk
 cloud_init_image_ol66: myOL7image
 
