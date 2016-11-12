@@ -56,6 +56,7 @@ yum_conf="/etc/yum.conf"
 whobei=`whoami`
 if [[ $whobei == "root" ]];then SUDO="";else SUDO=`which sudo`;fi
 
+setup_proxy () {
 ################################
 # setup oracle proxy for yum
 ################################
@@ -74,7 +75,9 @@ if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
 #git_proxys="git config --global https.proxy http://www-proxy.us.oracle.com:443"
 fi
 #
+}
 
+setup_vnc () {
 ################################
 # setup vnc server
 ################################
@@ -99,6 +102,9 @@ $SUDO systemctl enable vncserver@:$VNC_PORT.service
 $SUDO systemctl start vncserver@:$VNC_PORT.service
 echo "VNC: Done"
 
+}
+
+setup_bashprofile () {
 ################################
 # setup .bash_profile 
 ################################
@@ -117,7 +123,9 @@ PATH=$PATH:$HOME/bin
 export PATH
 
 EOF
+}
 
+setup_bashrc () {
 ################################
 # setup .bashrc
 ################################
@@ -147,7 +155,9 @@ echo "BASHRC: Done"
 echo "BASHRC: Sourcing .bashrc"
 . ~/.bash_profile
 
+}
 
+setup_vimrc () {
 ################################
 # setup .vimrc
 ################################
@@ -159,30 +169,13 @@ elif [[ $(grep -c tabstop ~/.vimrc 2>/dev/null) == 0 ]]; then
     echo "set tabstop=4 softtabstop=0 expandtab shiftwidth=4 smarttab" >> ~/.vimrc
 fi
 echo "VIMRC: Done"
+}
+
+
+setup_repo () {
 ################################
 # install packages/repos
 ################################
-echo "Updating ALL packges"
-#$SUDO yum --disablerepo=* --enablerepo=ol7_latest,ol7_UEKR3 update
-
-if [[ $(yum repolist | grep -ic epel ) == 0 ]]; then
-  echo "Installing EPEL YUM Repol"
-  $SUDO yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-fi
-
-echo "waiting for yum to clean up"
-#sleep 60
-
-echo "Removing packages not needed"
-  $SUDO systemctl disable firewalld
-  $SUDO iptables -F
-  $SUDO yum --enablerepo=epel,ol7_optional_latest -y remove $package_remove_list
-
-echo "Installing package list"
-  $SUDO yum clean all
-  $SUDO yum --enablerepo=epel,ol7_latest,ol7_optional_latest -y install $package_list
-
-
 echo "Installing createrepo rpm"
   $SUDO yum --enablerepo=ol7_latest -y install createrepo
 
@@ -209,12 +202,34 @@ priority = 1
 EOF
   fi
 
-  $SUDO sed -i "s/enabled=1/enabled=0/g" /etc/yum.repos.d/*
-  $SUDO cd /
+  for repos in `ls /etc/yum.repos.d/`; do
+    if [[ $repos != "rdolocal.repo" ]]; then  
+        $SUDO sed -i "s/enabled=1/enabled=0/g" /etc/yum.repos.d/*
+    fi
+  done
+
   if [[ ! -h /rdolocal ]] ; then
-    $SUDO ln -s /var/lib/repos/rdolocal rdolocal
+    $SUDO cd /
+    $SUDO ln -s /var/lib/repos/rdolocal/${OPENSTACK_RELEASE}/ rdolocal
   fi
 
+}
+
+################################
+# package install 
+################################
+package_remove () {
+echo "Removing packages not needed"
+  $SUDO systemctl disable firewalld
+  $SUDO iptables -F
+  $SUDO yum --enablerepo=epel,ol7_optional_latest -y remove $package_remove_list
+}
+
+################################
+# package install 
+################################
+
+package_install () {
 echo "Installing package list"
   $SUDO yum clean all
   $SUDO yum --enablerepo=rdolocal -y install $package_list
@@ -223,7 +238,9 @@ echo "Exporting local repo /var/lib/repos"
   $SUDO grep "/var/lib/repos " /etc/exports || echo "/var/lib/repos      *(ro,async)" >> /etc/exports
   $SUDO /sbin/exportfs -av
 
+}
 
+install_ansible () {
 ################################
 # pip install 
 ################################
@@ -235,5 +252,22 @@ else
   $SUDO pip install ansible==2.1.1
   $SUDO pip install shade
 fi
+}
 
 source ~/.bashrc
+if [[ -n $1 ]]; then
+    funct=$1
+    echo "$funct"
+    $funct
+else
+    echo "no cmd line args specified"
+    setup_proxy
+    setup_vnc
+    setup_bashprofile
+    setup_bashrc
+    setup_vmrc
+    setup_repo
+    package_remove
+    package_install
+    install_ansiblefi
+fi
