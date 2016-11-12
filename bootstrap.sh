@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash 
 
 ####################
 # disalbe sslVerificitaion for git
@@ -28,7 +28,7 @@ proxy="http://adc-proxy.oracle.com:80"
 ####################
 # OpenStack Release
 ####################
-OPENSTACK_RELEASE=newton
+OPENSTACK_RELEASE="newton"
 
 ####################
 # END OF CONFIG
@@ -180,24 +180,31 @@ echo "Installing createrepo rpm"
   $SUDO yum --enablerepo=ol7_latest -y install createrepo
 
 echo "Downloading extra packages from RDO EPEL ... this can take few minutes"
-  $SUDO mkdir -p /var/lib/repos/rdolocal/$OPENSTACK_RELEASE
+  #$SUDO mkdir -p /var/lib/repos/rdolocal/$OPENSTACK_RELEASE
 
-  size=$(du -sm /var/lib/repos/rdolocal/$OPENSTACK_RELEASE|awk '{print $1}')
+echo "Checking for ${MASTER_REPO} in no_proxy"
+  if [[ $(echo $no_proxy |grep -c ${MASTER_REPO}) != 1 ]]; then
+    export no_proxy=$no_proxy,${MASTER_REPO}
+    echo $no_proxy
+  fi
+
+echo "Checking size of rdolocal"
+  size=$(du -sm /var/lib/repos/rdolocal/${OPENSTACK_RELEASE} 2>/dev/null|awk '{print $1}')
   if [[ $size -lt 240 ]] ; then
-    \rm -rf /var/lib/repos/rdolocal/$OPENSTACK_RELEASE
-    $SUDO wget  -nd -q -P /var/lib/repos/rdolocal/$OPENSTACK_RELEASE -r --no-parent ${MASTER_REPO}/rdolocal/${OPENSTACK_RELEASE}/
+    \rm -rf /var/lib/repos/rdolocal/${OPENSTACK_RELEASE} 2>/dev/null
+    $SUDO wget  -nd -q -P /var/lib/repos/rdolocal/${OPENSTACK_RELEASE} -r --no-parent ${MASTER_REPO}/rdolocal/${OPENSTACK_RELEASE}/
 
 #  $SUDO cat ./packages.list | while read rpm ; do
 #          /usr/bin/yum  -y install --downloaddir=/var/lib/repos/rdolocal --downloadonly $rpm | grep Installed || \
 #          /usr/bin/yum  -y reinstall --downloaddir=/var/lib/repos/rdolocal --downloadonly $rpm
 #        done
-    $SUDO createrepo /var/lib/repos/rdolocal/$OPENSTACK_RELEASE
+    $SUDO createrepo /var/lib/repos/rdolocal/${OPENSTACK_RELEASE}
     $SUDO cat > /etc/yum.repos.d/rdolocal.repo << EOF
 [rdolocal]
-baseurl = file:///rdolocal/$OPENSTACK_RELEASE
+baseurl = file:///rdolocal/${OPENSTACK_RELEASE}
 enabled = 1
 gpgcheck = 0
-name = local rdolocal repo for $OPENSTACK_RELEASE
+name = local rdolocal repo for ${OPENSTACK_RELEASE}
 priority = 1
 EOF
   fi
