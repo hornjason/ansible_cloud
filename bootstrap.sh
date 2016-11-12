@@ -217,7 +217,7 @@ EOF
 
   if [[ ! -h /rdolocal ]] ; then
     $SUDO cd /
-    $SUDO ln -s /var/lib/repos/rdolocal/${OPENSTACK_RELEASE}/ rdolocal
+    $SUDO ln -s /var/lib/repos/rdolocal/ rdolocal
   fi
 
 echo "Exporting local repo /var/lib/repos"
@@ -272,9 +272,9 @@ else
     setup_vnc
     setup_bashprofile
     setup_bashrc
-    setup_vmrc
+    setup_vimrc
     setup_repo
     package_remove
     package_install
-    install_ansiblefi
+    install_ansible
 fi
