@@ -61,11 +61,8 @@ packstack_output_file: "{{ packstack_dir }}/packstack.out"
 # Glance
 image_url: http://10.240.121.66/images/myOL7image.qcow2
 image_file_dir: /var/lib/openstack
-#image_file_name: myOL7image.qcow2
-images: 
-  - myOL7image.qcow2
-  - DSR-80_12_0.vmdk
-#image_file_name: DSR-80_12_0.vmdk
+cloud_init_image: myOL7image.qcow2
+image_file_name: myOL7image.qcow2
 cloud_init_image_ol66: myOL7image
 
 #########################

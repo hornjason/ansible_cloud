@@ -1,0 +1,150 @@
+params:
+    appimage: DSR-80_12_0.vmdk
+    public_network: ext-net
+    ssh_key: dm
+    flavors:
+      - name: oam_flavor
+        ram: 4096
+        vcpus: 2
+        disk: 60
+      - name: damp_flavor
+        ram: 4096
+        vcpus: 2
+        disk: 60
+    noampfunction: DSR (active/standby pair)
+    noampflavor: oam_flavor
+    noampprofile: DSR Guest
+    networks:
+        - name: XMI
+          cidr: 192.168.0.0/24
+          routed: true
+          shared: true
+          dns_nameservers: 
+            - 192.168.56.180
+            - 10.75.137.245
+        - name: IMI
+          cidr: 172.168.0.0/24
+          routed: false
+          shared: true
+    globalnetworks:
+        - name: XSI1
+          cidr: 192.168.100.0/24
+          routed: false
+          shared: false
+    interfaces:
+        - XMI
+        - IMI
+    services:
+        - name: OAM
+          interSitePath: XMI
+          intraSitePath: IMI
+        - name: Replication
+          interSitePath: XMI
+          intraSitePath: IMI
+        - name: Replication_MP
+          interSitePath: XMI
+          intraSitePath: IMI
+        - name: Signaling
+          interSitePath: XMI
+          intraSitePath: IMI
+        - name: ComAgent
+          interSitePath: XMI
+          intraSitePath: IMI
+    networkelements:
+        - soamfunction: DSR (active/standby pair)
+          soamflavor: oam_flavor
+          soamprofile: DSR Guest
+          networks:
+            - name: XMI
+              cidr: 192.168.0.0/24
+              routed: true
+              shared: true
+              dns_nameservers: 
+                - 192.168.56.180
+                - 10.75.137.245
+            - name: IMI
+              cidr: 172.168.0.0/24
+        - name: Signaling
+          interSitePath: XMI
+          intraSitePath: IMI
+        - name: ComAgent
+          interSitePath: XSI1
+          intraSitePath: IMI
+    networkelements:
+        - soamfunction: DSR (active/standby pair)
+          soamflavor: oam_flavor
+          soamprofile: DSR Guest
+          networks:
+            - name: XMI
+              cidr: 192.168.0.0/24
+              routed: true
+              shared: true
+              dns_nameservers: 
+                - 192.168.56.180
+                - 10.75.137.245
+            - name: IMI
+              cidr: 172.168.0.0/24
+              routed: false
+              shared: true
+          interfaces:
+              - XMI
+              - IMI
+          mpservergroups:
+            - function: DSR (multi-active cluster)
+              mpflavor: damp_flavor
+              mpprofile: DSR Guest
+              mpcount: 10
+              interfaces:
+                  - XMI
+                  - IMI
+                  - XSI1
+          ipfeservergroups:
+            - function: IP Front End
+              ipfeflavor: damp_flavor
+              ipfeprofile: DSR Guest
+              ipfecount: 1
+              interfaces:
+                  - XMI
+                  - IMI
+                  - XSI1
+            - function: IP Front End
+              ipfeflavor: damp_flavor
+              ipfeprofile: DSR Guest
+              ipfecount: 1
+              interfaces:
+                  - XMI
+                  - IMI
+                  - XSI1
+
+
+extras:
+    - name: seagull
+      image: MEATOS6.106.0
+      flavor: oam_flavor
+      interfaces:
+          - nename: NO_NE
+            network: XMI
+          - nename: GLOBAL
+            network: XSI1
+      user-data: |
+          #cloud-config
+
+          runcmd:
+              - ifup eth1
+
+          write_files:
+              - path: /etc/sysconfig/network-scripts/ifcfg-eth1
+                permissions: '0644'
+                owner: root:root
+                content: |
+                    DEVICE=eth1
+                    ONBOOT=yes
+                    TYPE=Ethernet
+                    BOOTPROTO=dhcp
+                    DEFROUTE=no
+                    PEERDNS=no
+
+          packages:
+              - seagull
+              - seafood
+              - flock

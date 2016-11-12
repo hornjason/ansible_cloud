@@ -1,0 +1,13 @@
+git clone https://slc10vrt.us.oracle.com/leo/stacktools
+cp dsr-*generator.py stacktools/leo-heatgen/generatory.py
+cp ~/.ssh/id_rsa keyfile
+pip install --upgrade  stacktools
+heatgen dsr.yaml > dsr.hot
+# add heat_stack_owner
+. /var/lib/openstack/keystonerc_cloud_admin
+openstack role add --project demo --user demoadmin heat_stack_owner
+# start stack
+. /var/lib/openstack/keystonerc_cloud_demo
+openstack stack create -t dsr.hot DSRStack
+#configure
+stackconfigure DSRStack keyfile

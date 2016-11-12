@@ -1,0 +1,774 @@
+heat_template_version: '2015-04-30'
+outputs:
+  floatingip_noa:
+    description: The floating IP used to access 'noa'.
+    value:
+      get_attr:
+      - noa_NO_NE_XMI_port_fip
+      - floating_ip_address
+  floatingip_soa1:
+    description: The floating IP used to access 'soa1'.
+    value:
+      get_attr:
+      - soa1_NO_NE_XMI_port_fip
+      - floating_ip_address
+parameter_groups:
+- label: VM Options
+  parameters:
+  - image
+  - sshkeypair
+- label: Network Options
+  parameters:
+  - NO_NE_XMI_cidr
+  - NO_NE_IMI_cidr
+  - GLOBAL_XSI1_cidr
+parameters:
+  GLOBAL_XSI1_cidr:
+    default: 192.168.100.0/24
+    label: GLOBAL XSI1 Network Address
+    type: string
+  NO_NE_IMI_cidr:
+    default: 172.168.0.0/24
+    label: NO_NE IMI Network Address
+    type: string
+  NO_NE_XMI_cidr:
+    default: 192.168.0.0/24
+    label: NO_NE XMI Network Address
+    type: string
+  image:
+    default: DSR-80_12_0.vmdk
+    label: Image Name
+    type: string
+  public_network:
+    default: ext-net
+    label: Public Network ID
+    type: string
+  sshkeypair:
+    default: dm
+    label: SSH keypair name
+    type: string
+resources:
+  GLOBAL_XSI1:
+    metadata:
+      name: XSI1
+      neName: GLOBAL
+      routed: false
+      shared: false
+    type: OS::Neutron::Net
+  GLOBAL_XSI1_subnet:
+    properties:
+      cidr:
+        get_param: GLOBAL_XSI1_cidr
+      gateway_ip: null
+      network_id:
+        get_resource: GLOBAL_XSI1
+    type: OS::Neutron::Subnet
+  NO_NE_IMI:
+    metadata:
+      name: IMI
+      neName: NO_NE
+      routed: false
+      shared: true
+    type: OS::Neutron::Net
+  NO_NE_IMI_subnet:
+    properties:
+      cidr:
+        get_param: NO_NE_IMI_cidr
+      gateway_ip: null
+      network_id:
+        get_resource: NO_NE_IMI
+    type: OS::Neutron::Subnet
+  NO_NE_XMI:
+    metadata:
+      name: XMI
+      neName: NO_NE
+      routed: true
+      shared: true
+    type: OS::Neutron::Net
+  NO_NE_XMI_intf:
+    properties:
+      router_id:
+        get_resource: router
+      subnet:
+        get_resource: NO_NE_XMI_subnet
+    type: OS::Neutron::RouterInterface
+  NO_NE_XMI_subnet:
+    properties:
+      cidr:
+        get_param: NO_NE_XMI_cidr
+      dns_nameservers:
+      - 192.168.56.180
+      - 10.75.137.245
+      - 10.75.137.246
+      network_id:
+        get_resource: NO_NE_XMI
+    type: OS::Neutron::Subnet
+  damp_flavor:
+    properties:
+      disk: 60
+      ram: 4096
+      vcpus: 2
+    type: OS::Nova::Flavor
+  noa:
+    metadata:
+      appworks:
+        networkelements:
+        - name: NO_NE
+        - name: SO_NE1
+        servergroups:
+        - functionName: DSR (active/standby pair)
+          level: A
+          name: NO_SG
+          numWanRepConn: 1
+          parentSgName: NONE
+        - functionName: DSR (active/standby pair)
+          level: B
+          name: SO_SG1
+          numWanRepConn: 1
+          parentSgName: NO_SG
+        - functionName: DSR (multi-active cluster)
+          level: C
+          name: SO1MP_SG1
+          numWanRepConn: 1
+          parentSgName: SO_SG1
+        - functionName: IP Front End
+          level: C
+          name: SO1IPFE_SG1
+          numWanRepConn: 1
+          parentSgName: SO_SG1
+        - functionName: IP Front End
+          level: C
+          name: SO1IPFE_SG2
+          numWanRepConn: 1
+          parentSgName: SO_SG1
+        services:
+        - interSitePath: XMI
+          intraSitePath: IMI
+          name: OAM
+        - interSitePath: XMI
+          intraSitePath: IMI
+          name: Replication
+        - interSitePath: XMI
+          intraSitePath: IMI
+          name: Replication_MP
+        - interSitePath: XMI
+          intraSitePath: IMI
+          name: Signaling
+        - interSitePath: XMI
+          intraSitePath: IMI
+          name: ComAgent
+      extra: false
+      hwprofile: DSR Guest
+      neName: NO_NE
+      noa: true
+      portmap:
+        IMI: eth1
+        XMI: eth0
+      role: roleNOAMP
+      sgName: NO_SG
+    properties:
+      flavor:
+        get_resource: oam_flavor
+      image:
+        get_param: image
+      key_name:
+        get_param: sshkeypair
+      name:
+        str_replace:
+          params:
+            $name:
+              get_param: OS::stack_name
+          template: $name-noa
+      networks:
+      - port:
+          get_resource: noa_NO_NE_XMI_port
+      - port:
+          get_resource: noa_NO_NE_IMI_port
+      user_data:
+        str_replace:
+          params:
+            $name: noa
+            $stack:
+              get_param: OS::stack_name
+          template: "#cloud-config\nhostname: $stack-$name\nfqdn: $stack-$name\n\n\
+            system_info:\n    default_user:\n        name: admusr\n        lock_passwd:\
+            \ false\n\nbootcmd:\n    - echo proxy=http://adc-proxy.oracle.com:80 >>\
+            \ /etc/yum.conf\n\nwrite_files:\n    - content: |\n        127.0.0.1 \
+            \  localhost localhost4 localhost4.localdomain4 $stack-$name\n       \
+            \ ::1         localhost localhost6 localhost6.localdomain6 $stack-$name\n\
+            \        10.250.32.10    ntpserver1\n      path: /etc/hosts\n      owner:\
+            \ root:root\n      permissions: '0644'\n    - content: |\n        export\
+            \ http_proxy=http://adc-proxy.oracle.com:80\n        export https_proxy=http://adc-proxy.oracle.com:80\n\
+            \        export HTTP_PROXY=http://adc-proxy.oracle.com:80\n        export\
+            \ HTTPS_PROXY=http://adc-proxy.oracle.com:80\n        export no_proxy=localhost,127.0.0.1,us.oracle.com,oracle.com,labs.nc.tekelec.com\n\
+            \      path: /etc/profile.d/proxy.sh\n      owner: root:root\n      permissions:\
+            \ '0755'\n    - content: |\n        DEVICE=eth0\n        ONBOOT=yes\n\
+            \        TYPE=Ethernet\n        BOOTPROTO=dhcp\n        DEFROUTE=no\n\
+            \        PEERDNS=no\n      path: /etc/sysconfig/network-scripts/ifcfg-eth0\n\
+            \      permissions: '0644'\n      owner: root:root\n\nruncmd:\n    - ifup\
+            \ eth0\n\noutput: {all: '| tee -a /var/log/cloud-init-output.log'}\n"
+      user_data_format: RAW
+    type: OS::Nova::Server
+  noa_NO_NE_IMI_port:
+    properties:
+      network:
+        get_resource: NO_NE_IMI
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  noa_NO_NE_XMI_port:
+    properties:
+      network:
+        get_resource: NO_NE_XMI
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  noa_NO_NE_XMI_port_fip:
+    depends_on: NO_NE_XMI_intf
+    properties:
+      floating_network:
+        get_param: public_network
+      port_id:
+        get_resource: noa_NO_NE_XMI_port
+    type: OS::Neutron::FloatingIP
+  nob:
+    metadata:
+      extra: false
+      haRolePref: SPARE
+      hwprofile: DSR Guest
+      neName: NO_NE
+      noa: false
+      portmap:
+        IMI: eth1
+        XMI: eth0
+      role: roleNOAMP
+      sgName: NO_SG
+    properties:
+      flavor:
+        get_resource: oam_flavor
+      image:
+        get_param: image
+      key_name:
+        get_param: sshkeypair
+      name:
+        str_replace:
+          params:
+            $name:
+              get_param: OS::stack_name
+          template: $name-nob
+      networks:
+      - port:
+          get_resource: nob_NO_NE_XMI_port
+      - port:
+          get_resource: nob_NO_NE_IMI_port
+      user_data:
+        str_replace:
+          params:
+            $name: nob
+            $stack:
+              get_param: OS::stack_name
+          template: "#cloud-config\nhostname: $stack-$name\nfqdn: $stack-$name\n\n\
+            system_info:\n    default_user:\n        name: admusr\n        lock_passwd:\
+            \ false\n\nbootcmd:\n    - echo proxy=http://adc-proxy.oracle.com:80 >>\
+            \ /etc/yum.conf\n\nwrite_files:\n    - content: |\n        127.0.0.1 \
+            \  localhost localhost4 localhost4.localdomain4 $stack-$name\n       \
+            \ ::1         localhost localhost6 localhost6.localdomain6 $stack-$name\n\
+            \        10.250.32.10    ntpserver1\n      path: /etc/hosts\n      owner:\
+            \ root:root\n      permissions: '0644'\n    - content: |\n        export\
+            \ http_proxy=http://adc-proxy.oracle.com:80\n        export https_proxy=http://adc-proxy.oracle.com:80\n\
+            \        export HTTP_PROXY=http://adc-proxy.oracle.com:80\n        export\
+            \ HTTPS_PROXY=http://adc-proxy.oracle.com:80\n        export no_proxy=localhost,127.0.0.1,us.oracle.com,oracle.com,labs.nc.tekelec.com\n\
+            \      path: /etc/profile.d/proxy.sh\n      owner: root:root\n      permissions:\
+            \ '0755'\n    - content: |\n        DEVICE=eth0\n        ONBOOT=yes\n\
+            \        TYPE=Ethernet\n        BOOTPROTO=dhcp\n        DEFROUTE=no\n\
+            \        PEERDNS=no\n      path: /etc/sysconfig/network-scripts/ifcfg-eth0\n\
+            \      permissions: '0644'\n      owner: root:root\n\nruncmd:\n    - ifup\
+            \ eth0\n\noutput: {all: '| tee -a /var/log/cloud-init-output.log'}\n"
+      user_data_format: RAW
+    type: OS::Nova::Server
+  nob_NO_NE_IMI_port:
+    properties:
+      network:
+        get_resource: NO_NE_IMI
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  nob_NO_NE_XMI_port:
+    properties:
+      network:
+        get_resource: NO_NE_XMI
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  oam_flavor:
+    properties:
+      disk: 60
+      ram: 4096
+      vcpus: 2
+    type: OS::Nova::Flavor
+  router:
+    properties:
+      external_gateway_info:
+        network:
+          get_param: public_network
+    type: OS::Neutron::Router
+  seagull:
+    metadata:
+      extra: true
+      hwprofile: null
+      neName: NONE
+      noa: false
+      portmap:
+        XMI: eth0
+        XSI1: eth1
+      role: NONE
+      sgName: NONE
+    properties:
+      flavor:
+        get_resource: oam_flavor
+      image: MEATOS6.106.0
+      key_name:
+        get_param: sshkeypair
+      name:
+        str_replace:
+          params:
+            $name:
+              get_param: OS::stack_name
+          template: $name-seagull
+      networks:
+      - port:
+          get_resource: seagull_NO_NE_XMI_port
+      - port:
+          get_resource: seagull_GLOBAL_XSI1_port
+      user_data:
+        str_replace:
+          params:
+            $name: seagull
+            $stack:
+              get_param: OS::stack_name
+          template: "#cloud-config\n\nruncmd:\n    - ifup eth1\n\nwrite_files:\n \
+            \   - path: /etc/sysconfig/network-scripts/ifcfg-eth1\n      permissions:\
+            \ '0644'\n      owner: root:root\n      content: |\n          DEVICE=eth1\n\
+            \          ONBOOT=yes\n          TYPE=Ethernet\n          BOOTPROTO=dhcp\n\
+            \          DEFROUTE=no\n          PEERDNS=no\n\npackages:\n    - seagull\n\
+            \    - seafood\n    - flock\n"
+      user_data_format: RAW
+    type: OS::Nova::Server
+  seagull_GLOBAL_XSI1_port:
+    properties:
+      network:
+        get_resource: GLOBAL_XSI1
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  seagull_NO_NE_XMI_port:
+    properties:
+      network:
+        get_resource: NO_NE_XMI
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  secu_group:
+    properties:
+      description: Ping SSH Web
+      name: custom
+      rules:
+      - port_range_max: '65535'
+        port_range_min: '1'
+        protocol: tcp
+        remote_ip_prefix: 0.0.0.0/0
+      - protocol: icmp
+        remote_ip_prefix: 0.0.0.0/0
+      - port_range_max: '22'
+        port_range_min: '22'
+        protocol: tcp
+        remote_ip_prefix: 0.0.0.0/0
+      - port_range_max: '443'
+        port_range_min: '443'
+        protocol: tcp
+        remote_ip_prefix: 0.0.0.0/0
+      - port_range_max: '80'
+        port_range_min: '80'
+        protocol: tcp
+        remote_ip_prefix: 0.0.0.0/0
+    type: OS::Neutron::SecurityGroup
+  so1ipfe1:
+    metadata:
+      extra: false
+      hwprofile: DSR Guest
+      neName: SO_NE1
+      noa: false
+      portmap:
+        IMI: eth1
+        XMI: eth0
+        XSI1: eth2
+      role: roleMP
+      sgName: SO1IPFE_SG1
+    properties:
+      flavor:
+        get_resource: damp_flavor
+      image:
+        get_param: image
+      key_name:
+        get_param: sshkeypair
+      name:
+        str_replace:
+          params:
+            $name:
+              get_param: OS::stack_name
+          template: $name-so1ipfe1
+      networks:
+      - port:
+          get_resource: so1ipfe1_NO_NE_XMI_port
+      - port:
+          get_resource: so1ipfe1_NO_NE_IMI_port
+      - port:
+          get_resource: so1ipfe1_GLOBAL_XSI1_port
+      user_data:
+        str_replace:
+          params:
+            $name: so1ipfe1
+            $stack:
+              get_param: OS::stack_name
+          template: "#cloud-config\nhostname: $stack-$name\nfqdn: $stack-$name\n\n\
+            system_info:\n    default_user:\n        name: admusr\n        lock_passwd:\
+            \ false\n\nbootcmd:\n    - echo proxy=http://adc-proxy.oracle.com:80 >>\
+            \ /etc/yum.conf\n\nwrite_files:\n    - content: |\n        127.0.0.1 \
+            \  localhost localhost4 localhost4.localdomain4 $stack-$name\n       \
+            \ ::1         localhost localhost6 localhost6.localdomain6 $stack-$name\n\
+            \        10.250.32.10    ntpserver1\n      path: /etc/hosts\n      owner:\
+            \ root:root\n      permissions: '0644'\n    - content: |\n        export\
+            \ http_proxy=http://adc-proxy.oracle.com:80\n        export https_proxy=http://adc-proxy.oracle.com:80\n\
+            \        export HTTP_PROXY=http://adc-proxy.oracle.com:80\n        export\
+            \ HTTPS_PROXY=http://adc-proxy.oracle.com:80\n        export no_proxy=localhost,127.0.0.1,us.oracle.com,oracle.com,labs.nc.tekelec.com\n\
+            \      path: /etc/profile.d/proxy.sh\n      owner: root:root\n      permissions:\
+            \ '0755'\n    - content: |\n        DEVICE=eth0\n        ONBOOT=yes\n\
+            \        TYPE=Ethernet\n        BOOTPROTO=dhcp\n        DEFROUTE=no\n\
+            \        PEERDNS=no\n      path: /etc/sysconfig/network-scripts/ifcfg-eth0\n\
+            \      permissions: '0644'\n      owner: root:root\n\nruncmd:\n    - ifup\
+            \ eth0\n\noutput: {all: '| tee -a /var/log/cloud-init-output.log'}\n"
+      user_data_format: RAW
+    type: OS::Nova::Server
+  so1ipfe1_GLOBAL_XSI1_port:
+    properties:
+      network:
+        get_resource: GLOBAL_XSI1
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  so1ipfe1_NO_NE_IMI_port:
+    properties:
+      network:
+        get_resource: NO_NE_IMI
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  so1ipfe1_NO_NE_XMI_port:
+    properties:
+      network:
+        get_resource: NO_NE_XMI
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  so1ipfe2:
+    metadata:
+      extra: false
+      hwprofile: DSR Guest
+      neName: SO_NE1
+      noa: false
+      portmap:
+        IMI: eth1
+        XMI: eth0
+        XSI1: eth2
+      role: roleMP
+      sgName: SO1IPFE_SG2
+    properties:
+      flavor:
+        get_resource: damp_flavor
+      image:
+        get_param: image
+      key_name:
+        get_param: sshkeypair
+      name:
+        str_replace:
+          params:
+            $name:
+              get_param: OS::stack_name
+          template: $name-so1ipfe2
+      networks:
+      - port:
+          get_resource: so1ipfe2_NO_NE_XMI_port
+      - port:
+          get_resource: so1ipfe2_NO_NE_IMI_port
+      - port:
+          get_resource: so1ipfe2_GLOBAL_XSI1_port
+      user_data:
+        str_replace:
+          params:
+            $name: so1ipfe2
+            $stack:
+              get_param: OS::stack_name
+          template: "#cloud-config\nhostname: $stack-$name\nfqdn: $stack-$name\n\n\
+            system_info:\n    default_user:\n        name: admusr\n        lock_passwd:\
+            \ false\n\nbootcmd:\n    - echo proxy=http://adc-proxy.oracle.com:80 >>\
+            \ /etc/yum.conf\n\nwrite_files:\n    - content: |\n        127.0.0.1 \
+            \  localhost localhost4 localhost4.localdomain4 $stack-$name\n       \
+            \ ::1         localhost localhost6 localhost6.localdomain6 $stack-$name\n\
+            \        10.250.32.10    ntpserver1\n      path: /etc/hosts\n      owner:\
+            \ root:root\n      permissions: '0644'\n    - content: |\n        export\
+            \ http_proxy=http://adc-proxy.oracle.com:80\n        export https_proxy=http://adc-proxy.oracle.com:80\n\
+            \        export HTTP_PROXY=http://adc-proxy.oracle.com:80\n        export\
+            \ HTTPS_PROXY=http://adc-proxy.oracle.com:80\n        export no_proxy=localhost,127.0.0.1,us.oracle.com,oracle.com,labs.nc.tekelec.com\n\
+            \      path: /etc/profile.d/proxy.sh\n      owner: root:root\n      permissions:\
+            \ '0755'\n    - content: |\n        DEVICE=eth0\n        ONBOOT=yes\n\
+            \        TYPE=Ethernet\n        BOOTPROTO=dhcp\n        DEFROUTE=no\n\
+            \        PEERDNS=no\n      path: /etc/sysconfig/network-scripts/ifcfg-eth0\n\
+            \      permissions: '0644'\n      owner: root:root\n\nruncmd:\n    - ifup\
+            \ eth0\n\noutput: {all: '| tee -a /var/log/cloud-init-output.log'}\n"
+      user_data_format: RAW
+    type: OS::Nova::Server
+  so1ipfe2_GLOBAL_XSI1_port:
+    properties:
+      network:
+        get_resource: GLOBAL_XSI1
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  so1ipfe2_NO_NE_IMI_port:
+    properties:
+      network:
+        get_resource: NO_NE_IMI
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  so1ipfe2_NO_NE_XMI_port:
+    properties:
+      network:
+        get_resource: NO_NE_XMI
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  so1mp1:
+    metadata:
+      extra: false
+      hwprofile: DSR Guest
+      neName: SO_NE1
+      noa: false
+      portmap:
+        IMI: eth1
+        XMI: eth0
+        XSI1: eth2
+      role: roleMP
+      sgName: SO1MP_SG1
+    properties:
+      flavor:
+        get_resource: damp_flavor
+      image:
+        get_param: image
+      key_name:
+        get_param: sshkeypair
+      name:
+        str_replace:
+          params:
+            $name:
+              get_param: OS::stack_name
+          template: $name-so1mp1
+      networks:
+      - port:
+          get_resource: so1mp1_NO_NE_XMI_port
+      - port:
+          get_resource: so1mp1_NO_NE_IMI_port
+      - port:
+          get_resource: so1mp1_GLOBAL_XSI1_port
+      user_data:
+        str_replace:
+          params:
+            $name: so1mp1
+            $stack:
+              get_param: OS::stack_name
+          template: "#cloud-config\nhostname: $stack-$name\nfqdn: $stack-$name\n\n\
+            system_info:\n    default_user:\n        name: admusr\n        lock_passwd:\
+            \ false\n\nbootcmd:\n    - echo proxy=http://adc-proxy.oracle.com:80 >>\
+            \ /etc/yum.conf\n\nwrite_files:\n    - content: |\n        127.0.0.1 \
+            \  localhost localhost4 localhost4.localdomain4 $stack-$name\n       \
+            \ ::1         localhost localhost6 localhost6.localdomain6 $stack-$name\n\
+            \        10.250.32.10    ntpserver1\n      path: /etc/hosts\n      owner:\
+            \ root:root\n      permissions: '0644'\n    - content: |\n        export\
+            \ http_proxy=http://adc-proxy.oracle.com:80\n        export https_proxy=http://adc-proxy.oracle.com:80\n\
+            \        export HTTP_PROXY=http://adc-proxy.oracle.com:80\n        export\
+            \ HTTPS_PROXY=http://adc-proxy.oracle.com:80\n        export no_proxy=localhost,127.0.0.1,us.oracle.com,oracle.com,labs.nc.tekelec.com\n\
+            \      path: /etc/profile.d/proxy.sh\n      owner: root:root\n      permissions:\
+            \ '0755'\n    - content: |\n        DEVICE=eth0\n        ONBOOT=yes\n\
+            \        TYPE=Ethernet\n        BOOTPROTO=dhcp\n        DEFROUTE=no\n\
+            \        PEERDNS=no\n      path: /etc/sysconfig/network-scripts/ifcfg-eth0\n\
+            \      permissions: '0644'\n      owner: root:root\n\nruncmd:\n    - ifup\
+            \ eth0\n\noutput: {all: '| tee -a /var/log/cloud-init-output.log'}\n"
+      user_data_format: RAW
+    type: OS::Nova::Server
+  so1mp1_GLOBAL_XSI1_port:
+    properties:
+      network:
+        get_resource: GLOBAL_XSI1
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  so1mp1_NO_NE_IMI_port:
+    properties:
+      network:
+        get_resource: NO_NE_IMI
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  so1mp1_NO_NE_XMI_port:
+    properties:
+      network:
+        get_resource: NO_NE_XMI
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  soa1:
+    metadata:
+      extra: false
+      hwprofile: DSR Guest
+      neName: SO_NE1
+      noa: false
+      portmap:
+        IMI: eth1
+        XMI: eth0
+      role: roleSOAM
+      sgName: SO_SG1
+    properties:
+      flavor:
+        get_resource: oam_flavor
+      image:
+        get_param: image
+      key_name:
+        get_param: sshkeypair
+      name:
+        str_replace:
+          params:
+            $name:
+              get_param: OS::stack_name
+          template: $name-soa1
+      networks:
+      - port:
+          get_resource: soa1_NO_NE_XMI_port
+      - port:
+          get_resource: soa1_NO_NE_IMI_port
+      user_data:
+        str_replace:
+          params:
+            $name: soa1
+            $stack:
+              get_param: OS::stack_name
+          template: "#cloud-config\nhostname: $stack-$name\nfqdn: $stack-$name\n\n\
+            system_info:\n    default_user:\n        name: admusr\n        lock_passwd:\
+            \ false\n\nbootcmd:\n    - echo proxy=http://adc-proxy.oracle.com:80 >>\
+            \ /etc/yum.conf\n\nwrite_files:\n    - content: |\n        127.0.0.1 \
+            \  localhost localhost4 localhost4.localdomain4 $stack-$name\n       \
+            \ ::1         localhost localhost6 localhost6.localdomain6 $stack-$name\n\
+            \        10.250.32.10    ntpserver1\n      path: /etc/hosts\n      owner:\
+            \ root:root\n      permissions: '0644'\n    - content: |\n        export\
+            \ http_proxy=http://adc-proxy.oracle.com:80\n        export https_proxy=http://adc-proxy.oracle.com:80\n\
+            \        export HTTP_PROXY=http://adc-proxy.oracle.com:80\n        export\
+            \ HTTPS_PROXY=http://adc-proxy.oracle.com:80\n        export no_proxy=localhost,127.0.0.1,us.oracle.com,oracle.com,labs.nc.tekelec.com\n\
+            \      path: /etc/profile.d/proxy.sh\n      owner: root:root\n      permissions:\
+            \ '0755'\n    - content: |\n        DEVICE=eth0\n        ONBOOT=yes\n\
+            \        TYPE=Ethernet\n        BOOTPROTO=dhcp\n        DEFROUTE=no\n\
+            \        PEERDNS=no\n      path: /etc/sysconfig/network-scripts/ifcfg-eth0\n\
+            \      permissions: '0644'\n      owner: root:root\n\nruncmd:\n    - ifup\
+            \ eth0\n\noutput: {all: '| tee -a /var/log/cloud-init-output.log'}\n"
+      user_data_format: RAW
+    type: OS::Nova::Server
+  soa1_NO_NE_IMI_port:
+    properties:
+      network:
+        get_resource: NO_NE_IMI
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  soa1_NO_NE_XMI_port:
+    properties:
+      network:
+        get_resource: NO_NE_XMI
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  soa1_NO_NE_XMI_port_fip:
+    depends_on: NO_NE_XMI_intf
+    properties:
+      floating_network:
+        get_param: public_network
+      port_id:
+        get_resource: soa1_NO_NE_XMI_port
+    type: OS::Neutron::FloatingIP
+  sob1:
+    metadata:
+      extra: false
+      haRolePref: SPARE
+      hwprofile: DSR Guest
+      neName: SO_NE1
+      noa: false
+      portmap:
+        IMI: eth1
+        XMI: eth0
+      role: roleSOAM
+      sgName: SO_SG1
+    properties:
+      flavor:
+        get_resource: oam_flavor
+      image:
+        get_param: image
+      key_name:
+        get_param: sshkeypair
+      name:
+        str_replace:
+          params:
+            $name:
+              get_param: OS::stack_name
+          template: $name-sob1
+      networks:
+      - port:
+          get_resource: sob1_NO_NE_XMI_port
+      - port:
+          get_resource: sob1_NO_NE_IMI_port
+      user_data:
+        str_replace:
+          params:
+            $name: sob1
+            $stack:
+              get_param: OS::stack_name
+          template: "#cloud-config\nhostname: $stack-$name\nfqdn: $stack-$name\n\n\
+            system_info:\n    default_user:\n        name: admusr\n        lock_passwd:\
+            \ false\n\nbootcmd:\n    - echo proxy=http://adc-proxy.oracle.com:80 >>\
+            \ /etc/yum.conf\n\nwrite_files:\n    - content: |\n        127.0.0.1 \
+            \  localhost localhost4 localhost4.localdomain4 $stack-$name\n       \
+            \ ::1         localhost localhost6 localhost6.localdomain6 $stack-$name\n\
+            \        10.250.32.10    ntpserver1\n      path: /etc/hosts\n      owner:\
+            \ root:root\n      permissions: '0644'\n    - content: |\n        export\
+            \ http_proxy=http://adc-proxy.oracle.com:80\n        export https_proxy=http://adc-proxy.oracle.com:80\n\
+            \        export HTTP_PROXY=http://adc-proxy.oracle.com:80\n        export\
+            \ HTTPS_PROXY=http://adc-proxy.oracle.com:80\n        export no_proxy=localhost,127.0.0.1,us.oracle.com,oracle.com,labs.nc.tekelec.com\n\
+            \      path: /etc/profile.d/proxy.sh\n      owner: root:root\n      permissions:\
+            \ '0755'\n    - content: |\n        DEVICE=eth0\n        ONBOOT=yes\n\
+            \        TYPE=Ethernet\n        BOOTPROTO=dhcp\n        DEFROUTE=no\n\
+            \        PEERDNS=no\n      path: /etc/sysconfig/network-scripts/ifcfg-eth0\n\
+            \      permissions: '0644'\n      owner: root:root\n\nruncmd:\n    - ifup\
+            \ eth0\n\noutput: {all: '| tee -a /var/log/cloud-init-output.log'}\n"
+      user_data_format: RAW
+    type: OS::Nova::Server
+  sob1_NO_NE_IMI_port:
+    properties:
+      network:
+        get_resource: NO_NE_IMI
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+  sob1_NO_NE_XMI_port:
+    properties:
+      network:
+        get_resource: NO_NE_XMI
+      security_groups:
+      - get_resource: secu_group
+    type: OS::Neutron::Port
+

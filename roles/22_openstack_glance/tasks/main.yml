@@ -10,7 +10,7 @@
   - name: Creating Image
     os_image:
       cloud: cloud-admin
-      name: '{{ cloud_init_image_ol66 }}'
+      name: '{{ cloud_init_image }}'
       container_format: bare
       disk_format: qcow2
       state: present
