@@ -213,6 +213,9 @@ EOF
     $SUDO ln -s /var/lib/repos/rdolocal/${OPENSTACK_RELEASE}/ rdolocal
   fi
 
+echo "Exporting local repo /var/lib/repos"
+  $SUDO grep "/var/lib/repos " /etc/exports || echo "/var/lib/repos      *(ro,async)" >> /etc/exports
+  $SUDO /sbin/exportfs -av
 }
 
 ################################
@@ -234,9 +237,6 @@ echo "Installing package list"
   $SUDO yum clean all
   $SUDO yum --enablerepo=rdolocal -y install $package_list
 
-echo "Exporting local repo /var/lib/repos"
-  $SUDO grep "/var/lib/repos " /etc/exports || echo "/var/lib/repos      *(ro,async)" >> /etc/exports
-  $SUDO /sbin/exportfs -av
 
 }
 
