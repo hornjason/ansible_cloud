@@ -253,11 +253,11 @@ install_ansible () {
 ################################
 echo "PIP: Installing ansible and shade"
 if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
-  $SUDO pip --proxy $PROXY install ansible==2.1.1
-  $SUDO pip --proxy $PROXY install shade
+  $SUDO pip --proxy $PROXY install ansible==2.1.1 || exit
+  $SUDO pip --proxy $PROXY install shade==1.11.1 || exit
 else
-  $SUDO pip install ansible==2.1.1
-  $SUDO pip install shade
+  $SUDO pip install ansible==2.1.1 || exit
+  $SUDO pip install shade==1.11.1 || exit
 fi
 }
 

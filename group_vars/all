@@ -3,7 +3,7 @@
 openstack_release: newton
 
 # Project
-project: big_cloud
+project: sweingarten
 
 # n6k chassis
 n6k: false
@@ -63,7 +63,7 @@ image_url: http://10.240.121.66/images/myOL7image.qcow2
 image_file_dir: /var/lib/openstack
 cloud_init_image: myOL7image.qcow2
 image_file_name: myOL7image.qcow2
-cloud_init_image_ol66: myOL7image
+cloud_init_image_ol66: myOL7image.qcow2
 
 #########################
 # define infrastructure
