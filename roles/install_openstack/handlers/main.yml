@@ -1,0 +1,7 @@
+---
+
+- name: reload daemon
+  shell: "systemctl daemon-reload"
+
+- name: restart mariadb
+  service: name=mariadb state=restarted enabled=yes

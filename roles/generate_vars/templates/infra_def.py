@@ -237,7 +237,7 @@ def _print_chassis_blades(infra_id, number_of_chassis, infra_file, hosts_file, l
       
       # BLADEs
       infra_file.write(x6sp + "blades:" + "\n")
-      for blade in range(0, 10):
+      for blade in range(0, 40):
         blade_id = cmm_id + "b" + "%02d" % (blade,)
         infra_file.write(x8sp + blade_id + ":" + "\n")
         infra_file.write(x10sp + "blade_id: " + blade_id + "\n")

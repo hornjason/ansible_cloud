@@ -1,38 +1,50 @@
 ---
-#- debug: var=hostvars['pxe']['ansible_host']
-
-- name: create local repo directories /epel /rdo-mitaka
-  file: name={{ item }} state=directory 
+- name: De-exposing EPEL and RDO public repos
+  yum: name={{ item }} state=absent
   with_items:
-    - /epel
-    - /rdo-mitaka
+    - epel-release
+    - rdo-release-{{ openstack_release }}
 
-- name: mount epel / rdo-mitaka local repos
+- name: Disabling Oracle Linux YUM Repo
+  replace:
+    dest: /etc/yum.repos.d/public-yum-ol7.repo
+    regexp: '^enabled.*$'
+    replace: 'enabled=0'
+
+- name: create local repo directories 
+  file: name=/rdolocal state=directory 
+
+- name: mounting rdolocal dir
   mount: 
-    name: "/{{ item }}"
+    name: /rdolocal
     state: mounted 
-    src: "{{ hostvars['pxe']['ansible_host'] }}:/var/lib/repos/{{ item }}"
+    src: "{{ hostvars['pxe']['ansible_host'] }}:/var/lib/repos/rdolocal"
     fstype: nfs 
     opts: defaults,soft
     dump: 0 
     passno: 2 
-  with_items:
-    - epel
-    - rdo-mitaka
 
 - name: create local epel/rdo-mitaka repos
   yum_repository:
-    name: "{{ item }}_local"
+    name: "rdolocal"
     state: present
-    description: local {{ item }} repo
-    file: "{{ item }}_local"
-    baseurl: file:///{{ item }}
+    description: local rdolocal repo
+    file: "rdolocal"
+    baseurl: "file:///rdolocal/{{ openstack_release }}"
     gpgcheck: no
     enabled: yes
-  with_items:
-    - epel
-    - rdo-mitaka
+    priority: 1 
 
-#- name: Tryin epel repos by installing nmap    
-#  yum: name=nmap state=installed
-  
+- name: clean yum
+  command: yum clean all
+
+- name: installing yum priorities plugin
+  yum: name=yum-plugin-priorities state=present update_cache=yes
+
+- name: enabling yum plugins
+  ini_file:     
+    dest: /etc/yum.conf     
+    section: main  
+    option: plugins  
+    value: 1
+

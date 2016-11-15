@@ -1,7 +1,4 @@
 ---
-- pause: seconds=60
-  tags: unhack_chkconfig
-
 - name: Restoring chkconfig to original state
   copy: src=/usr/sbin/chkconfig.dontuse dest=/usr/sbin/chkconfig remote_src=True
   tags: unhack_chkconfig

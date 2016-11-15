@@ -33,7 +33,7 @@
       state=started
       port=22
       delay=60
-      timeout=400
+      timeout=1800
   when:
     - kernel_changed|success
     - grub_rebuilt|success 

@@ -3,7 +3,9 @@
   include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
    
 - name: Installing openstack-packstack rpm
-  yum: enablerepo=ol7_optional_latest name=openstack-packstack state=installed
+  #DEPRICATED: REMOVE
+  #yum: enablerepo=ol7_optional_latest name=openstack-packstack state=installed
+  yum: name=openstack-packstack state=installed
   register: packstack_rpm_installed
     
 # Preparing packstack answers    
@@ -14,13 +16,64 @@
   template: src=packstack_answers.txt.j2 dest="{{ packstack_answer_file }}" owner=root group=root mode=0644
   register: packstack_answers_file_created
 
+- name: Removing Http Proxy from bashrc to avoid "Bad Gateway" issue during Packstack
+  lineinfile:
+    dest=/root/.bashrc
+    regexp="^export http_proxy.*$"
+    state=absent
+  tags: run_packstack
+
+# DEPRECATED # for local repos only
+- name: Removing conflicting mariadb-server-galera
+  yum: name={{ item }} state=absent
+  with_items:
+    - mariadb-server-galera
+
+- name: Removing conflicting liberty packages
+  yum: name={{ item }} state=absent
+  when: openstack_release == 'liberty'
+  with_items:
+    - mysql-community-libs
+    - mysql-community-common
+
 - name: Installing packages wanted by packstack
   yum: name={{ item }} state=installed
   with_items:
     - openstack-neutron-ml2
     - openstack-neutron-openvswitch
     - deltarpm
+    - mariadb-server
 
-- name: install epel repo
-  yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
+- name: creating /etc/systemd/system/mariadb.service.d dir
+  file:
+    path: /etc/systemd/system/mariadb.service.d
+    state: directory
 
+- name: creating limit.conf file for mariadb
+  file:
+    path: /etc/systemd/system/mariadb.service.d/limits.conf
+    state: touch
+
+- ini_file: 
+    dest: /etc/systemd/system/mariadb.service.d/limits.conf
+    section: Service
+    option: "{{ item.option }}"
+    value:  "{{ item.value }}"
+  with_items:
+    - { option: LimitNOFILE,  value: infinity }
+    - { option: LimitMEMLOCK, value: infinity }
+  notify:
+    - reload daemon
+    - restart mariadb
+
+#- name: Creating symlink for mariadb systemd
+#  file:
+#    src: /usr/lib/systemd/system/mariadb.service
+#    dest: /etc/systemd/system/multi-user.target.wants/mariadb.service
+#    state: link
+#
+#- name: Templating mariadb systemd file
+#  template: src="mariadb.service.j2" dest=/usr/lib/systemd/system/mariadb.service
+#  notify:
+#    - reload daemon
+#    - restart mariadb

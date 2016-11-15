@@ -17,10 +17,6 @@
     - { role: 23_openstack_neutron         , tags: 23_openstack_neutron }
     - { role: 24_secgroup_rules               , tags: 24_secgroup_rules }
     - { role: 25_openstack_nova_boot     , tags: 25_openstack_nova_boot }
-  environment:
-    http_proxy:
-    #no_proxy: 
-    no_proxy: 10.75.165.35,10.75.138.38
 
 # to add a natted address to horizon as is the case in MVL
 # sed -i '/^.*ServerAlias c00b00/a \  ServerAlias 100.65.194.202' /etc/httpd/conf.d/15-horizon_vhost.conf

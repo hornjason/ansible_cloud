@@ -1,22 +1,22 @@
 ---
-- name: update hostname
+- name: Updating hostname
   hostname: name="{{ item.key }}"
   with_dict: "{{ infrastructure.utility_servers }}"
 
 - name: Checking for nfs-utils
   yum: name=nfs-utils state=present
 
-- name: Setup nfs exports dir  
+- name: Setting up nfs exports dir  
   file: path={{ nfs_staging_dir }}/{{ kickstart_file }} state=directory
 
-- name: update exports file with {{ nfs_staging_dir }}     
+- name: Updating exports file with {{ nfs_staging_dir }}     
   lineinfile: 
     dest=/etc/exports 
     state=present 
     insertafter=EOF 
     line="{{ nfs_staging_dir }}      *(rw,sync,no_root_squash,no_all_squash)"
 
-- name: Verify all services are enabled/restarted
+- name: Verifying all services are enabled/restarted
   service: name={{ item }}  state=restarted enabled=yes
   with_items:
   - rpcbind
@@ -24,37 +24,36 @@
   - nfs-lock
   - nfs-idmap
 
-- name: create /var/lib/images to store iso
+- name: Creating /var/lib/images to store iso
   file: path=/var/lib/images state=directory
 
-- name: check for iSO /var/lib/images/{{ iso_name }}
+- name: Checking existence of /var/lib/images/{{ iso_name }} ISO
   stat: path=/var/lib/images/{{ iso_name }} get_checksum=yes get_md5=no
   register: isochk
 
-- name: download iso {{ iso_name }}
+- name: Downloading iso {{ iso_name }}
   get_url: 
-    #url=http://kernel.us.oracle.com/osinstall/OracleLinux/OL7/u1/x86_64/{{ iso_name }}
-    url=http://kernel.us.oracle.com/osinstall/OracleLinux/OL7/u2/x86_64/{{ iso_name }}
+    url="{{ iso_url }}"
     dest=/var/lib/images/
-    use_proxy=no
-    force=no
+    # use_proxy=yes
   when: isochk.stat.exists == False
 
-- name: mount iso "/var/lib/images/{{ iso_name}} => {{ nfs_staging_dir }}"
+- name: Mounting iso "/var/lib/images/{{ iso_name}} => {{ nfs_staging_dir }}"
   mount: name=/mnt src=/var/lib/images/{{ iso_name }} state=mounted fstype=iso9660
 
-- name: "copy {{ iso_name }} to {{ nfs_staging_dir }}"
+- name: "Copying {{ iso_name }} to {{ nfs_staging_dir }}"
   local_action:
     copy src=/mnt/ dest={{ nfs_staging_dir }} force=no
-#  when: isochk.stat.exists == False
+  when: isochk.stat.exists == False
 
-- name: copy {{ kickstart_file }} to {{ nfs_staging_dir }}/{{ kickstart_file }}/{{ kickstart_file }}
+- name: Copying {{ kickstart_file }} to {{ nfs_staging_dir }}/{{ kickstart_file }}/{{ kickstart_file }}
   template: src={{ kickstart_file }}  dest={{ nfs_staging_dir }}/{{ kickstart_file }}/{{ kickstart_file }}
   tags: ks
 
-- name: copy isolinux.cfg to {{ nfs_staging_dir }}/isolinux/
-  copy: src={{ local_repo }}/isolinux.cfg  dest={{ nfs_staging_dir }}/isolinux/
+- name: Copying isolinux.cfg to {{ nfs_staging_dir }}/isolinux/
+  #copy: src={{ local_repo }}/isolinux.cfg  dest={{ nfs_staging_dir }}/isolinux/
+  copy: src=isolinux.cfg  dest={{ nfs_staging_dir }}/isolinux/
   tags: ks
 
-- name: unmount iso
+- name: Unmounting iso
   mount: name=/mnt src=/var/lib/images/{{ iso_name }} state=unmounted fstype=iso9660

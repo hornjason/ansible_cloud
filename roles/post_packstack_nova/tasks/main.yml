@@ -53,37 +53,56 @@
   template: src=templates/interfaces.template.j2 dest={{ interfaces_template_file }} owner=root group=root mode=0755
 
 - name: Installing openstack-nova-serialproxy on the controller only
-  yum: name=openstack-nova-serialproxy enablerepo=openstack-mitaka state=installed
+  yum: name=openstack-nova-serialproxy enablerepo=rdolocal state=installed
+  ###yum: name=openstack-nova-serialproxy enablerepo=openstack-mitaka state=installed
   when: inventory_hostname in groups.controller
 
 - name: Starting and Enabling openstack-nova-serialproxy Service on the controller only
   service: name=openstack-nova-serialproxy enabled=yes state=started
   when: inventory_hostname in groups.controller
 
+- name: Installing openstack-utils
+  yum: name=openstack-utils enablerepo=rdolocal state=installed
+  ###yum: name=openstack-utils enablerepo=openstack-mitaka state=installed
+
 - name: allow all tenants to create flavors with HEAT
   lineinfile:
     "dest={{ heat_policy_file }}
-    regexp=resource_types:OS::Nova::Flavor
-    line='    \"resource_types:OS::Nova::Flavor\":  \"\" '
-    state=present"
+    regexp='resource_types:OS::Nova::Flavor.*(\".*\")(.*)$'
+    line='    \"resource_types:OS::Nova::Flavor\":  \"\"\\2'
+    state=present
+    backrefs=yes"
   when: inventory_hostname in groups.controller
+  tags:
+    - heat_flavor
 
 - name: allow all tenants to create flavors with NOVA
   lineinfile:
     "dest={{ nova_policy_file }}
-    regexp=os_compute_api:os-flavor-manage
-    line='    \"os_compute_api:os-flavor-manage\": \"\", '
-    state=present"
-  when: inventory_hostname in groups.controller
+    regexp='os_compute_api:os-flavor-manage.*(\".*\")(.*)$'
+    line='    \"os_compute_api:os-flavor-manage\": \"\"\\2'
+    state=present
+    backrefs=yes"
+  when: 
+    - inventory_hostname in groups.controller
+    - openstack_release != 'newton'
+  tags:
+    - nova_flavor
 
 - name: allow all tenants to create flavors with NOVA
   lineinfile:
     "dest={{ nova_policy_file }}
-    regexp=compute_extension:flavormanage
-    line='    \"compute_extension:flavormanage\": \"\", '
-    state=present"
-  when: inventory_hostname in groups.controller
-
+    regexp='compute_extension:flavormanage.*(\".*\")(.*)$'
+    line='    \"compute_extension:flavormanage\": \"\"\\2'
+    state=present
+    backrefs=yes"
+  when: 
+    - inventory_hostname in groups.controller
+    - openstack_release != 'newton'
+  tags:
+    - nova_flavor
 
 - name: Restart nova
   shell: "openstack-service restart nova"
+  when: 
+    - inventory_hostname in groups.controller

@@ -11,4 +11,4 @@
 
  - include: hosts.yml
 
-
+ - include: dns.yml

@@ -1,7 +1,0 @@
-## execute: ansible-playbook [-v for debugging] -i hosts -s full-install.yml
----
-- hosts: here
-  roles:
-    - 00_loop_through
-    ###- 01_verify_mgmt_ip
-

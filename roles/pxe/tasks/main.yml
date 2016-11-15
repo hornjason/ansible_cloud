@@ -1,10 +1,14 @@
 ---
-- name: load subnet variables
+- name: Loading subnet variables
   include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
   run_once: true
 
 - include: nfs.yml
+  run_once: true
 
 - include: dhcp.yml
+  run_once: true
 
 - include: tftp.yml
+  run_once: true
+

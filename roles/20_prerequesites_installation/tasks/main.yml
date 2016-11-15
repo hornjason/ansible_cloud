@@ -34,14 +34,15 @@
     when: proxy_env.http_proxy is defined
     
   - name: Installing python-devel
-    yum: enablerepo=ol7_u2_base name=python-devel state=installed
+    #yum: enablerepo=ol7_u2_base name=python-devel state=installed
+    yum: name=python-devel state=installed
     register: python_dev_installed
 
   - name: Installing pip
     easy_install: name=pip state=latest
 
   - name: installing gcc
-    yum: name=gcc enablerepo=ol7_u2_base state=present
+    yum: name=gcc state=present
     
   - name: Installing shade
     pip: name=shade extra_args='--proxy http://www-proxy.us.oracle.com:80'

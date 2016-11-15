@@ -1,1 +1,79 @@
-mv_x5-2_steven_all
+---
+# Openstack Release
+openstack_release: newton
+
+# Project
+project: big_cloud
+
+# n6k chassis
+n6k: false
+
+# wipe True by default -e wipe=false to overide
+wipe: "True"
+
+# Environment preparation
+#proxy_env:
+  #http_proxy: http://adc-proxy.oracle.com:80
+  #https_proxy: http://adc-proxy.oracle.com:80
+  #no_proxy: localhost,us.oracle.com,10.240.121.66,10.240.121.2,10.75.183.4
+
+# interfaces
+management_interface: eno2
+ext_management_interface: eno1
+storage_interface: eno2
+tenant_interface: "{{ storage_interface }}"
+provider_interface: eno1
+dummy_physical_port_for_neutron: "{{ provider_interface }}.1"
+
+# MTU for all openstack nodes
+mtu: 9000
+
+#PXE
+nfs_staging_dir: /stage
+boot_dev: sda
+iso_name: OracleLinux-R7-U2-Server-x86_64-dvd.iso
+iso_url: http://10.240.121.66/images/{{ iso_name }}
+kickstart_file: ol7.ks
+
+local_repo: "{{ playbook_dir }}/repo"
+remote_repo: /root/scripts
+
+# Pause duration
+resolv_pause: 5
+ilom_pause: 10
+reboot_wait_time: 5
+after_epel_pause: 5
+repave_wait_time: 15
+
+
+public_yum_ol7_repo_url: "http://public-yum.oracle.com/public-yum-ol7.repo"
+# Tested with liberty && mitaka && newton
+#openstack_rpmrelease: 3
+#rdo_release_rpm: "https://repos.fedorapeople.org/repos/openstack/openstack-{{ openstack_release }}/rdo-release-{{ openstack_release }}-{{ openstack_rpmrelease }}.noarch.rpm"
+#epel_rpm: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+#epel_baseurl: "http://ftp.linux.ncsu.edu/pub/epel/7/$basearch"
+
+# Packstack 
+packstack_dir: "/var/lib/packstack"
+packstack_answer_file: "{{ packstack_dir }}/answers.txt"
+packstack_output_file: "{{ packstack_dir }}/packstack.out"
+
+# Glance
+image_url: http://10.240.121.66/images/myOL7image.qcow2
+image_file_dir: /var/lib/openstack
+cloud_init_image: myOL7image.qcow2
+image_file_name: myOL7image.qcow2
+cloud_init_image_ol66: myOL7image
+
+#########################
+# define infrastructure
+# Number of chassis
+num_chassis: 1
+# Number of utility servers
+num_utility_servers: 1
+# Number of Storage Head Pairs
+num_zfs: 0
+# Number of es2 72 Pairs (Storage/Tenant)
+num_es2_72: 1
+
+

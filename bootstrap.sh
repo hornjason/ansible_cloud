@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash 
 
 ####################
 # disalbe sslVerificitaion for git
@@ -8,7 +8,7 @@
 ####################
 # enable proxy for this server
 ####################
-ENABLE_PROXY="false"
+ENABLE_PROXY="true"
 
 ####################
 # vnc port
@@ -16,11 +16,30 @@ ENABLE_PROXY="false"
 VNC_PORT="99"
 
 ####################
+# master repo that contains rdo packages
+####################
+MASTER_REPO="10.240.121.66"
+
+####################
+# proxy server
+####################
+proxy="http://adc-proxy.oracle.com:80"
+
+####################
+# OpenStack Release
+####################
+OPENSTACK_RELEASE="newton"
+
+####################
+# END OF CONFIG
+####################
+
+####################
 # packages to install
 ####################
 package_list="vim virt-install libvirt libguestfs-tools libguestfs git asciidoc rpm-build python2-devel \
 python-pip python-devel sshpass python-httplib2 python-paramiko python-keyczar tigervnc-server pexpect  \
-git gcc libffi-devel openssl-devel"
+gcc libffi-devel openssl-devel createrepo"
 
 ####################
 # packages to remove
@@ -31,36 +50,34 @@ package_remove_list="firewalld NetworkManager gnome-packagekit"
 yum_conf="/etc/yum.conf"
 ####################
 
-
-####################
-# proxy server
-####################
-proxy=" proxy=http://www-proxy.us.oracle.com:80"
-
 ####################
 # whoami
 ####################
 whobei=`whoami`
 if [[ $whobei == "root" ]];then SUDO="";else SUDO=`which sudo`;fi
 
+setup_proxy () {
 ################################
 # setup oracle proxy for yum
 ################################
 if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
+  PROXY=$proxy
   if [[ $(grep -c proxy $yum_conf) == 0 ]]; then
       echo "Adding proxy $proxy to $yum_conf"
       $SUDO sed -ie "\$a$proxy" $yum_conf
   fi
-  export http_proxy="http://www-proxy.us.oracle.com:80"
-  export https_proxy="http://www-proxy.us.oracle.com:80"
-  printf -v no_proxy '%s,' 172.31.2.{1..255};
-  export no_proxy="localhost,127.0.0.1,us.oracle.com,$no_proxy,10.75.138.39"
+  export http_proxy=$proxy
+  export https_proxy=$proxy
+  #printf -v no_proxy '%s,' 172.31.2.{1..255};
+  export no_proxy="localhost,127.0.0.1,us.oracle.com,$MASTER_REPO"
 
 #git_proxy="git config --global http.proxy http://www-proxy.us.oracle.com:80"
 #git_proxys="git config --global https.proxy http://www-proxy.us.oracle.com:443"
 fi
 #
+}
 
+setup_vnc () {
 ################################
 # setup vnc server
 ################################
@@ -71,6 +88,7 @@ passwd="changeme"
 
 $SUDO cp /lib/systemd/system/vncserver@.service /etc/systemd/system/vncserver@.service
 $SUDO sed -i "s/\/home\/<USER>/\/$whobei/g" /etc/systemd/system/vncserver@.service
+$SUDO sed -i "s/<USER>/$whobei/g" /etc/systemd/system/vncserver@.service
 $SUDO sed -i 's/vncserver %i"/vncserver %i -geometry 1280x1024"/' /etc/systemd/system/vncserver@.service
 
 $SUDO mkdir ~/.vnc
@@ -84,6 +102,9 @@ $SUDO systemctl enable vncserver@:$VNC_PORT.service
 $SUDO systemctl start vncserver@:$VNC_PORT.service
 echo "VNC: Done"
 
+}
+
+setup_bashprofile () {
 ################################
 # setup .bash_profile 
 ################################
@@ -93,7 +114,7 @@ cat > /.bash_profile << EOF
 # Get the aliases and functions
 if [ -f ~/.bashrc ]; then
         . ~/.bashrc
-fi0.110
+fi
 
 # User specific environment and startup programs
 
@@ -102,7 +123,9 @@ PATH=$PATH:$HOME/bin
 export PATH
 
 EOF
+}
 
+setup_bashrc () {
 ################################
 # setup .bashrc
 ################################
@@ -117,12 +140,14 @@ force_color_prompt=yes
 
     export PS1="[\u@\[\e[00;31m\]\h\[\e[0m\]:\[\e[00;36m\]UTILITY\[\e[0m\]:\t: \w]# "
 unset color_prompt force_color_prompt
+alias ll='ls -lh --color'
 EOF
 
 if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
 cat >> ~/.bashrc << EOF
-export http_proxy=http://www-proxy.us.oracle.com:80
-export https_proxy=http://www-proxy.us.oracle.com:80
+export http_proxy=$proxy
+export https_proxy=$proxy
+export no_proxy="localhost,127.0.0.1,us.oracle.com,$no_proxy,$MASTER_REPO"
 EOF
 fi
 
@@ -130,7 +155,9 @@ echo "BASHRC: Done"
 echo "BASHRC: Sourcing .bashrc"
 . ~/.bash_profile
 
+}
 
+setup_vimrc () {
 ################################
 # setup .vimrc
 ################################
@@ -142,55 +169,112 @@ elif [[ $(grep -c tabstop ~/.vimrc 2>/dev/null) == 0 ]]; then
     echo "set tabstop=4 softtabstop=0 expandtab shiftwidth=4 smarttab" >> ~/.vimrc
 fi
 echo "VIMRC: Done"
+}
+
+
+setup_repo () {
 ################################
 # install packages/repos
 ################################
-echo "Updating ALL packges"
-#$SUDO yum --disablerepo=* --enablerepo=ol7_latest,ol7_UEKR3 update
+echo "Installing createrepo rpm"
+  $SUDO yum --enablerepo=ol7_latest -y install createrepo
 
-if [[ $(yum repolist | grep -ic epel ) == 0 ]]; then
-  echo "Installing EPEL YUM Repol"
-  $SUDO yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-fi
+echo "Downloading extra packages from RDO EPEL ... this can take few minutes"
+  #$SUDO mkdir -p /var/lib/repos/rdolocal/$OPENSTACK_RELEASE
 
-echo "waiting for yum to clean up"
-#sleep 60
+echo "Checking for ${MASTER_REPO} in no_proxy"
+  if [[ $(echo $no_proxy |grep -c ${MASTER_REPO}) != 1 ]]; then
+    export no_proxy=$no_proxy,${MASTER_REPO}
+    echo $no_proxy
+  fi
 
+echo "Checking size of rdolocal"
+  size=$(du -sm /var/lib/repos/rdolocal/${OPENSTACK_RELEASE} 2>/dev/null|awk '{print $1}')
+  if [[ $size -lt 240 ]] ; then
+    \rm -rf /var/lib/repos/rdolocal/${OPENSTACK_RELEASE} 2>/dev/null
+    $SUDO wget  -nd -q -P /var/lib/repos/rdolocal/${OPENSTACK_RELEASE} -r --no-parent ${MASTER_REPO}/rdolocal/${OPENSTACK_RELEASE}/
+
+#  $SUDO cat ./packages.list | while read rpm ; do
+#          /usr/bin/yum  -y install --downloaddir=/var/lib/repos/rdolocal --downloadonly $rpm | grep Installed || \
+#          /usr/bin/yum  -y reinstall --downloaddir=/var/lib/repos/rdolocal --downloadonly $rpm
+#        done
+    $SUDO createrepo /var/lib/repos/rdolocal/${OPENSTACK_RELEASE}
+    $SUDO cat > /etc/yum.repos.d/rdolocal.repo << EOF
+[rdolocal]
+baseurl = file:///rdolocal/${OPENSTACK_RELEASE}
+enabled = 1
+gpgcheck = 0
+name = local rdolocal repo for ${OPENSTACK_RELEASE}
+priority = 1
+EOF
+  fi
+
+  for repos in `ls /etc/yum.repos.d/`; do
+    if [[ $repos != "rdolocal.repo" ]]; then  
+        $SUDO sed -i "s/enabled=1/enabled=0/g" /etc/yum.repos.d/*
+    fi
+  done
+
+  if [[ ! -h /rdolocal ]] ; then
+    $SUDO cd /
+    $SUDO ln -s /var/lib/repos/rdolocal/ rdolocal
+  fi
+
+echo "Exporting local repo /var/lib/repos"
+  $SUDO grep "/var/lib/repos " /etc/exports || echo "/var/lib/repos      *(ro,async)" >> /etc/exports
+  $SUDO /sbin/exportfs -av
+}
+
+################################
+# package install 
+################################
+package_remove () {
 echo "Removing packages not needed"
   $SUDO systemctl disable firewalld
   $SUDO iptables -F
   $SUDO yum --enablerepo=epel,ol7_optional_latest -y remove $package_remove_list
+}
 
+################################
+# package install 
+################################
+
+package_install () {
 echo "Installing package list"
-  $SUDO yum --enablerepo=epel,ol7_optional_latest -y install $package_list
-
-################################
-# setup git globals
-################################
+  $SUDO yum clean all
+  $SUDO yum --enablerepo=rdolocal -y install $package_list
 
 
-################################
-# install ansible 2.0 from git
-################################
-pip install ansible==2.1.1
+}
 
-#if [[ $(rpm -qa |grep -c ansible) == 0 ]]; then
-#    cd /usr/src
-#    #for stable checkout stable branch
-#    $SUDO git clone https://github.com/ansible/ansible.git --recursive -b stable-2.1
-#    cd ansible
-#    $SUDO make rpm
-#    $SUDO yum -y install rpm-build/*noarch.rpm
-#fi
+install_ansible () {
 ################################
 # pip install 
 ################################
-echo "PIP: Installing shade"
-pip install shade
-################################
-# update pxe ansible_host= 
-################################
-#pxe_ip=$(/sbin/ifconfig|awk '/172.31.51/ {print $2}') 
-#sed -i "s/172.31.254.254/$pxe_ip/g" hosts
-#sed -i "s/pxe_boot_server:.*/pxe_boot_server: $pxe_ip/" group_vars/all
+echo "PIP: Installing ansible and shade"
+if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
+  $SUDO pip --proxy $PROXY install ansible==2.1.1
+  $SUDO pip --proxy $PROXY install shade
+else
+  $SUDO pip install ansible==2.1.1
+  $SUDO pip install shade
+fi
+}
 
+source ~/.bashrc
+if [[ -n $1 ]]; then
+    funct=$1
+    echo "$funct"
+    $funct
+else
+    echo "no cmd line args specified"
+    setup_proxy
+    setup_vnc
+    setup_bashprofile
+    setup_bashrc
+    setup_vimrc
+    setup_repo
+    package_remove
+    package_install
+    install_ansible
+fi

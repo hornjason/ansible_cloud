@@ -1,28 +1,16 @@
 ## Synopsis
 
-This repository contains the Ansible Roles for deploying a full infrastructure from Operating System provisioning to running a VM in the OpenStack Cloud.
-.
+This repository contains the Ansible Roles for deploying OpenStack on given hardware.
+
 
 ## Code Example
 
 To deploy a full Cloud infrastructure certain requirements must be met (we'll go into those details later) and the Infrastructure must be described before running the actual deployment commands. These Ansible Roles can be modulated to achieve certain tasks, in this repository we have put together three sets of roles: Prepare the environment, Deploy the Systems and Provision the Cloud. Obviously it is possible to re-order those roles to fit a different environment.
 Here are the Scripts and Roles provided for the Cloud Administrator.
 
--	Bootstrap the Install server (includes installing Ansible)
-
-{Ansible_playbooks_directory}/bootstrap.sh
-
--	Configure the Ansible environment on the Install Server
-
-{Ansible_playbooks_directory}/deploy_utils_server.yml
-
 -	Install the Operating System and OpenStack
 
 {Ansible_playbooks_directory}/deploy_infrastructure.yml
-
--	Provision the installed Cloud with external network, VXlan network, an image and two VMs
-
-{Ansible_playbooks_directory}/provision_cloud.yml
 
 ## Motivation
 
