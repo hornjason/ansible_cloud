@@ -278,3 +278,6 @@ else
     package_install
     install_ansible
 fi
+
+# END OF BOOTSTRAP.SH
+########################
