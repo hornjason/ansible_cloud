@@ -24,6 +24,8 @@ storage_interface: eno2
 tenant_interface: "{{ storage_interface }}"
 provider_interface: eno1
 dummy_physical_port_for_neutron: "{{ provider_interface }}.1"
+# PXE interface of the utils server ONLY
+pxe_interface: eno2
 
 # MTU for all openstack nodes
 mtu: 9000

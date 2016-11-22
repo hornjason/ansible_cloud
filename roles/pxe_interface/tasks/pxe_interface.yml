@@ -1,10 +1,10 @@
 ---
 - name: Bringing down the labmgmt internal (PXE) interface
-  shell: /usr/sbin/ifdown {{ management_interface }}
+  shell: /usr/sbin/ifdown {{ pxe_interface }}
   ignore_errors: true
 
-- name: Adding labmgmt internal (PXE) interface on {{ management_interface }}
-  template: src=interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ management_interface }} owner=root group=root mode=0644
+- name: Adding labmgmt internal (PXE) interface on {{ pxe_interface }}
+  template: src=interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ pxe_interface }} owner=root group=root mode=0644
 
 - name: Bringing up the labmgmt internal (PXE) interface
-  shell: /usr/sbin/ifup {{ management_interface }}
+  shell: /usr/sbin/ifup {{ pxe_interface }}
