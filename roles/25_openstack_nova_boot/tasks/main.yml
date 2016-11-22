@@ -17,7 +17,7 @@
       state: present
       name: test-vm1
       availability_zone: nova
-      image: '{{ cloud_init_image_ol66 }}'
+      image: '{{ cloud_init_image }}'
       flavor: m1.medium
       security_groups: default
       auto_ip: no
@@ -49,7 +49,7 @@
       state: present
       name: test-vm2
       availability_zone: nova
-      image: '{{ cloud_init_image_ol66 }}'
+      image: '{{ cloud_init_image }}'
       flavor: m1.medium
       #security_groups: default
       auto_ip: yes
