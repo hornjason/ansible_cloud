@@ -1,0 +1,29 @@
+# Accept the VMware End User License Agreement
+vmaccepteula
+
+# Set the root password for the DCUI and Tech Support Mode
+rootpw changeme
+
+# Install on the first local disk available on machine
+install --firstdisk --overwritevmfs
+
+# Set the network to DHCP on the first network adapter
+network --bootproto=dhcp --device={{ esxi_internal_management_interface }}
+reboot
+
+%firstboot --interpreter=busybox
+# enable & start remote ESXi Shell  (SSH)
+vim-cmd hostsvc/enable_ssh
+vim-cmd hostsvc/start_ssh
+vim-cmd hostsvc/enable_esx_shell
+vim-cmd hostsvc/start_esx_shell
+
+### NTP CONFIGURATIONS ###
+#cat > /etc/ntp.conf << __NTP_CONFIG__
+#server {{ infrastructure.vlans.int_management_vlan.ntp_server }}
+#__NTP_CONFIG__
+#/sbin/chkconfig ntpd on
+
+# Needed for configuration changes that could not be performed in esxcli
+esxcli system maintenanceMode set --enable true
+esxcli system shutdown reboot -d 60 -r "rebooting after host configuration"

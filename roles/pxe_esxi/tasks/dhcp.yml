@@ -1,0 +1,16 @@
+---
+- name: Installing dhcp server
+  local_action: yum name=dhcp state=present
+  tags:
+    - dhcp
+
+- name: Removing /var/lib/dhcpd/dhcpd.leases 
+  local_action: file path=/var/lib/dhcpd/dhcpd.leases state=absent
+  tags:
+    - dhcp
+
+- name: Recreating /var/lib/dhcpd/dhcpd.leases
+  local_action: file path=/var/lib/dhcpd/dhcpd.leases state=touch
+  tags:
+    - dhcp
+

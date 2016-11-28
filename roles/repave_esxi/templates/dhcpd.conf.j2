@@ -1,0 +1,30 @@
+#
+# DHCP Server Configuration file.
+#   see /usr/share/doc/dhcp*/dhcpd.conf.example
+#   see dhcpd.conf(5) man page
+#
+#
+# Do not edit manually TEMPLATE
+ddns-update-style interim;
+subnet {{ infrastructure.dhcp_subnets.info.base }} netmask {{ infrastructure.dhcp_subnets.info.netmask }} {
+option routers {{ infrastructure.dhcp_subnets.info.routers }};
+option subnet-mask {{ infrastructure.dhcp_subnets.info.netmask }};
+option ntp-servers {{ infrastructure.vlans.ext_management_vlan.ntp_server }};
+default-lease-time 3600;
+max-lease-time 7200;
+}
+
+{% for c,val in infrastructure.chassis.iteritems() %}
+{% for key,value in val.blades.iteritems() %}
+{% if mac[key] is defined %}
+ host {{ key }}  {
+   hardware ethernet {{ mac[key] }};
+   option host-name "{{ key }}";
+   fixed-address {{ value.blade_int_mgmt_ip }};
+   filename "esxi/pxelinux.0";
+   next-server {{ infrastructure.dhcp_subnets.info.next_server }};
+}
+{% endif %}
+{% endfor %}
+{% endfor %}
+

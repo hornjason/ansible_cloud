@@ -1,0 +1,20 @@
+#!/usr/bin/ansible-playbook
+---
+ - hosts: [pxe]
+   remote_user: root
+   gather_facts: no
+   connection: local
+   roles:
+     - { role: generate_vars, tags: vars }    
+     - { role: pxe_interface, tags: pxe_interface }
+
+ - hosts: [pxe]
+   remote_user: root
+   gather_facts: no
+   connection: local
+   roles:
+     - { role: proxy, tags: proxy }
+     - { role: prime_os, tags: prime_os }
+     - { role: pxe_esxi, tags: pxe_esxi }    
+
+  

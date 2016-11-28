@@ -1,0 +1,68 @@
+---
+- name: Loading Infra Variables
+  include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
+
+- name: Updating hostname
+  hostname: name="{{ item.key }}"
+  with_dict: "{{ infrastructure.utility_servers }}"
+
+- name: Checking for nfs-utils
+  yum: name=nfs-utils state=present
+
+- name: Setting up nfs exports dir  
+  file: path={{ esxi_nfs_staging_dir }} state=directory
+
+- name: Updating exports file with {{ esxi_nfs_staging_dir }}     
+  lineinfile: 
+    dest=/etc/exports 
+    state=present 
+    insertafter=EOF 
+    line="{{ esxi_nfs_staging_dir }}      *(rw,sync,no_root_squash,no_all_squash)"
+
+- name: Verifying all services are enabled/restarted
+  service: name={{ item }}  state=restarted enabled=yes
+  with_items:
+  - rpcbind
+  - nfs-server
+  - nfs-lock
+  - nfs-idmap
+
+- name: Creating /var/lib/images to store iso
+  file: path=/var/lib/images state=directory
+
+- name: Creating /esxi to mount iso
+  file: path=/esxi state=directory
+
+- name: Creating {{ esxi_nfs_staging_dir }}/pxelinux.cfg/ directory
+  file: path={{ esxi_nfs_staging_dir }}/pxelinux.cfg state=directory
+
+- name: Creating {{ esxi_kickstart_dir }}
+  file: path={{ esxi_kickstart_dir }} state=directory
+
+- name: Checking existence of /var/lib/images/{{ esxi_iso_name }} ISO
+  stat: path=/var/lib/images/{{ esxi_iso_name }} get_checksum=yes get_md5=no
+  register: isochk
+
+- name: Downloading iso {{ esxi_iso_name }}
+  get_url: 
+    url="{{ esxi_iso_url }}"
+    dest=/var/lib/images/
+  when: isochk.stat.exists == False
+
+- name: Mounting iso "/var/lib/images/{{ esxi_iso_name}} => {{ esxi_nfs_staging_dir }}"
+  mount: name=/esxi src=/var/lib/images/{{ esxi_iso_name }} state=mounted fstype=iso9660
+
+- name: "Copying {{ esxi_iso_name }} content to {{ esxi_nfs_staging_dir }}"
+  local_action:
+    copy src=/esxi/ dest={{ esxi_nfs_staging_dir }} force=no
+  #when: isochk.stat.exists == False
+
+- name: Copying isolinux.cfg to pxelinux.cfg directory as default boot file
+  local_action:
+    copy src={{ esxi_nfs_staging_dir }}/isolinux.cfg  dest={{ esxi_nfs_staging_dir }}/pxelinux.cfg/default
+
+- name: Templating {{ esxi_kickstart_file }} to {{ esxi_kickstart_dir }}/{{ esxi_kickstart_file }}
+  template: src=ks.cfg.j2  dest={{ esxi_kickstart_dir }}/{{ esxi_kickstart_file }}
+
+- name: Unmounting iso
+  mount: name=/esxi src=/var/lib/images/{{ iso_name }} state=unmounted fstype=iso9660

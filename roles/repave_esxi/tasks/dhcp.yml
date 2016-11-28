@@ -1,0 +1,85 @@
+---
+- name: tftpd start
+  local_action: service name=tftp state=started enabled=yes
+  run_once: true
+  tags: tftp
+
+- name: Destroying any mac directory
+  local_action: file name=/tmp/mac state=absent
+  run_once: true
+
+- name: Destroying the main mac file
+  local_action: file name={{ local_repo }}/macs state=absent
+  run_once: true
+  when:
+    - wipe
+
+- name: Creating mac directory
+  local_action: file name=/tmp/mac state=directory mode=0755
+  run_once: true
+   
+- name: template mac generation script
+  local_action: template src=netra6k_retrieve_mac.py dest={{ role_path }}/files/netra6k_retrieve_mac.py mode=0755
+  run_once: true
+  tags:
+    - dhcp
+    
+- name: get mac (N6K)
+  local_action: script {{ role_path }}/files/netra6k_retrieve_mac.py {{ infrastructure.chassis[enclosure].nems[enclosure+'n01'].nem_ilom_ip }} {{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_int_mgmt_ip }} {{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ilom_ip }} {{ enclosure+slot }}
+  #register: mac
+  with_items: "{{ inventory_hostname }}"
+  when: 
+    - wipe
+    - n6k
+  tags:
+    - dhcp
+
+- name: get mac (X5-2)
+  local_action: shell ipmitool -Ilanplus -U root -Pchangeme -H {{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ilom_ip }} sunoem cli 'show System host_primary_mac_address' | awk -F":"  --non-decimal-data 'BEGIN{ORS=""} /address =/ {intmac=(("0x"$NF)+0)+1 ; print "  {{ inventory_hostname }}_ "substr( $1, length($1) - 2, length($1) )"_"$2"_"$3"_"$4"_"$5"_" ; printf("%02x\n", intmac)}'  | tr '_' ':' >> {{ local_repo }}/macs
+  when: 
+    - wipe
+    - not n6k
+  tags:
+    - dhcp
+
+- name: Concatenate all mac files into one
+  local_action: assemble src=/tmp/mac dest={{ local_repo }}/macs
+  run_once: true
+  when:
+    - wipe
+    - n6k
+  tags:
+    - dhcp
+  
+- name: Add mac header
+  local_action: lineinfile dest={{ local_repo }}/macs insertbefore=BOF line="mac:"
+  run_once: true
+  when:
+    - wipe
+  tags:
+    - dhcp
+  
+- name: load subnet variables
+  include_vars: "{{ local_repo }}/macs"
+  run_once: true
+  when:
+    - wipe
+  tags:
+    - dhcp
+
+- name: Generate dhcpd.conf
+  local_action: template src=dhcpd.conf.j2 dest=/etc/dhcp/dhcpd.conf owner=root group=root mode=0644 #validate='/usr/sbin/dhcpd -t -cf %s'
+  run_once: true
+  when:
+    - wipe
+  tags:
+    - dhcp
+    - dhcp_templating
+
+- name: enabling / starting dhcp server
+  local_action: service name=dhcpd state=restarted enabled=yes
+  run_once: true
+  tags:
+    - dhcp
+  
+  

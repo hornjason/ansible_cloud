@@ -1,0 +1,13 @@
+#!/usr/bin/ansible-playbook
+---
+- hosts: [pxe]
+  remote_user: root
+  roles:
+    - { role: generate_vars, tags: vars }    
+
+# openstack prep
+- hosts: [esxi]
+  gather_facts: no
+  roles:
+    - { role: repave_esxi, tags: repave_esxi }
+
