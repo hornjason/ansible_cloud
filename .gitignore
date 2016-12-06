@@ -1,7 +1,10 @@
-clouds.yml
+./clouds.yml
 *.log
 *.retry
-roles/generate_vars/vars/main.yml
-roles/generate_vars/files/infra_def.py
-.ansible*
-repo/macs
+/roles/generate_vars/vars/main.yml
+/roles/generate_vars/files/infra_def.py
+/.ansible*
+/repo/macs
+/hosts
+/group_vars/all*
+/group_vars/lab*

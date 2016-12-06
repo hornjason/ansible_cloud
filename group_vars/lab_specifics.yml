@@ -1,22 +1,22 @@
 ---
 lab_specifics:
-  lab_id: 101
-  vlans: 
+  lab_id: 3603
+  vlans:
     openstack_vxlan_tenant:
-      vlan_id: 138
+      vlan_id: 16
       tagged_traffic_needed: true
       network: 172.16.0.0
       netmask: 255.255.0.0
 
     openstack_provider_vlan:
-      vlan_id: 130
-      tagged_traffic_needed: true
-      network: 10.75.165.32
-      netmask: 255.255.255.224
-      broadcast: 10.75.165.63
-      host_min: 10.75.165.44
-      host_max: 10.75.165.62
-      gateway: 10.75.165.33
+      vlan_id: 1
+      tagged_traffic_needed: false
+      network: 10.75.138.0
+      netmask: 255.255.254.0
+      broadcast: 10.75.139.255
+      host_min: 10.75.138.41
+      host_max: 10.75.138.49
+      gateway: 10.75.138.1
       ntp_server: 10.250.32.10
       name_server: 10.209.76.197
       name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
@@ -24,14 +24,14 @@ lab_specifics:
        - nem1
 
     ext_management_vlan:
-      vlan_id: 130
-      tagged_traffic_needed: true
-      network: 10.75.165.32
-      netmask: 255.255.255.224
-      broadcast: 10.75.165.63
-      host_min: 10.75.165.34
-      host_max: 10.75.165.43
-      gateway: 10.75.165.33
+      vlan_id: 1
+      tagged_traffic_needed: false
+      network: 10.75.138.0
+      netmask: 255.255.254.0
+      broadcast: 10.75.139.255
+      host_min: 10.75.138.38
+      host_max: 10.75.138.49
+      gateway: 10.75.138.1
       ntp_server: 10.250.32.10
       name_server: 10.209.76.197
       name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
@@ -39,26 +39,19 @@ lab_specifics:
        - nem0
       blades:
         # chassis onap2
-        c00b00: 10.75.165.35
-        c00b01: 10.75.165.36
-        c00b02: 10.75.165.37
-        c00b03: 10.75.165.38
-        c00b04: 10.75.165.39
-        c00b05: 10.75.165.40
-        c00b06: 10.75.165.41
-        c00b07: 10.75.165.42
-        c00b08: 10.75.165.43
+        c00b00: 10.75.138.39
+        c00b01: 10.75.138.40
       utility_servers:
-        y5-200: 10.75.165.34
+        x5-200: 10.75.138.38
 
     int_management_vlan:
-      vlan_id: 
+      vlan_id: 1 
       tagged_traffic_needed: false
       network: 172.31.0.0
       netmask: 255.255.0.0
       broadcast: 172.31.255.255
-      host_min: 172.31.0.1
-      host_max: 172.31.0.254
+      host_min: 172.31.2.1
+      host_max: 172.31.2.254
       gateway: 172.31.254.254
       ntp_server: 10.250.32.10
       name_server: 10.209.76.197
@@ -66,20 +59,13 @@ lab_specifics:
       defined:
        - nem0
       utility_servers:
-        y5-200: 172.31.254.254
+        x5-200: 172.31.254.254
       blades:
-        c00b00: 172.31.0.110
-        c00b01: 172.31.0.111
-        c00b02: 172.31.0.112
-        c00b03: 172.31.0.113
-        c00b04: 172.31.0.114
-        c00b05: 172.31.0.115
-        c00b06: 172.31.0.116
-        c00b07: 172.31.0.117
-        c00b08: 172.31.0.118
+        c00b00: 172.31.2.110
+        c00b01: 172.31.2.111
 
     ilom_vlan:
-      vlan_id:
+      vlan_id: 1
       tagged_traffic_needed: false
       network: 10.75.129.0
       netmask: 255.255.255.0
@@ -90,17 +76,10 @@ lab_specifics:
         c00n00: 172.31.2.251
         c00n01: 172.31.2.252
       blades:
-        c00b00: 10.75.129.49
-        c00b01: 10.75.129.50
-        c00b02: 10.75.129.51
-        c00b03: 10.75.129.52
-        c00b04: 10.75.129.53
-        c00b05: 10.75.129.54
-        c00b06: 10.75.129.55
-        c00b07: 10.75.129.56
-        c00b08: 10.75.129.57
+        c00b00: 10.75.129.45
+        c00b01: 10.75.129.47
       utility_servers:
-        y5-200: 10.75.129.48
+        x5-200: 10.75.129.46
 
   dhcp_subnets:
     info:
