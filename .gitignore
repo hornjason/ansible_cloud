@@ -6,5 +6,4 @@
 /.ansible*
 /repo/macs
 /hosts
-/group_vars/all*
 /group_vars/lab*
