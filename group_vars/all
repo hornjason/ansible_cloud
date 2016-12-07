@@ -18,6 +18,7 @@ wipe: "True"
   #no_proxy: localhost,us.oracle.com,10.240.121.66,10.240.121.2,10.75.183.4
 
 # interfaces
+pxe_interface: eno2
 management_interface: eno2
 ext_management_interface: eno1
 storage_interface: eno2
@@ -64,7 +65,7 @@ image_url: http://10.240.121.66/images/myOL7image.qcow2
 image_file_dir: /var/lib/openstack
 cloud_init_image: myOL7image.qcow2
 image_file_name: myOL7image.qcow2
-cloud_init_image_ol66: myOL7image.qcow2
+cloud_init_image_ol66: myOL7image
 
 #########################
 # define infrastructure

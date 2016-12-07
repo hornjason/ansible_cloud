@@ -8,6 +8,7 @@ ansible_ssh_pass='changeme'
 [pxe]
 pxe   ansible_host=172.31.254.254  wipe=false
 
+<<<<<<< HEAD
 [controller1-x42]
 c01b20 ansible_host=172.31.1.130 enclosure=c01 slot=b20
 
@@ -20,8 +21,26 @@ c00b01 ansible_host=172.31.0.111 enclosure=c00 slot=b01
 c00b02 ansible_host=172.31.0.112 enclosure=c00 slot=b02
 c00b03 ansible_host=172.31.0.113 enclosure=c00 slot=b03
 c00b04 ansible_host=172.31.0.114 enclosure=c00 slot=b04
+=======
+
+
+[controller1]
+c00b00 ansible_host=172.31.2.110 enclosure=c00 slot=b00 
+
+[controller2]
+>>>>>>> 6baecd6f6b87a7d416e20139a7b30cd84743ffba
 c00b05 ansible_host=172.31.0.115 enclosure=c00 slot=b05
+
+
+[compute1]
+c00b01 ansible_host=172.31.2.111  enclosure=c00 slot=b01
+#c00b02 ansible_host=172.31.2.112 enclosure=c00 slot=b02
+#c00b03 ansible_host=172.31.2.113 enclosure=c00 slot=b03
+#c00b04 ansible_host=172.31.2.114 enclosure=c00 slot=b04
+
+[compute2]
 c00b06 ansible_host=172.31.0.116 enclosure=c00 slot=b06
+<<<<<<< HEAD
 c00b07 ansible_host=172.31.0.117 enclosure=c00 slot=b07
 c00b08 ansible_host=172.31.0.118 enclosure=c00 slot=b08
 c00b09 ansible_host=172.31.0.119 enclosure=c00 slot=b09
@@ -77,6 +96,11 @@ c01b19 ansible_host=172.31.1.129 enclosure=c01 slot=b19
 
 [additional_compute:children]
 seagull-x32
+=======
+#c00b07 ansible_host=172.31.2.117 enclosure=c00 slot=b07
+#c00b08 ansible_host=172.31.2.118 enclosure=c00 slot=b08
+#c00b09 ansible_host=172.31.2.119 enclosure=c00 slot=b09
+>>>>>>> 6baecd6f6b87a7d416e20139a7b30cd84743ffba
 
 [controller:children]
 controller2-x42
