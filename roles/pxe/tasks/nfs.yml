@@ -45,6 +45,7 @@
   local_action:
     copy src=/mnt/ dest={{ nfs_staging_dir }} force=no
   when: isochk.stat.exists == False
+  tags: ccc
 
 - name: Copying {{ kickstart_file }} to {{ nfs_staging_dir }}/{{ kickstart_file }}/{{ kickstart_file }}
   template: src={{ kickstart_file }}  dest={{ nfs_staging_dir }}/{{ kickstart_file }}/{{ kickstart_file }}
@@ -54,6 +55,7 @@
   #copy: src={{ local_repo }}/isolinux.cfg  dest={{ nfs_staging_dir }}/isolinux/
   copy: src=isolinux.cfg  dest={{ nfs_staging_dir }}/isolinux/
   tags: ks
+  when: isochk.stat.exists == False
 
 - name: Unmounting iso
   mount: name=/mnt src=/var/lib/images/{{ iso_name }} state=unmounted fstype=iso9660

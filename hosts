@@ -1,7 +1,6 @@
 [all:vars]
 ansible_ssh_pass='changeme'
 
-
 [localhost]
 127.0.0.1 ansible_connection=local
 #ansible_python_interpreter="/usr/bin/env python"
@@ -9,10 +8,14 @@ ansible_ssh_pass='changeme'
 [pxe]
 pxe   ansible_host=172.31.254.254  wipe=false
 
-[controller1]
-c00b00 ansible_host=172.31.0.110 enclosure=c00 slot=b00 
+[controller1-x42]
+c01b20 ansible_host=172.31.1.130 enclosure=c01 slot=b20
 
-[compute1]
+[controller2-x42]
+c01b21 ansible_host=172.31.1.131 enclosure=c01 slot=b21
+
+[compute-x62]
+c00b00 ansible_host=172.31.0.110 enclosure=c00 slot=b00
 c00b01 ansible_host=172.31.0.111 enclosure=c00 slot=b01
 c00b02 ansible_host=172.31.0.112 enclosure=c00 slot=b02
 c00b03 ansible_host=172.31.0.113 enclosure=c00 slot=b03
@@ -21,9 +24,64 @@ c00b05 ansible_host=172.31.0.115 enclosure=c00 slot=b05
 c00b06 ansible_host=172.31.0.116 enclosure=c00 slot=b06
 c00b07 ansible_host=172.31.0.117 enclosure=c00 slot=b07
 c00b08 ansible_host=172.31.0.118 enclosure=c00 slot=b08
+c00b09 ansible_host=172.31.0.119 enclosure=c00 slot=b09
+c00b10 ansible_host=172.31.0.120 enclosure=c00 slot=b10
+c00b11 ansible_host=172.31.0.121 enclosure=c00 slot=b11
+c00b12 ansible_host=172.31.0.122 enclosure=c00 slot=b12
+c00b13 ansible_host=172.31.0.123 enclosure=c00 slot=b13
+c00b14 ansible_host=172.31.0.124 enclosure=c00 slot=b14
+c00b15 ansible_host=172.31.0.125 enclosure=c00 slot=b15
+c00b16 ansible_host=172.31.0.126 enclosure=c00 slot=b16
+c00b17 ansible_host=172.31.0.127 enclosure=c00 slot=b17
+c00b18 ansible_host=172.31.0.128 enclosure=c00 slot=b18
+c00b19 ansible_host=172.31.0.129 enclosure=c00 slot=b19
+c00b20 ansible_host=172.31.0.130 enclosure=c00 slot=b20
+c00b21 ansible_host=172.31.0.131 enclosure=c00 slot=b21
+c00b22 ansible_host=172.31.0.132 enclosure=c00 slot=b22
+c00b23 ansible_host=172.31.0.133 enclosure=c00 slot=b23
+c00b24 ansible_host=172.31.0.134 enclosure=c00 slot=b24
+c00b25 ansible_host=172.31.0.135 enclosure=c00 slot=b25
+c00b26 ansible_host=172.31.0.136 enclosure=c00 slot=b26
+c00b27 ansible_host=172.31.0.137 enclosure=c00 slot=b27
+c00b28 ansible_host=172.31.0.138 enclosure=c00 slot=b28
+c00b29 ansible_host=172.31.0.139 enclosure=c00 slot=b29
+c00b30 ansible_host=172.31.0.140 enclosure=c00 slot=b30
+c00b31 ansible_host=172.31.0.141 enclosure=c00 slot=b31
+#c00b32 ansible_host=172.31.0.142 enclosure=c00 slot=b32
+
+[seagull-x32]
+c01b00 ansible_host=172.31.1.110 enclosure=c01 slot=b00
+c01b01 ansible_host=172.31.1.111 enclosure=c01 slot=b01
+c01b02 ansible_host=172.31.1.112 enclosure=c01 slot=b02
+c01b03 ansible_host=172.31.1.113 enclosure=c01 slot=b03
+
+[compute-x32]
+c01b04 ansible_host=172.31.1.114 enclosure=c01 slot=b04
+c01b05 ansible_host=172.31.1.115 enclosure=c01 slot=b05
+c01b06 ansible_host=172.31.1.116 enclosure=c01 slot=b06
+c01b07 ansible_host=172.31.1.117 enclosure=c01 slot=b07
+
+[compute-x52]
+c01b08 ansible_host=172.31.1.118 enclosure=c01 slot=b08
+c01b09 ansible_host=172.31.1.119 enclosure=c01 slot=b09
+c01b10 ansible_host=172.31.1.120 enclosure=c01 slot=b10
+c01b11 ansible_host=172.31.1.121 enclosure=c01 slot=b11
+c01b12 ansible_host=172.31.1.122 enclosure=c01 slot=b12
+c01b13 ansible_host=172.31.1.123 enclosure=c01 slot=b13
+c01b14 ansible_host=172.31.1.124 enclosure=c01 slot=b14
+c01b15 ansible_host=172.31.1.125 enclosure=c01 slot=b15
+c01b16 ansible_host=172.31.1.126 enclosure=c01 slot=b16
+c01b17 ansible_host=172.31.1.127 enclosure=c01 slot=b17
+c01b18 ansible_host=172.31.1.128 enclosure=c01 slot=b18
+c01b19 ansible_host=172.31.1.129 enclosure=c01 slot=b19
+
+[additional_compute:children]
+seagull-x32
 
 [controller:children]
-controller1
+controller2-x42
 
 [compute:children]
-compute1
+compute-x52
+compute-x32
+compute-x62
