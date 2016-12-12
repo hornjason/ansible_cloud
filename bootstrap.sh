@@ -17,8 +17,13 @@ VNC_PORT="99"
 
 ####################
 # master repo that contains rdo packages
+#     $MASTER_REPO          $MASTER_REPO_URL /<openstack release>
+# ex. http://10.240.121.66/rdolocal/<openstack release>/
 ####################
 MASTER_REPO="10.240.121.66"
+MASTER_REPO_URL="rdolocal"
+#MASTER_REPO="ap-yummy"
+#MASTER_REPO_URL="found-tech"
 
 ####################
 # proxy server
@@ -44,7 +49,7 @@ gcc libffi-devel openssl-devel createrepo"
 ####################
 # packages to remove
 ####################
-package_remove_list="firewalld NetworkManager gnome-packagekit"
+package_remove_list="NetworkManager gnome-packagekit"
 
 ####################
 yum_conf="/etc/yum.conf"
@@ -68,7 +73,6 @@ if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
   fi
   export http_proxy=$proxy
   export https_proxy=$proxy
-  #printf -v no_proxy '%s,' 172.31.2.{1..255};
   export no_proxy="localhost,127.0.0.1,us.oracle.com,$MASTER_REPO"
 
 #git_proxy="git config --global http.proxy http://www-proxy.us.oracle.com:80"
@@ -86,22 +90,42 @@ $SUDO yum -y install tigervnc-server
 passwd="changeme"
 # set vncpasswd
 
-$SUDO cp /lib/systemd/system/vncserver@.service /etc/systemd/system/vncserver@.service
-$SUDO sed -i "s/\/home\/<USER>/\/$whobei/g" /etc/systemd/system/vncserver@.service
-$SUDO sed -i "s/<USER>/$whobei/g" /etc/systemd/system/vncserver@.service
-$SUDO sed -i 's/vncserver %i"/vncserver %i -geometry 1280x1024"/' /etc/systemd/system/vncserver@.service
+echo "Checking if vnc server is installed"
+if [[ $(systemctl list-units --all |grep -c "vncserver@:${VNC_PORT}.service") < 1 ]]; then
+  $SUDO cp /lib/systemd/system/vncserver@.service /etc/systemd/system/vncserver@.service
+  $SUDO sed -i "s/\/home\/<USER>/\/$whobei/g" /etc/systemd/system/vncserver@.service
+  $SUDO sed -i "s/<USER>/$whobei/g" /etc/systemd/system/vncserver@.service
+  $SUDO sed -i 's/vncserver %i"/vncserver %i -geometry 1280x1024"/' /etc/systemd/system/vncserver@.service
+  
+  $SUDO mkdir ~/.vnc
+  $SUDO chmod 600 ~/.vnc
+  $SUDO echo $passwd | vncpasswd -f > ~/.vnc/passwd
+  $SUDO chmod -R 600 ~/.vnc
+  
+  echo "VNC: enabling/starting service"
+  $SUDO systemctl daemon-reload
+  $SUDO systemctl enable vncserver@:$VNC_PORT.service
+  $SUDO systemctl start vncserver@:$VNC_PORT.service
+  echo "VNC: Done"
+fi
 
-$SUDO mkdir ~/.vnc
-$SUDO chmod 600 ~/.vnc
-$SUDO echo $passwd | vncpasswd -f > ~/.vnc/passwd
-$SUDO chmod -R 600 ~/.vnc
-
-echo "VNC: enabling/starting service"
-$SUDO systemctl daemon-reload
-$SUDO systemctl enable vncserver@:$VNC_PORT.service
-$SUDO systemctl start vncserver@:$VNC_PORT.service
-echo "VNC: Done"
-
+# Check if a firewall rule needs adding
+echo "Checking Firewall rules"
+if [[ $(iptables -L -n|grep -c 59${VNC_PORT}) < 1 ]]; then
+   # check for firewalld
+    rc=$(which firewalld &>/dev/null;echo $?)
+    if [[ $rc -eq 1 ]];then
+      echo "Installing firewalld"
+      yum -y install firewalld
+      
+      echo "Adding rules for VNC"
+      systemctl start firewall-cmd 
+      systemctl enable firewall-cmd 
+      firewall-cmd --zone=public --permanent --add-port=59${VNC_PORT}/tcp 
+      firewall-cmd --zone=public --permanent --add-port=59${VNC_PORT}/udp
+      systemctl restart firewall-cmd 
+   fi
+fi
 }
 
 setup_bashprofile () {
@@ -147,7 +171,7 @@ if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
 cat >> ~/.bashrc << EOF
 export http_proxy=$proxy
 export https_proxy=$proxy
-export no_proxy="localhost,127.0.0.1,us.oracle.com,$no_proxy,$MASTER_REPO"
+export no_proxy="localhost,127.0.0.1,us.oracle.com,$MASTER_REPO"
 EOF
 fi
 
@@ -191,8 +215,9 @@ echo "Checking for ${MASTER_REPO} in no_proxy"
 echo "Checking size of rdolocal"
   size=$(du -sm /var/lib/repos/rdolocal/${OPENSTACK_RELEASE} 2>/dev/null|awk '{print $1}')
   if [[ $size -lt 240 ]] ; then
+    echo "Cleaning up old repo && Syncing from ${MASTER_REPO}/${MASTER_REPO_URL}/${OPENSTACK_RELEASE}"
     \rm -rf /var/lib/repos/rdolocal/${OPENSTACK_RELEASE} 2>/dev/null
-    $SUDO wget  -nd -q -P /var/lib/repos/rdolocal/${OPENSTACK_RELEASE} -r --no-parent ${MASTER_REPO}/rdolocal/${OPENSTACK_RELEASE}/
+    $SUDO wget  -nd -q -P /var/lib/repos/rdolocal/${OPENSTACK_RELEASE} -r --no-parent http://${MASTER_REPO}/${MASTER_REPO_URL}/${OPENSTACK_RELEASE}/
 
 #  $SUDO cat ./packages.list | while read rpm ; do
 #          /usr/bin/yum  -y install --downloaddir=/var/lib/repos/rdolocal --downloadonly $rpm | grep Installed || \

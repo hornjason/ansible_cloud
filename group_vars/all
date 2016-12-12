@@ -3,7 +3,7 @@
 openstack_release: newton
 
 # Project
-project: bigcloud01
+project: mvl-x52
 
 # n6k chassis
 n6k: false
