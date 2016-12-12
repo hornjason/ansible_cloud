@@ -18,7 +18,6 @@ wipe: "True"
   #no_proxy: localhost,us.oracle.com,10.240.121.66,10.240.121.2,10.75.183.4
 
 # interfaces
-pxe_interface: eno2
 management_interface: eno2
 ext_management_interface: eno1
 storage_interface: eno2
@@ -30,7 +29,7 @@ dummy_physical_port_for_neutron: "{{ provider_interface }}.1"
 mtu: 9000
 
 #PXE
-pxe_interface: eno2
+pxe_interface: "{{ management_interface }}"
 nfs_staging_dir: /stage
 boot_dev: sda
 iso_name: OracleLinux-R7-U2-Server-x86_64-dvd.iso
