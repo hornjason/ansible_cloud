@@ -110,22 +110,24 @@ if [[ $(systemctl list-units --all |grep -c "vncserver@:${VNC_PORT}.service") < 
 fi
 
 # Check if a firewall rule needs adding
-echo "Checking Firewall rules"
-if [[ $(iptables -L -n|grep -c 59${VNC_PORT}) < 1 ]]; then
+#echo "Checking Firewall rules"
+#if [[ $(iptables -L -n|grep -c 59${VNC_PORT}) < 1 ]]; then
    # check for firewalld
-    rc=$(which firewalld &>/dev/null;echo $?)
-    if [[ $rc -eq 1 ]];then
-      echo "Installing firewalld"
-      yum -y install firewalld
+#    rc=$(which firewalld &>/dev/null;echo $?)
+#    if [[ $rc -eq 1 ]];then
+#      echo "Installing firewalld"
+#      yum -y install firewalld
       
-      echo "Adding rules for VNC"
-      systemctl start firewall-cmd 
-      systemctl enable firewall-cmd 
-      firewall-cmd --zone=public --permanent --add-port=59${VNC_PORT}/tcp 
-      firewall-cmd --zone=public --permanent --add-port=59${VNC_PORT}/udp
-      systemctl restart firewall-cmd 
-   fi
-fi
+#      echo "Adding rules for VNC"
+#      systemctl start firewall-cmd 
+#      systemctl enable firewall-cmd 
+#      firewall-cmd --zone=public --permanent --add-port=59${VNC_PORT}/tcp 
+#      firewall-cmd --zone=public --permanent --add-port=59${VNC_PORT}/udp
+#      systemctl restart firewall-cmd 
+#   fi
+#fi
+
+    
 }
 
 setup_bashprofile () {
