@@ -1,0 +1,37 @@
+# 21_openstack_keystone
+---
+- name: Creating project
+  os_project:
+    cloud: cloud-admin
+    state: '{{ state }}'
+    name: '{{ item.value.project }}'
+    description: '{{ item.value.description }}'
+    enabled: True
+  with_dict: "{{ tenants }}"
+
+- name: Creating user / assigning project
+  os_user:
+    cloud: cloud-admin
+    state: '{{ state }}'
+    name: '{{ item.key }}'
+    password: '{{ item.value.pass }}'
+    default_project: '{{ item.value.project }}'
+    enabled: True
+  with_dict: "{{ tenants }}"
+    
+- name: Adding admin role to user 
+  shell: "source {{ openstack_dir }}/{{ keystonerc }}_admin && openstack role add --project {{ item.value.project }} --user {{ item.key }} admin"
+  ignore_errors: True
+  register: command_result
+  #failed_when: "'FAILED' in command_result.stderr" 
+  with_dict: "{{ tenants }}" 
+  when: state == "present"
+
+- debug: var=command_result.results.stderr
+
+- name: setting quotas
+  shell: "source {{ openstack_dir }}/{{ keystonerc }}_admin && openstack quota set {{ quotas }} {{ item.key }}"
+  with_dict: "{{ tenants }}"
+  when: state == "present"
+  tags:
+    - quotas

@@ -3,7 +3,7 @@
 openstack_release: newton
 
 # Project
-project: bigcloud01
+project: mvl-x52
 
 # n6k chassis
 n6k: false
@@ -18,7 +18,6 @@ wipe: "True"
   #no_proxy: localhost,us.oracle.com,10.240.121.66,10.240.121.2,10.75.183.4
 
 # interfaces
-pxe_interface: eno2
 management_interface: eno2
 ext_management_interface: eno1
 storage_interface: eno2
@@ -27,10 +26,10 @@ provider_interface: eno1
 dummy_physical_port_for_neutron: "{{ provider_interface }}.1"
 
 # MTU for all openstack nodes
-mtu: 9000
+mtu: 1500
 
 #PXE
-pxe_interface: eno2
+pxe_interface: "{{ management_interface }}"
 nfs_staging_dir: /stage
 boot_dev: sda
 iso_name: OracleLinux-R7-U2-Server-x86_64-dvd.iso
@@ -45,7 +44,7 @@ resolv_pause: 5
 ilom_pause: 10
 reboot_wait_time: 5
 after_epel_pause: 5
-repave_wait_time: 30
+repave_wait_time: 15
 
 
 public_yum_ol7_repo_url: "http://public-yum.oracle.com/public-yum-ol7.repo"

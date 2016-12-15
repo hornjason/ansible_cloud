@@ -1,0 +1,18 @@
+#!/usr/bin/ansible-playbook
+---
+- hosts: [controller]
+  connection: local
+  gather_facts: no
+  vars:
+    keystonerc: "keystonerc_cloud"
+    openstack_dir: "/var/lib/openstack"
+    tenants:
+      smog:
+        pass: changeme
+        project: smog
+        description: "SMOG Project/User"
+  roles:
+    - { role: generate_cloud_files, tags: generate_cloud_files }
+    - { role: keystone, tags: keystone }
+
+
