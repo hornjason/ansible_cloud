@@ -15,6 +15,10 @@
    roles:
      - { role: proxy, tags: proxy }
      - { role: prime_os, tags: prime_os }
-     - { role: pxe_esxi, tags: pxe_esxi }    
 
-  
+ - hosts: [esxi]
+   remote_user: root
+   gather_facts: no
+   connection: local
+   roles:
+     - { role: pxe_esxi, tags: pxe_esxi }    
