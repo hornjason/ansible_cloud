@@ -6,9 +6,3 @@
  - include: sshkey.yml
 
  - include: packages.yml
-
- - include: ntp.yml
-
- - include: hosts.yml
-
- - include: dns.yml
