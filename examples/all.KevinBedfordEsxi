@@ -1,0 +1,83 @@
+---
+wipe: "True"
+
+# Project
+project: vmware01
+
+# n6k chassis
+n6k: false
+
+# interfaces
+management_interface: ens3f1
+ext_management_interface: ens3f0
+storage_interface: ens3f1
+tenant_interface: "{{ storage_interface }}"
+provider_interface: ens3f0
+dummy_physical_port_for_neutron: "{{ provider_interface }}.1"
+# PXE interface of the utils server ONLY
+pxe_interface: eth3
+
+mtu: 9000
+
+#PXE
+#pxe_boot_server: 
+nfs_staging_dir: /stage
+boot_dev: sda
+iso_name: OracleLinux-R7-U2-Server-x86_64-dvd.iso
+iso_url: http://kernel.us.oracle.com/osinstall/OracleLinux/OL7/u2/x86_64/{{ iso_name }}
+kickstart_file: ol7.ks
+
+local_repo: "{{ playbook_dir }}/repo"
+remote_repo: /root/scripts
+
+# VMware ESXi Specifics
+esxi_external_management_interface: vmnic0
+esxi_internal_management_interface: vmnic1
+esxi_nfs_staging_dir: /var/lib/tftpboot/esxi
+#esxi_iso_name: VMware-VMvisor-Installer-6.0.0.update02-3620759.x86_64.iso
+esxi_iso_name: ESXi-5.x-Custom.iso
+#esxi_iso_name: VMware-ESXi-5.5U3-RollupISO1.iso
+esxi_iso_url: http://10.138.221.29/images/{{ esxi_iso_name }}
+esxi_kickstart_dir: /var/www/html/esxi_ksFiles
+esxi_kickstart_file: ks.cfg
+
+# define infrastructure
+# Number of chassis
+num_chassis: 1
+# Number of utility servers
+num_utility_servers: 1
+# Number of Storage Head Pairs
+num_zfs: 0
+# Number of es2 72 Pairs (Storage/Tenant)
+num_es2_72: 1
+
+# Pause duration
+resolv_pause: 10
+ilom_pause: 10
+reboot_wait_time: 5
+after_epel_pause: 10
+repave_wait_time: 45
+
+# Environment preparation
+#proxy_env:
+#  http_proxy: http://www-proxy.us.oracle.com:80
+
+public_yum_ol7_repo_url: "http://public-yum.oracle.com/public-yum-ol7.repo"
+# Tested with liberty && mitaka
+openstack_release: newton
+rdo_release_rpm: "https://repos.fedorapeople.org/repos/openstack/openstack-{{ openstack_release }}/rdo-release-{{ openstack_release }}-5.noarch.rpm"
+epel_rpm: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+epel_baseurl: "http://ftp.linux.ncsu.edu/pub/epel/7/$basearch"
+
+packstack_dir: "/var/lib/packstack"
+packstack_answer_file: "{{ packstack_dir }}/answers.txt"
+packstack_output_file: "{{ packstack_dir }}/packstack.out"
+
+# Glance
+#http://10.240.121.66/images/baseOEL6imageVM.qcow2
+#image_url: http://10.240.199.2/image/myOL6image.qcow2
+#image_url: http://10.133.96.27/image/myOL6image.qcow2
+image_url: http://10.138.221.29/images/myOL7image.qcow2
+image_file_dir: /var/lib/openstack
+image_file_name: myOL7image.qcow2
+cloud_init_image: testVMimage

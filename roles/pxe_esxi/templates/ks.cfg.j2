@@ -5,10 +5,14 @@ vmaccepteula
 rootpw changeme
 
 # Install on the first local disk available on machine
-install --firstdisk --overwritevmfs
+#clearpart --firstdisk --overwritevmfs
+#install --firstdisk=MR9361-8i,naa,remote --overwritevmfs
+install --firstdisk=remote --overwritevmfs
 
 # Set the network to DHCP on the first network adapter
-network --bootproto=dhcp --device={{ esxi_internal_management_interface }}
+#network --bootproto=dhcp --device={{ esxi_internal_management_interface }}
+# Set the network to STATIC on the second network adapter
+network --bootproto=static --device={{ esxi_external_management_interface }} --ip={{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ext_mgmt_ip }} --netmask={{ infrastructure.vlans.ext_management_vlan.netmask }} --gateway={{ infrastructure.vlans.ext_management_vlan.gateway }} --nameserver={{ infrastructure.vlans.ext_management_vlan.name_server }} --hostname={{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_hostname }}
 reboot
 
 %firstboot --interpreter=busybox
@@ -19,10 +23,10 @@ vim-cmd hostsvc/enable_esx_shell
 vim-cmd hostsvc/start_esx_shell
 
 ### NTP CONFIGURATIONS ###
-#cat > /etc/ntp.conf << __NTP_CONFIG__
-#server {{ infrastructure.vlans.int_management_vlan.ntp_server }}
-#__NTP_CONFIG__
-#/sbin/chkconfig ntpd on
+cat > /etc/ntp.conf << __NTP_CONFIG__
+server {{ infrastructure.vlans.int_management_vlan.ntp_server }}
+__NTP_CONFIG__
+/sbin/chkconfig ntpd on
 
 # Needed for configuration changes that could not be performed in esxcli
 esxcli system maintenanceMode set --enable true
