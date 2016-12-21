@@ -1,0 +1,7 @@
+#!/usr/bin/ansible-playbook
+---
+- hosts: [controller]
+  connection: local
+  gather_facts: no
+  roles:
+    - { role: debug_cloud, tags: debug_cloud }

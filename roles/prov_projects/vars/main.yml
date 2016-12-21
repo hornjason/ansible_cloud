@@ -1,0 +1,10 @@
+state: present
+#quotas: "--server-group-members -1 
+#--instances -1 
+#--cores -1 
+#--ram -1 
+#--networks -1
+#--subnets -1
+#--ports -1
+#--floating-ips -1"
+

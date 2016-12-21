@@ -1,0 +1,10 @@
+#!/usr/bin/ansible-playbook
+---
+- name: Deleting {{ item.name }} from Glance
+  os_image:
+    cloud: cloud-admin
+    state: absent
+    name: "{{ item.name }}"
+  tags:
+    - remove_image
+  with_items: "{{ images }}"

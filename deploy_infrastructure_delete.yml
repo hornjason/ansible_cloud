@@ -1,0 +1,24 @@
+#!/usr/bin/ansible-playbook
+---
+- hosts: [controller,compute]
+  roles:
+     - { role: unhack_chkconfig, tags: unhack_chkconfig }
+     - { role: ovs_interfaces, tags: ovs_interfaces }
+
+# openstack post-installation and customization
+- hosts: [compute, controller]
+  roles:
+    - { role: post_packstack_nova, tags: post_packstack_nova }
+
+- hosts: [compute]
+  roles:
+    - { role: post_packstack_neutron_compute, tags: post_packstack_neutron_compute }
+
+- hosts: [controller]
+  roles:
+    - { role: post_packstack_neutron_controller, tags: post_packstack_neutron_controller }
+    - { role: post_packstack_mariadb_tuning, tags: post_packstack_mariadb_tuning }
+
+- hosts: [compute, controller]
+  roles:
+    - { role: post_packstack_all, tags: post_packstack_all }

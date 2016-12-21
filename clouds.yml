@@ -1,0 +1,19 @@
+clouds:
+  cloud-admin:
+    auth:
+      auth_url: http://10.75.138.39:5000/v2.0/
+      username: admin
+      password: changeme
+      project_name: admin
+  cloud-smog_project_1:
+    auth:
+      auth_url: http://10.75.138.39:5000/v2.0/
+      username: smog_jb
+      password: changeme
+      project_name: smog_project_1 
+  cloud-smog_project_2:
+    auth:
+      auth_url: http://10.75.138.39:5000/v2.0/
+      username: smog_jason
+      password: changeme
+      project_name: smog_project_2 

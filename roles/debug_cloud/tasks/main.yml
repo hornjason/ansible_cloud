@@ -1,0 +1,49 @@
+---
+- name: load subnet variables
+  include_vars: "{{ playbook_dir }}/group_vars/lab_specifics.yml"
+  run_once: true
+  tags: tt
+
+- name: Printing images
+  run_once: true
+  debug: msg="Image {{ item.key }} has source {{ item.value.source }} and file_dir {{ item.value.file_dir }}"
+  with_dict: "{{ images }}"
+
+- name: Printing flavors
+  run_once: true
+  debug: msg="Flavor {{ item.key }} has is_public {{ item.value.is_public }} and RAM {{ item.value.ram }}"
+  with_dict: "{{ flavors }}"
+
+- name: Printing host aggregates
+  run_once: true
+  debug: msg="host aggregate {{ item.key }} has the following hosts {{ item.value.hosts }} and the properties {{ item.value.properties }}"
+  with_dict: "{{ host_aggregates }}"
+
+- name: Printing server groups
+  run_once: true
+  debug: msg="server group {{ item.key }} has the following policy {{ item.value.policy }}"
+  with_dict: "{{ server_groups }}"
+
+- name: Printing ADMIN networks and subnets
+  run_once: true
+  debug: msg="network {{ item.0.name }} its provider_physical_network is {{ item.0.provider_physical_network }} its subnets are {{ item.1.name }} and the gateway_ip is {{ item.1.gateway_ip }} and dns nameserver {{ item.1.dns_nameserver }}"
+  with_subelements:
+    - "{{ networks }}"
+    - subnets
+  tags: tt
+
+- name: Printing tenants and their networks
+  run_once: true
+  debug: msg="user {{ item.0.name }} project {{ item.0.user_name }} and networks {{ item.1.name }} and shared {{ item.1.shared }} and subnet is {{ item.1.subnets.name }} with gateway_ip {{ item.1.subnets.gateway_ip }} and dns_nameservers {{ item.1.subnets.dns_nameserver }}"
+  with_subelements:
+    - "{{ projects }}"
+    - networks
+
+- name: Printing tenants and their routers
+  run_once: true
+  debug: msg="user {{ item.0.name }} project {{ item.0.user_name }} and routers {{ item.1.name }} and 1st interface {{ item.1.network }} and nterface{{ item.1.interfaces }}"
+  with_subelements:
+    - "{{ projects }}"
+    - routers
+
+
