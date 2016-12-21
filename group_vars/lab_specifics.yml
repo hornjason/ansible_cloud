@@ -151,28 +151,28 @@ flavors:
     is_public: true
 
 host_aggregates:
-    host_agg_x62:
-      hosts:
-       - c00b00
-       - c00b01
-       - c00b02
-       - c00b03
-       - c00b04
-      properties:
-       - key1: value1
-       - key2: value2
-       - key3: value3
-    host_agg_x52:
-      hosts:
-       - c01b08
-       - c01b09
-       - c01b10
-       - c01b11
-       - c01b12
-      properties:
-       - key1: value1
-       - key2: value2
-       - key3: value3
+  - name: host_agg_x62
+    hosts:
+     - c00b00
+     - c00b01
+     - c00b02
+     - c00b03
+     - c00b04
+    properties:
+     - key1: value1
+     - key2: value2
+     - key3: value3
+  - name: host_agg_x52
+    hosts:
+     - c01b08
+     - c01b09
+     - c01b10
+     - c01b11
+     - c01b12
+    properties:
+     - key1: value1
+     - key2: value2
+     - key3: value3
 
 server_groups:
   nosa_1:
@@ -185,32 +185,30 @@ networks:
     provider_network_type: flat
     provider_physical_network: physnet1        
     provider_segmentation_id: None
-    shared: true
-    external: true
-    router: external
+    shared: yes
+    external: yes
     subnets:
       - name: ext-subnet
-        gateway_ip: 10.75.183.1
-        allocation_pool_start: 10.75.183.65
-        allocation_pool_end: 10.75.183.126
+        gateway_ip: 10.75.138.1
+        allocation_pool_start: 10.75.138.41
+        allocation_pool_end: 10.75.138.45
         enable_dhcp: False
-        cidr: 10.75.183.0/25
-        dns_nameserver: 10.250.32.10
+        cidr: 10.75.138.0/23
+        dns_nameserver: 10.209.76.197
   - name: ext-net2
-    provider_network_type: flat
-    provider_physical_network: physnet2
-    provider_segmentation_id: None
-    shared: true
-    external: true
-    router: external
+    provider_network_type: vlan
+    provider_physical_network: physnet1
+    provider_segmentation_id: 200
+    shared: yes
+    external: yes
     subnets:
       - name: ext-subnet2
-        gateway_ip: 10.75.199.1
-        allocation_pool_start: 10.75.199.65
-        allocation_pool_end: 10.75.199.126
+        gateway_ip: 200.200.200.1
+        allocation_pool_start: 200.200.200.100
+        allocation_pool_end: 200.200.200.110
         enable_dhcp: False
-        cidr: 10.75.199.0/25
-        dns_nameserver: 10.250.32.10
+        cidr: 200.200.200.0/24
+        dns_nameserver: 20.20.20.20
 
 projects:
   - name: smog_project_1

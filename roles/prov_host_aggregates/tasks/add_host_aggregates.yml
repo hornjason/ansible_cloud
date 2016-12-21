@@ -1,0 +1,12 @@
+---
+- name: Creating Host Aggreggates
+  os_nova_flavor:
+    cloud: cloud-admin
+    state: '{{ state }}'
+    name: '{{ item.name }}'
+    ram: '{{ item.ram }}'
+    disk: '{{ item.disk }}'
+    ephemeral: '{{ item.ephemeral }}'
+    vcpus: '{{ item.vcpus }}'
+    is_public: '{{ item.is_public }}'
+  with_items: "{{ flavors }}"

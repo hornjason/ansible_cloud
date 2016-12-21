@@ -3,7 +3,7 @@
   include_vars: "{{ playbook_dir }}/group_vars/lab_specifics.yml"
   run_once: true
 
-- include: nfs_import_image.yml
+- include: add_images.yml
   when:
     - state == 'present'
   tags: 
