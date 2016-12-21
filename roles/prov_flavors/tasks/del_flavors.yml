@@ -1,0 +1,7 @@
+---
+- name: Deleting flavors
+  os_nova_flavor:
+    cloud: cloud-admin
+    state: '{{ state }}'
+    name: '{{ item.name }}'
+  with_items: "{{ flavors }}"

@@ -137,13 +137,13 @@ images:
     disk_format: qcow2
 
 flavors:
-  dsr_soam_flavor:
+  - name: dsr_soam_flavor
     ram: 6000
     disk: 60
     ephemeral: 0
     vcpus: 4
     is_public: true
-  m1_super_large_flavor:
+  - name: m1_super_large_flavor
     ram: 48000
     disk: 100
     ephemeral: 0
