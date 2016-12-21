@@ -5,5 +5,5 @@
 /roles/generate_vars/files/infra_def.py
 /.ansible*
 /repo/macs
-/hosts
-/group_vars/lab*
+#/hosts
+#/group_vars/lab*
