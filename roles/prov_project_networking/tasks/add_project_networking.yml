@@ -1,0 +1,70 @@
+---
+## VXLAN based project networks / subnets
+
+- name: Registering tenant IDs
+  shell: "source /var/lib/openstack/keystonerc_cloud_admin && openstack project list -f value -c ID -c Name | grep {{ item.name }} | cut -f1 -d' '"
+  register: reg
+  with_items: "{{ projects }}"
+
+- debug: var=item.stdout
+  with_items: reg.results
+
+- pause:
+
+- name: Creating VXLAN based project networks
+  os_network:
+    #cloud: "cloud-{{ item.0.name }}"
+    cloud: cloud-admin
+    state: "{{ state }}"
+    name: "{{ item.1.name }}"
+    provider_network_type: "{{ item.1.provider_network_type }}"
+    shared: true
+    #project: "{{ item.1.name }}"
+    project: 1647935eca884238987e325f2aa7cb54
+  when: item.1.provider_network_type == "vxlan"
+  with_together:
+    - 
+
+- name: Creating VXLAN based project networks
+  os_network:
+    #cloud: "cloud-{{ item.0.name }}"
+    cloud: cloud-admin
+    state: "{{ state }}"
+    name: "{{ item.1.name }}"
+    provider_network_type: "{{ item.1.provider_network_type }}"
+    shared: true
+    #project: "{{ item.1.name }}"
+    project: 1647935eca884238987e325f2aa7cb54
+  when: item.1.provider_network_type == "vxlan"
+  with_subelements:
+    - "{{ projects }}"
+    - networks
+
+- pause:
+
+- name: Creating VXLAN based project subnets
+  os_subnet:
+    cloud: "cloud-{{ item.0.name }}"
+    state: "{{ state }}"
+    name: "{{ item.1.subnet.name }}"
+    gateway_ip: "{{ item.1.subnet.gateway_ip }}"
+    allocation_pool_start: "{{ item.1.subnet.allocation_pool_start }}"
+    allocation_pool_end: "{{ item.1.subnet.allocation_pool_end }}"
+    enable_dhcp: "{{ item.1.subnet.enable_dhcp }}"
+    cidr: "{{ item.1.subnet.cidr }}"
+    network_name: "{{ item.1.name }}"
+  when: item.1.provider_network_type == "vxlan"
+  with_subelements:
+    - "{{ projects }}"
+    - networks
+
+- name: Creating project routers
+  os_router:
+    cloud: "cloud-{{ item.0.name }}"
+    state: "{{ state }}"
+    name: "router_{{ item.1.network }}_{{ item.1.interfaces }}"
+    interfaces: "{{ item.1.interfaces }}"
+    network: "{{ item.1.network }}"
+  with_subelements:
+    - "{{ projects }}"
+    - routers

@@ -14,5 +14,5 @@
     #- { role: prov_host_aggregates, tags: prov_host_aggregates }
     #- { role: prov_server_groups, tags: prov_server_groups }
     - { role: prov_admin_networking, tags: prov_admin_networking }
-    #- { role: prov_project_networking, tags: prov_project_networking }
+    - { role: prov_project_networking, tags: prov_project_networking }
     #- { role: debug_cloud, tags: debug_cloud }

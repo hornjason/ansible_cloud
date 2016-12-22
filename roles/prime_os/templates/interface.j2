@@ -1,0 +1,6 @@
+DEVICE={{ management_interface }}
+BOOTPROTO=static
+ONBOOT=yes
+IPADDR={{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_int_mgmt_ip }}
+NETMASK={{ infrastructure.vlans.int_management_vlan.netmask }}
+MTU={{ mtu }}
