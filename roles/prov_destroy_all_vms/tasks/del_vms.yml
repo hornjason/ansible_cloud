@@ -1,0 +1,4 @@
+---
+- name: Deleting vms
+  shell: source {{ openstack_dir }}/keystonerc_cloud_admin && /bin/openstack server list -f value -c ID | xargs -l openstack server delete
+  ignore_errors: true

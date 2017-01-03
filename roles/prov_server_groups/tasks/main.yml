@@ -3,8 +3,8 @@
   include_vars: "{{ playbook_dir }}/group_vars/lab_specifics.yml"
   run_once: true
 
-- include: add_images.yml
+- include: add_server_groups.yml
   when: state == 'present'
 
-- include: del_images.yml
+- include: del_server_groups.yml
   when: state == 'absent'

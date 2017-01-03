@@ -1,0 +1,38 @@
+---
+- name: load subnet variables
+  include_vars: "{{ playbook_dir }}/group_vars/lab_specifics.yml"
+  run_once: true
+
+- name: Creating project
+  os_project:
+    cloud: cloud-admin
+    state: '{{ state }}'
+    name: '{{ item.name }}'
+    description: '{{ item.name }}'
+    enabled: True
+  with_items: "{{ projects }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Creating user / assigning project
+  os_user:
+    cloud: cloud-admin
+    state: '{{ state }}'
+    name: '{{ item.user_name }}'
+    password: '{{ item.user_pass }}'
+    default_project: '{{ item.name }}'
+    enabled: True
+  #with_dict: "{{ tenants }}"
+  with_items: "{{ projects }}"
+  register: user_result
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Setting quotas
+  shell: "source {{ openstack_dir }}/keystonerc_cloud_admin && openstack quota set {{ item.quotas }} {{ item.name }}"
+  with_items: "{{ projects }}"
+  when: state == "present" and user_result|success
+  register: quotas_result
+  changed_when: 'quotas_result.rc != 0'
+  loop_control:
+    label: "{{ item.name }}"

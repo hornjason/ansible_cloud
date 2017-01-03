@@ -10,3 +10,12 @@
     vcpus: '{{ item.vcpus }}'
     is_public: '{{ item.is_public }}'
   with_items: "{{ flavors }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Adding metadata to flavors
+  shell: "source {{ openstack_dir }}/keystonerc_cloud_admin && /bin/openstack flavor set {{ item.properties }} {{ item.name }}"
+  with_items:
+    - "{{ flavors }}"
+  loop_control:
+    label: "{{ item.name }}"

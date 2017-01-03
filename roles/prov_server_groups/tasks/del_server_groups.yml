@@ -1,9 +1,9 @@
 ---
-- name: Deleting flavors
-  os_nova_flavor:
+- name: Deleting nova server groups
+  os_server_group:
     cloud: cloud-admin
     state: '{{ state }}'
     name: '{{ item.name }}'
-  with_items: "{{ flavors }}"
+  with_items: "{{ server_groups }}"
   loop_control:
     label: "{{ item.name }}"

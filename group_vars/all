@@ -54,6 +54,9 @@ public_yum_ol7_repo_url: "http://public-yum.oracle.com/public-yum-ol7.repo"
 #epel_rpm: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
 #epel_baseurl: "http://ftp.linux.ncsu.edu/pub/epel/7/$basearch"
 
+# Openstack
+openstack_dir: "/var/lib/openstack"
+
 # Packstack 
 packstack_dir: "/var/lib/packstack"
 packstack_answer_file: "{{ packstack_dir }}/answers.txt"

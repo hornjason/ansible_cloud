@@ -285,6 +285,7 @@ if [[ $ENABLE_PROXY =~ ^[tT] ]]; then
 else
   $SUDO pip install ansible==2.1.1 || exit
   $SUDO pip install shade==1.11.1 || exit
+  $SUDO pip install ansible==2.2.0.0 || exit
 fi
 }
 

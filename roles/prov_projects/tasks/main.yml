@@ -3,38 +3,8 @@
   include_vars: "{{ playbook_dir }}/group_vars/lab_specifics.yml"
   run_once: true
 
-- name: Creating project
-  os_project:
-    cloud: cloud-admin
-    state: '{{ state }}'
-    name: '{{ item.name }}'
-    description: '{{ item.name }}'
-    enabled: True
-  with_items: "{{ projects }}"
+- include: add_projects.yml
+  when: state == 'present'
 
-- name: Creating user / assigning project
-  os_user:
-    cloud: cloud-admin
-    state: '{{ state }}'
-    name: '{{ item.user_name }}'
-    password: '{{ item.user_pass }}'
-    default_project: '{{ item.name }}'
-    enabled: True
-  #with_dict: "{{ tenants }}"
-  with_items: "{{ projects }}"
-  register: user_result
-
-#- name: Adding admin role to user 
-#  shell: "source {{ openstack_dir }}/{{ keystonerc }}_admin && openstack role add --project {{ item.value.project }} --user {{ item.key }} admin"
-#  ignore_errors: True
-#  register: command_result
-#  #failed_when: "'FAILED' in command_result.stderr" 
-#  with_dict: "{{ tenants }}" 
-#  when: state == "present"
-
-- name: Setting quotas
-  shell: "source {{ openstack_dir }}/keystonerc_cloud_admin && openstack quota set {{ item.quotas }} {{ item.name }}"
-  with_items: "{{ projects }}"
-  when: state == "present"
-  register: quotas_result
-  changed_when: 'quotas_result.rc != 0'
+- include: del_projects.yml
+  when: state == 'absent'

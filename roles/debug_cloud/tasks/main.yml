@@ -30,14 +30,14 @@
   with_subelements:
     - "{{ networks }}"
     - subnets
-  tags: tt
 
 - name: Printing tenants and their networks
   run_once: true
-  debug: msg="user {{ item.0.name }} project {{ item.0.user_name }} and networks {{ item.1.name }} and shared {{ item.1.shared }} and subnet is {{ item.1.subnets.name }} with gateway_ip {{ item.1.subnets.gateway_ip }} and dns_nameservers {{ item.1.subnets.dns_nameserver }}"
+  debug: msg="user {{ item.0.name }} project {{ item.0.user_name }} and networks {{ item.1.name }} and subnet is {{ item.1.subnets.name }} with gateway_ip {{ item.1.subnets.gateway_ip }} and dns_nameservers {{ item.1.subnets.dns_nameserver }}"
   with_subelements:
     - "{{ projects }}"
     - networks
+  tags: tt
 
 - name: Printing tenants and their routers
   run_once: true

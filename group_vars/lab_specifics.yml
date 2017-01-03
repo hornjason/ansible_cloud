@@ -143,39 +143,35 @@ flavors:
     ephemeral: 0
     vcpus: 4
     is_public: true
+    properties: "--property aggregate_instance_extra_specs:soam=true"
   - name: m1_super_large_flavor
     ram: 48000
     disk: 100
     ephemeral: 0
     vcpus: 32
     is_public: true
+    properties: "--property key1=value1 --property key2=value2 --property key3=value3"
 
 host_aggregates:
   - name: host_agg_x62
+    zone: soam
+    properties: "--property soam=true"
     hosts:
-     - c00b00
-     - c00b01
-     - c00b02
-     - c00b03
-     - c00b04
-    properties:
-     - key1: value1
-     - key2: value2
-     - key3: value3
+     - name: c00b01
   - name: host_agg_x52
+    zone: noam
+    properties: "--property key1=value1 --property key2=value2 --property key3=value3"
     hosts:
-     - c01b08
-     - c01b09
-     - c01b10
-     - c01b11
-     - c01b12
-    properties:
-     - key1: value1
-     - key2: value2
-     - key3: value3
+     - name: c00b01
 
 server_groups:
-  - name: nosa_1
+  - name: noa
+    policy: anti-affinity
+  - name: nob
+    policy: anti-affinity
+  - name: soa
+    policy: anti-affinity
+  - name: sob
     policy: anti-affinity
   - name: samehost
     policy: affinity
@@ -220,6 +216,7 @@ projects:
         provider_network_type: vxlan
         subnets:
             name: xmi-1-subnet
+            network_name: xmi-1
             gateway_ip: 192.168.1.1
             allocation_pool_start: 192.168.1.2
             allocation_pool_end: 192.168.1.254
@@ -230,6 +227,7 @@ projects:
         provider_network_type: vxlan
         subnets:
             name: xmi-2-subnet
+            network_name: xmi-2
             gateway_ip: 192.168.2.1
             allocation_pool_start: 192.168.2.2
             allocation_pool_end: 192.168.2.254
@@ -238,7 +236,7 @@ projects:
             cidr: 192.168.2.0/24
     routers:
       - network: ext-net
-        interfaces: xm-1-subnet
+        interfaces: xmi-1-subnet
       - network: ext-net2
         interfaces: xmi-2-subnet
 
@@ -251,6 +249,7 @@ projects:
         provider_network_type: vxlan
         subnets:
             name: xmi-1-subnet
+            network_name: xmi-1
             gateway_ip: 192.168.1.1
             allocation_pool_start: 192.168.1.2
             allocation_pool_end: 192.168.1.254
@@ -261,6 +260,7 @@ projects:
         provider_network_type: vxlan
         subnets:
             name: xmi-2-subnet
+            network_name: xmi-2
             gateway_ip: 192.168.2.1
             allocation_pool_start: 192.168.2.2
             allocation_pool_end: 192.168.2.254
@@ -269,6 +269,6 @@ projects:
             cidr: 192.168.2.0/24
     routers:
       - network: ext-net2
-        interfaces: xm-1-subnet
+        interfaces: xmi-1-subnet
       - network: ext-net2
         interfaces: xmi-2-subnet

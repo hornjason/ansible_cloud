@@ -5,6 +5,8 @@
     - import
   with_items: "{{ images }}"
   when: item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: Ensuring rpcbind is running
   service: name=rpcbind state=started enabled=yes
@@ -12,6 +14,8 @@
     - import
   with_items: "{{ images }}"
   when: item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: "Ensuring {{ item.nfs_mount_point }} directory exists"
   file: path={{ item.nfs_mount_point }} state=directory
@@ -19,6 +23,8 @@
     - import
   with_items: "{{ images }}"
   when: item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: Mounting {{ item.source }} --> {{ nfs_mount_point }}
   mount: name={{ item.nfs_mount_point }} src={{ item.source }} fstype=nfs opts="rw,sync,nfsvers=3" state=mounted
@@ -26,50 +32,16 @@
     - import
   with_items: "{{ images }}"
   when: item.protocol == "nfs"
-
-#- name: Determining application image location
-#  shell: echo "{{ item.name }}" | sed -n -e 's/^\([[:alpha:]].*\)-.*$/\1/p'
-#  register: app_result
-#  tags:
-#    - import
-#  with_items: "{{ images }}"
-#  when: item.protocol == "nfs"
-#
-#- debug: var=item.stdout
-#  with_items: "{{ app_result.results }}"
-#  when: item.item.protocol == "nfs"
-#
-#- name: Set facts for app to anything
-#  set_fact: app=item.stdout
-#  when: item.item.protocol == "nfs"
-#  with_items: "{{ app_result.results }}"
-#
-#- name: Set facts for app to IDIH
-#  set_fact: app='IDIH'
-#  when:
-#    - 'item.stdout == "oracle" or item.stdout == "mediation" or item.stdout == "apps"'
-#    #- 'app_result.stdout == "oracle" or app_result.stdout == "mediation" or app_result.stdout == "apps"'
-#    - item.item.protocol == "nfs"
-#  with_items: "{{ app_result.results }}"
-#
-#- name: Determining application release
-#  shell: echo "{{ item.name }}" | sed -n -e 's/^[[:alpha:]].*-\([[:digit:]]\.[[:digit:]]\).*$/\1/p'
-#  register: app_release_result
-#  tags:
-#    - import
-#  with_items: "{{ images }}"
-#  when: item.protocol == "nfs"
-#
-#- set_fact: app_release={{ app_release_result.stdout }}
-#  tags:
-#    - import
-#  when: item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: Checking existence of directory "{{ item.image_dir }}/{{ item.application }}/{{ item.application_release }}"
   file: path={{ item.image_dir }}/{{ item.application }}/{{ item.application_release }} mode=0755 state=directory
   tags:
     - import
   with_items: "{{ images }}"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: Checking existence of the file "{{ item.image_dir }}/{{ item.application }}/{{ item.application_release }}/{{ item.name }}"
   stat: path={{ item.image_dir }}/{{ item.application }}/{{ item.application_release }}/{{ item.name }}
@@ -78,6 +50,8 @@
     - import
   with_items: "{{ images }}"
   when: item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: Copying "{{ item.name }}" to "{{ item.image_dir }}/{{ item.application }}/{{ item.application_release }}/"
   copy:
@@ -91,6 +65,8 @@
   when:
     #- ova.stat.isreg != True
     - item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: Unmounting {{ item.source }} --> {{ nfs_mount_point }}
   run_once: true
@@ -99,6 +75,8 @@
     - import
   with_items: "{{ images }}"
   when: item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: Unpacking "{{ image_dir }}/{{ item.application }}/{{ item.application_release }}/*.{{ item.disk_format }}"
   shell: "cd {{ item.image_dir }}/{{ item.application }}/{{ item.application_release }}/; tar -xvf  {{ item.name }}"
@@ -108,14 +86,16 @@
   with_items: "{{ images }}"
   when:
     - item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: Registering {{ item.disk_format }} filename
   shell: "tar -tf {{ item.image_dir }}/{{ item.application }}/{{ item.application_release }}/{{ item.name }} | grep {{ item.disk_format }}"
   register: vmdk
-  tags:
-    - import
   with_items: "{{ images }}"
   when: item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: Glancing NFS based images
   os_image:
@@ -126,20 +106,20 @@
     container_format: "{{ item.0.container_format }}"
     is_public: yes
     filename: "{{item.0.image_dir  }}/{{item.0.application }}/{{ item.0.application_release }}/{{ item.1.stdout }}"
-  tags:
-    - import
   when: item.0.protocol == "nfs"
   with_together:
     - "{{ images }}"
     - "{{ vmdk.results }}"
+  loop_control:
+    label: "{{ item.0.name }}"
 
 ## HTTP based images
 - name: Retrieving image from URL
   get_url: url={{ item.source }} dest={{ item.image_dir }}/{{ item.application }}/{{ item.application_release }}/{{ item.name }}
   with_items: "{{ images }}"
   when: item.protocol == "http"
-  tags:
-    - jbb
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: Glancing HTTP based images
   os_image:
@@ -150,8 +130,7 @@
     container_format: "{{ item.container_format }}"
     is_public: yes
     filename: "{{item.image_dir  }}/{{item.application }}/{{ item.application_release }}/{{ item.name }}"
-  tags:
-    - import
-    - jbb
   when: item.protocol == "http"
   with_items: "{{ images }}"
+  loop_control:
+    label: "{{ item.name }}"

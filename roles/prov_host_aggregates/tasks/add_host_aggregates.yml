@@ -1,12 +1,37 @@
 ---
-- name: Creating Host Aggreggates
-  os_nova_flavor:
-    cloud: cloud-admin
-    state: '{{ state }}'
-    name: '{{ item.name }}'
-    ram: '{{ item.ram }}'
-    disk: '{{ item.disk }}'
-    ephemeral: '{{ item.ephemeral }}'
-    vcpus: '{{ item.vcpus }}'
-    is_public: '{{ item.is_public }}'
-  with_items: "{{ flavors }}"
+#- name: Printing HA and their hosts
+#  run_once: true
+#  debug: msg="ha is {{ item.0.name }} and its hosts {{ item.1.name }} "
+#  with_subelements:
+#    - "{{ host_aggregates }}"
+#    - hosts
+#  tags: tt
+
+- name: Creating host aggreggates
+  shell: "source {{ openstack_dir }}/keystonerc_cloud_admin && /bin/openstack aggregate create --zone {{ item.zone }} {{ item.name }}"
+  with_items: "{{ host_aggregates }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: host_aggregates_shell
+  failed_when: "'failed' in host_aggregates_shell.stderr"
+  changed_when: "host_aggregates_shell.rc == 0"
+
+- name: Adding metadata to host aggreggates
+  shell: "source {{ openstack_dir }}/keystonerc_cloud_admin && /bin/openstack aggregate set {{ item.properties }} {{ item.name }}"
+  with_items: "{{ host_aggregates }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: host_aggregates_shell
+  failed_when: "'failed' in host_aggregates_shell.stderr"
+  changed_when: "host_aggregates_shell.rc == 0"
+
+- name: Adding hosts to host aggreggates
+  shell: "source {{ openstack_dir }}/keystonerc_cloud_admin && /bin/openstack aggregate add host {{ item.0.name }} {{ item.1.name }}"
+  with_subelements:
+    - "{{ host_aggregates }}"
+    - hosts
+  loop_control:
+    label: "{{ item.0.name }}"
+  register: host_aggregates_shell
+  failed_when: "'failed' in host_aggregates_shell.stderr"
+  changed_when: "host_aggregates_shell.rc == 0"

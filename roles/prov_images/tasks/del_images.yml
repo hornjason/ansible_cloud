@@ -8,3 +8,5 @@
   tags:
     - remove_image
   with_items: "{{ images }}"
+  loop_control:
+    label: "{{ item.name }}"
