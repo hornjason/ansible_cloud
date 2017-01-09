@@ -32,6 +32,10 @@ Typical workflow:
 - cd ansible_rdo
 - edit bootstrap.sh (enable proxy etc..)
 - ./bootstrap.sh
+- ./deploy_utils_server.yml or ./deploy_utils_server_esxi.yml
+- ./deploy_infrastructure.yml or deploy_infrastructure_esxi.yml
+- ./provision_cloud.yml (configures tenant networking and external network while booting 2 vms to test each)
+
 
 Then, execute the bootstrap.sh script to have the rest of the software requirements deployed.
 
@@ -48,4 +52,4 @@ JB Broccard: j.b.broccard@oracle.com
 ## License
 
 This repository is intended only for Oracle CGBU use. Any use other than Oracle CGBU must be validated by Oracle CGBU Management.
-
+***

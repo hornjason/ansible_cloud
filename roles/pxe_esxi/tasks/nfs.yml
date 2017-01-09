@@ -5,12 +5,15 @@
 - name: Updating hostname
   hostname: name="{{ item.key }}"
   with_dict: "{{ infrastructure.utility_servers }}"
+  run_once: true
 
 - name: Checking for nfs-utils
   yum: name=nfs-utils state=present
+  run_once: true
 
 - name: Setting up nfs exports dir  
   file: path={{ esxi_nfs_staging_dir }} state=directory
+  run_once: true
 
 - name: Updating exports file with {{ esxi_nfs_staging_dir }}     
   lineinfile: 
@@ -18,6 +21,7 @@
     state=present 
     insertafter=EOF 
     line="{{ esxi_nfs_staging_dir }}      *(rw,sync,no_root_squash,no_all_squash)"
+  run_once: true
 
 - name: Verifying all services are enabled/restarted
   service: name={{ item }}  state=restarted enabled=yes
@@ -26,43 +30,62 @@
   - nfs-server
   - nfs-lock
   - nfs-idmap
+  run_once: true
 
 - name: Creating /var/lib/images to store iso
   file: path=/var/lib/images state=directory
+  run_once: true
 
 - name: Creating /esxi to mount iso
   file: path=/esxi state=directory
+  run_once: true
 
 - name: Creating {{ esxi_nfs_staging_dir }}/pxelinux.cfg/ directory
   file: path={{ esxi_nfs_staging_dir }}/pxelinux.cfg state=directory
+  run_once: true
 
 - name: Creating {{ esxi_kickstart_dir }}
   file: path={{ esxi_kickstart_dir }} state=directory
+  run_once: true
 
 - name: Checking existence of /var/lib/images/{{ esxi_iso_name }} ISO
   stat: path=/var/lib/images/{{ esxi_iso_name }} get_checksum=yes get_md5=no
   register: isochk
+  run_once: true
 
 - name: Downloading iso {{ esxi_iso_name }}
   get_url: 
     url="{{ esxi_iso_url }}"
     dest=/var/lib/images/
   when: isochk.stat.exists == False
+  run_once: true
 
 - name: Mounting iso "/var/lib/images/{{ esxi_iso_name}} => {{ esxi_nfs_staging_dir }}"
   mount: name=/esxi src=/var/lib/images/{{ esxi_iso_name }} state=mounted fstype=iso9660
+  run_once: true
 
 - name: "Copying {{ esxi_iso_name }} content to {{ esxi_nfs_staging_dir }}"
   local_action:
     copy src=/esxi/ dest={{ esxi_nfs_staging_dir }} force=no
   #when: isochk.stat.exists == False
+  run_once: true
+
+- name: Producing PXE conf file name in format 01-mac_address_of_target_ESXi_host (X5-2)
+  local_action: shell ipmitool -Ilanplus -U root -Pchangeme -H {{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ilom_ip }} sunoem cli 'show System host_primary_mac_address' | awk -F":"  --non-decimal-data 'BEGIN{ORS=""} /address =/ {intmac=(("0x"$NF)+0)+1 ; print "01-00-"$2"-"$3"-"$4"-"$5"-" ; printf("%02x\n", intmac)}'  | tr '_' ':'
+  register: mac_file
 
 - name: Copying isolinux.cfg to pxelinux.cfg directory as default boot file
   local_action:
-    copy src={{ esxi_nfs_staging_dir }}/isolinux.cfg  dest={{ esxi_nfs_staging_dir }}/pxelinux.cfg/default
+    #copy src={{ esxi_nfs_staging_dir }}/isolinux.cfg  dest={{ esxi_nfs_staging_dir }}/pxelinux.cfg/default
+    copy src={{ esxi_nfs_staging_dir }}/isolinux.cfg  dest={{ esxi_nfs_staging_dir }}/pxelinux.cfg/{{ mac_file.stdout }}
+
+- name: Change boot.cfg in mac_file.stdout
+  local_action:
+    lineinfile dest={{ esxi_nfs_staging_dir }}/pxelinux.cfg/{{ mac_file.stdout }} regexp='boot.cfg' line="  APPEND -c {{ inventory_hostname }}_boot.cfg"  state=present
 
 - name: Templating {{ esxi_kickstart_file }} to {{ esxi_kickstart_dir }}/{{ esxi_kickstart_file }}
-  template: src=ks.cfg.j2  dest={{ esxi_kickstart_dir }}/{{ esxi_kickstart_file }}
+  template: src=ks.cfg.j2  dest={{ esxi_kickstart_dir }}/{{ inventory_hostname }}_{{ esxi_kickstart_file }}
 
 - name: Unmounting iso
   mount: name=/esxi src=/var/lib/images/{{ iso_name }} state=unmounted fstype=iso9660
+  run_once: true

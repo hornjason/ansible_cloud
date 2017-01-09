@@ -1,0 +1,10 @@
+---
+- name: load subnet variables
+  include_vars: "{{ playbook_dir }}/group_vars/lab_specifics.yml"
+  run_once: true
+
+- include: add_admin_networking.yml
+  when: state == 'present'
+
+- include: del_admin_networking.yml
+  when: state == 'absent'

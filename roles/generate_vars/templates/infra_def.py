@@ -242,8 +242,15 @@ def _print_chassis_blades(infra_id, number_of_chassis, infra_file, hosts_file, l
         blade_id = cmm_id + "b" + "%02d" % (blade,)
         infra_file.write(x8sp + blade_id + ":" + "\n")
         infra_file.write(x10sp + "blade_id: " + blade_id + "\n")
-        infra_file.write(x10sp + "blade_hostname: " + blade_id + "\n")
-        
+        #infra_file.write(x10sp + "blade_hostname: " + blade_id + "\n")
+       
+        try:
+          blade_hostname = lab_specifics_data["lab_specifics"]["server_info"][blade_id]["hostname"]
+          infra_file.write(x10sp + "blade_hostname: " + blade_hostname + "\n")
+        except:
+          blade_hostname = str(blade_id)
+          infra_file.write(x10sp + "blade_hostname: " + blade_hostname + "\n")
+ 
         # if ilom ip is defined in the lab_specifics_file then we use it otherwise we compute this value
         try:
           blade_ilom_ip = lab_specifics_data["lab_specifics"]["vlans"]["ilom_vlan"]["blades"][blade_id]
@@ -267,7 +274,7 @@ def _print_chassis_blades(infra_id, number_of_chassis, infra_file, hosts_file, l
           blade_int_mgmt_ip = "172.31." + str(chassis) + "." + str(blade_last_digit_nonilom_ip)
           infra_file.write(x10sp + "blade_int_mgmt_ip: " + blade_int_mgmt_ip + "\n")
           
-        hosts_file.write(blade_int_mgmt_ip + "\t" + blade_id +"\n")
+        hosts_file.write(blade_int_mgmt_ip + "\t" + blade_id + "\t" + blade_hostname + "\n")
 
         #blade_last_digit_nonilom_ip = blade + 110
         #blade_int_mgmt_ip = "172.31." + str(chassis) + "." + str(blade_last_digit_nonilom_ip)

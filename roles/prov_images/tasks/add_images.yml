@@ -1,0 +1,136 @@
+---
+- name: Installing nfs client
+  yum: name=nfs-utils state=present
+  tags:
+    - import
+  with_items: "{{ images }}"
+  when: item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Ensuring rpcbind is running
+  service: name=rpcbind state=started enabled=yes
+  tags:
+    - import
+  with_items: "{{ images }}"
+  when: item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: "Ensuring {{ item.nfs_mount_point }} directory exists"
+  file: path={{ item.nfs_mount_point }} state=directory
+  tags:
+    - import
+  with_items: "{{ images }}"
+  when: item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Mounting {{ item.source }} --> {{ nfs_mount_point }}
+  mount: name={{ item.nfs_mount_point }} src={{ item.source }} fstype=nfs opts="rw,sync,nfsvers=3" state=mounted
+  tags:
+    - import
+  with_items: "{{ images }}"
+  when: item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Checking existence of directory "{{ item.image_dir }}/{{ item.application }}/{{ item.application_release }}"
+  file: path={{ item.image_dir }}/{{ item.application }}/{{ item.application_release }} mode=0755 state=directory
+  tags:
+    - import
+  with_items: "{{ images }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Checking existence of the file "{{ item.image_dir }}/{{ item.application }}/{{ item.application_release }}/{{ item.name }}"
+  stat: path={{ item.image_dir }}/{{ item.application }}/{{ item.application_release }}/{{ item.name }}
+  register: ova
+  tags:
+    - import
+  with_items: "{{ images }}"
+  when: item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Copying "{{ item.name }}" to "{{ item.image_dir }}/{{ item.application }}/{{ item.application_release }}/"
+  copy:
+    force=no
+    src="{{ item.nfs_mount_point }}/TPD/prod/{{ item.application }}/{{ item.application_release }}/ova/{{ item.name }}"
+    dest="{{ item.image_dir }}/{{ item.application }}/{{ item.application_release }}/"
+  register: cp_ova
+  tags:
+    - import
+  with_items: "{{ images }}"
+  when:
+    #- ova.stat.isreg != True
+    - item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Unmounting {{ item.source }} --> {{ nfs_mount_point }}
+  run_once: true
+  mount: name={{ item.nfs_mount_point }} src={{ item.source }} fstype=nfs state=unmounted
+  tags:
+    - import
+  with_items: "{{ images }}"
+  when: item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Unpacking "{{ image_dir }}/{{ item.application }}/{{ item.application_release }}/*.{{ item.disk_format }}"
+  shell: "cd {{ item.image_dir }}/{{ item.application }}/{{ item.application_release }}/; tar -xvf  {{ item.name }}"
+  register: vmdk_unpack
+  tags:
+    - import
+  with_items: "{{ images }}"
+  when:
+    - item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Registering {{ item.disk_format }} filename
+  shell: "tar -tf {{ item.image_dir }}/{{ item.application }}/{{ item.application_release }}/{{ item.name }} | grep {{ item.disk_format }}"
+  register: vmdk
+  with_items: "{{ images }}"
+  when: item.protocol == "nfs"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Glancing NFS based images
+  os_image:
+    cloud: cloud-admin
+    state: "{{ state | default('present') }}"
+    name: "{{ item.1.stdout }}"
+    disk_format: "{{ item.0.disk_format }}"
+    container_format: "{{ item.0.container_format }}"
+    is_public: yes
+    filename: "{{item.0.image_dir  }}/{{item.0.application }}/{{ item.0.application_release }}/{{ item.1.stdout }}"
+  when: item.0.protocol == "nfs"
+  with_together:
+    - "{{ images }}"
+    - "{{ vmdk.results }}"
+  loop_control:
+    label: "{{ item.0.name }}"
+
+## HTTP based images
+- name: Retrieving image from URL
+  get_url: url={{ item.source }} dest={{ item.image_dir }}/{{ item.application }}/{{ item.application_release }}/{{ item.name }}
+  with_items: "{{ images }}"
+  when: item.protocol == "http"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Glancing HTTP based images
+  os_image:
+    cloud: cloud-admin
+    state: "{{ state | default('present') }}"
+    name: "{{ item.name }}"
+    disk_format: "{{ item.disk_format }}"
+    container_format: "{{ item.container_format }}"
+    is_public: yes
+    filename: "{{item.image_dir  }}/{{item.application }}/{{ item.application_release }}/{{ item.name }}"
+  when: item.protocol == "http"
+  with_items: "{{ images }}"
+  loop_control:
+    label: "{{ item.name }}"

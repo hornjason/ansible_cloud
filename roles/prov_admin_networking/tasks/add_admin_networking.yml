@@ -1,0 +1,69 @@
+---
+## FLAT based provider networks / subnets
+- name: Creating FLAT Admin/Provider Networks
+  os_network:
+    cloud: cloud-admin
+    state: "{{ state }}"
+    name: "{{ item.name }}"
+    provider_network_type: "{{ item.provider_network_type }}"
+    provider_physical_network: "{{ item.provider_physical_network }}"
+    shared: "{{ item.shared }}"
+    external: "{{ item.external }}"
+  when: item.provider_network_type == "flat"
+  with_items: "{{ networks }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Creating FLAT Admin/Provider Subnets
+  os_subnet:
+    cloud: cloud-admin
+    state: "{{ state }}"
+    name: "{{ item.1.name }}"
+    gateway_ip: "{{ item.1.gateway_ip }}"
+    allocation_pool_start: "{{ item.1.allocation_pool_start }}"
+    allocation_pool_end: "{{ item.1.allocation_pool_end }}"
+    enable_dhcp: "{{ item.1.enable_dhcp }}"
+    cidr: "{{ item.1.cidr }}"
+    dns_nameservers: "{{ item.1.dns_nameserver }}"
+    network_name: "{{ item.0.name }}"
+  with_subelements:
+    - "{{ networks }}"
+    - subnets
+  when: item.0.provider_network_type == "flat"
+  loop_control:
+    label: "{{ item.1.name }}"
+
+## VLAN based provider networks / subnets
+- name: Creating VLAN Admin/Provider Networks
+  os_network:
+    cloud: cloud-admin
+    state: "{{ state }}"
+    name: "{{ item.name }}"
+    provider_network_type: "{{ item.provider_network_type }}"
+    provider_physical_network: "{{ item.provider_physical_network }}"
+    provider_segmentation_id: "{{ item.provider_segmentation_id }}"
+    shared: "{{ item.shared }}"
+    external: "{{ item.external }}"
+  when: item.provider_network_type == "vlan"
+  with_items: "{{ networks }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Creating VLAN Admin/Provider Subnets
+  os_subnet:
+    cloud: cloud-admin
+    state: "{{ state }}"
+    name: "{{ item.1.name }}"
+    gateway_ip: "{{ item.1.gateway_ip }}"
+    allocation_pool_start: "{{ item.1.allocation_pool_start }}"
+    allocation_pool_end: "{{ item.1.allocation_pool_end }}"
+    enable_dhcp: "{{ item.1.enable_dhcp }}"
+    cidr: "{{ item.1.cidr }}"
+    dns_nameservers: "{{ item.1.dns_nameserver }}"
+    network_name: "{{ item.0.name }}"
+  with_subelements:
+    - "{{ networks }}"
+    - subnets
+  when: item.0.provider_network_type == "vlan"
+  loop_control:
+    label: "{{ item.1.name }}"

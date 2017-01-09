@@ -1,0 +1,43 @@
+---
+## VXLAN based project networks / subnets
+- name: Creating VXLAN based project networks
+  os_network:
+    cloud: "cloud-{{ item.0.name }}"
+    state: "{{ state }}"
+    name: "{{ item.1.name }}"
+  when: item.1.provider_network_type == "vxlan"
+  with_subelements:
+    - "{{ projects }}"
+    - networks
+  loop_control:
+    label: "{{ item.0.name }}"
+
+- name: Creating VXLAN based project subnets
+  os_subnet:
+    cloud: "cloud-{{ item.0.name }}"
+    state: "{{ state }}"
+    name: "{{ item.1.subnets.name }}"
+    gateway_ip: "{{ item.1.subnets.gateway_ip }}"
+    allocation_pool_start: "{{ item.1.subnets.allocation_pool_start }}"
+    allocation_pool_end: "{{ item.1.subnets.allocation_pool_end }}"
+    enable_dhcp: "{{ item.1.subnets.enable_dhcp }}"
+    cidr: "{{ item.1.subnets.cidr }}"
+    network_name: "{{ item.1.subnets.network_name }}"
+  with_subelements:
+    - "{{ projects }}"
+    - networks
+  loop_control:
+    label: "{{ item.0.name }}"
+
+- name: Creating project routers
+  os_router:
+    cloud: "cloud-{{ item.0.name }}"
+    state: "{{ state }}"
+    name: "router_{{ item.1.network }}_{{ item.1.interfaces }}"
+    interfaces: "{{ item.1.interfaces }}"
+    network: "{{ item.1.network }}"
+  with_subelements:
+    - "{{ projects }}"
+    - routers
+  loop_control:
+    label: "{{ item.0.name }}"

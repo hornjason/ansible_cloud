@@ -1,0 +1,236 @@
+---
+lab_specifics:
+  lab_id: bigcloud
+  vlans:
+    openstack_vxlan_tenant:
+      vlan_id: 16
+      tagged_traffic_needed: true
+      network: 172.16.0.0
+      netmask: 255.255.0.0
+
+#    openstack_provider_vlan:
+#      vlan_id: 1
+#      tagged_traffic_needed: false
+#      network: 10.75.138.0
+#      netmask: 255.255.254.0
+#      broadcast: 10.75.139.255
+#      host_min: 10.75.138.41
+#      host_max: 10.75.138.49
+#      gateway: 10.75.138.1
+#      ntp_server: 10.250.32.10
+#      name_server: 10.250.32.10
+#      name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
+#      defined:
+#       - nem0
+#      utility_servers:
+#        bigcloud0100: 10.75.183.49
+    ext_management_vlan:
+      vlan_id: 1
+      tagged_traffic_needed: false
+      network: 10.75.138.0
+      netmask: 255.255.254.0
+      broadcast: 10.75.139.255
+      host_min: 10.75.138.38
+      host_max: 10.75.138.49
+      gateway: 10.75.138.1
+      ntp_server: 10.250.32.10
+      name_server: 10.250.32.10
+      name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
+      defined:
+       - nem0
+      blades:
+        # chassis onap2
+        c00b00: 10.75.138.39
+        c00b01: 10.75.138.40
+      utility_servers:
+        x5-200: 10.75.138.38
+
+    int_management_vlan:
+      vlan_id: 1 
+      tagged_traffic_needed: false
+      network: 172.31.0.0
+      netmask: 255.255.0.0
+      broadcast: 172.31.255.255
+      host_min: 172.31.2.1
+      host_max: 172.31.2.254
+      gateway: 172.31.254.254
+      ntp_server: 10.250.32.10
+      name_server: 10.250.32.10
+      name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
+      defined:
+       - nem1
+      utility_servers:
+        x5-200: 172.31.254.254
+      blades:
+        c00b00: 172.31.2.110
+        c00b01: 172.31.2.111
+
+    ilom_vlan:
+      vlan_id: 1
+      tagged_traffic_needed: false
+      network: 10.75.128.0
+      netmask: 255.255.252.0
+      broadcast: 10.75.131.255
+      host_min: 10.75.128.2
+      host_max: 10.75.131.254
+      gateway: 10.75.128.1
+      ntp_server: 198.211.106.151
+      zfs:
+        zfs00:
+          head00: 10.250.56.170
+          head01: 10.250.56.171
+      cmms:
+        c00: 10.240.121.130
+      nems:
+        c00n00: 10.240.121.131
+        c00n01: 10.240.121.132
+      blades:
+        c00b00: 10.75.129.45
+        c00b01: 10.75.129.47
+      utility_servers:
+        x5-200: 10.75.129.46
+
+  dhcp_subnets:
+    info:
+      base: 172.31.0.0
+      netmask: 255.255.0.0
+      routers: 172.31.1.1
+
+  server_info:
+    c00b00:
+      hostname: control_1
+    c00b01:
+      hostname: compute_1
+
+
+######################################
+# CLOUD SPECIFICS
+######################################
+
+images:
+  dsr_soam_img:
+    source: nfs
+    file_dir: /var/lib/openstack
+    nfs_source_ip: 10.100.177.2
+    nfs_source_dir: /var/exports/flavor
+    container_format: bare
+    disk_format: qcow2
+  cloud_init_ol7_img:
+    source: url
+    file_dir: /var/lib/openstack
+    url_source: http://10.240.121.66/images/myOL7image.qcow2
+    container_format: bare
+    disk_format: qcow2
+
+flavors:
+  dsr_soam_flavor:
+    ram: 6000
+    disk: 60
+    ephemeral: 0
+    vcpus: 4
+    is_public: true
+  m1_super_large_flavor:
+    ram: 48000
+    disk: 100
+    ephemeral: 0
+    vcpus: 32
+    is_public: true
+
+host_aggregates:
+    host_agg_x62:
+      hosts:
+       - c00b00
+       - c00b01
+       - c00b02
+       - c00b03
+       - c00b04
+      properties:
+       - key1: value1
+       - key2: value2
+       - key3: value3
+    host_agg_x52:
+      hosts:
+       - c01b08
+       - c01b09
+       - c01b10
+       - c01b11
+       - c01b12
+      properties:
+       - key1: value1
+       - key2: value2
+       - key3: value3
+
+server_groups:
+  nosa_1:
+    policy: anti-affinity
+  samehost:
+    policy: affinity
+
+networks:
+  - name: ext-net
+    provider_network_type: flat
+    provider_physical_network: physnet1        
+    provider_segmentation_id: None
+    shared: true
+    external: true
+    router: external
+    subnets:
+        name: ext-subnet
+        gateway_ip: 10.75.183.1
+        allocation_pool_start: 10.75.183.65
+        allocation_pool_end: 10.75.183.126
+        dns_nameservers:
+         - 10.250.32.10
+        enable_dhcp: False
+        cidr: 10.75.183.0/25
+
+projects:
+  - name: smog_project
+    quotas: ""
+    user_name: smog_jb
+    user_pass: changeme
+    networks:
+      - name: xmi-1
+        provider_network_type: vxlan
+        provider_physical_network: None
+        provider_segmentation_id: None
+        shared: False
+        external: False
+        router: internal
+        subnets:
+            name: xmi-1-subnet
+            gateway_ip: 192.168.1.1
+            allocation_pool_start: 192.168.1.2
+            allocation_pool_end: 192.168.1.254
+            dns_nameservers:
+             - 10.75.137.245
+             - 10.75.137.246
+             - 192.168.56.180
+            enable_dhcp: true
+            cidr: 192.168.1.0/24
+      - name: xmi-2
+        provider_network_type: vxlan
+        provider_physical_network: None
+        provider_segmentation_id: None
+        shared: False
+        external: False
+        router: internal
+        subnets:
+            name: xmi-2-subnet
+            gateway_ip: 192.168.2.1
+            allocation_pool_start: 192.168.2.2
+            allocation_pool_end: 192.168.2.254
+            dns_nameservers:
+             - 10.75.137.245
+             - 10.75.137.246
+             - 192.168.56.180
+            enable_dhcp: true
+            cidr: 192.168.2.0/24
+
+    routers:
+      - name: xmi-1-router:
+        network: ext-net
+        interfaces: xm-1-subnet
+      - name: xmi-2-router:
+        network: ext-net
+        interfaces: xmi-2-subnet

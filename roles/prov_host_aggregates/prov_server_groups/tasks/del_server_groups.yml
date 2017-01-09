@@ -1,0 +1,7 @@
+---
+- name: Deleting nova server groups
+  os_server_group:
+    cloud: cloud-admin
+    state: '{{ state }}'
+    name: '{{ item.name }}'
+  with_items: "{{ server_groups }}"

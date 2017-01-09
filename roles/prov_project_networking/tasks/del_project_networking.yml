@@ -1,0 +1,34 @@
+---
+- name: Removing project routers
+  os_router:
+    cloud: "cloud-{{ item.0.name }}"
+    state: "{{ state }}"
+    name: "router_{{ item.1.network }}_{{ item.1.interfaces }}"
+  with_subelements:
+    - "{{ projects }}"
+    - routers
+  loop_control:
+    label: "{{ item.0.name }}"
+
+- name: Removing VXLAN based project subnets
+  os_subnet:
+    cloud: "cloud-{{ item.0.name }}"
+    state: "{{ state }}"
+    name: "{{ item.1.subnets.name }}"
+  with_subelements:
+    - "{{ projects }}"
+    - networks
+  loop_control:
+    label: "{{ item.0.name }}"
+
+- name: Removing VXLAN based project networks
+  os_network:
+    cloud: "cloud-{{ item.0.name }}"
+    state: "{{ state }}"
+    name: "{{ item.1.name }}"
+  when: item.1.provider_network_type == "vxlan"
+  with_subelements:
+    - "{{ projects }}"
+    - networks
+  loop_control:
+    label: "{{ item.0.name }}"

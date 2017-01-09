@@ -1,0 +1,22 @@
+---      
+- name: loading infra file
+  include_vars: "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
+
+- name: loading infra file
+  include_vars: "{{ playbook_dir }}/group_vars/lab_specifics.yml"
+
+- name: Creating cloud files directory
+  local_action: file path={{ openstack_dir }} state=directory mode=0755
+
+- name: Creating admin credential file
+  local_action: template src=keystonerc_admin.j2 dest={{ openstack_dir }}/keystonerc_cloud_admin owner=root group=root mode=0755
+
+- name: Creating credential file
+  local_action: template src=keystonerc.j2 dest={{ openstack_dir }}/keystonerc_cloud_{{ item.name }} owner=root group=root mode=0755
+  register: create_rc
+  with_items: "{{ projects }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Creating clouds.yml locally
+  local_action: template src=clouds.yml.j2 dest={{ playbook_dir }}/clouds.yml

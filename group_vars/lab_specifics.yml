@@ -8,6 +8,7 @@ lab_specifics:
       network: 172.16.0.0
       netmask: 255.255.0.0
 
+<<<<<<< HEAD
     openstack_provider_vlan:
       vlan_id: 1
       tagged_traffic_needed: false
@@ -24,6 +25,24 @@ lab_specifics:
        - nem0
       utility_servers:
         bigcloud0100: 10.75.183.49
+=======
+#    openstack_provider_vlan:
+#      vlan_id: 1
+#      tagged_traffic_needed: false
+#      network: 10.75.138.0
+#      netmask: 255.255.254.0
+#      broadcast: 10.75.139.255
+#      host_min: 10.75.138.41
+#      host_max: 10.75.138.49
+#      gateway: 10.75.138.1
+#      ntp_server: 10.250.32.10
+#      name_server: 10.250.32.10
+#      name_server_search: "labs.nc.tekelec.com. us.oracle.com. oraclecorp.com. oracle.com."
+#      defined:
+#       - nem0
+#      utility_servers:
+#        bigcloud0100: 10.75.183.49
+>>>>>>> dced68b14a5fa6e0548d4451e06ad7e5adb7b2fa
     ext_management_vlan:
       vlan_id: 1
       tagged_traffic_needed: false
@@ -95,4 +114,184 @@ lab_specifics:
       base: 172.31.0.0
       netmask: 255.255.0.0
       routers: 172.31.1.1
+<<<<<<< HEAD
  
+=======
+
+  server_info:
+    c00b00:
+      hostname: c00b00
+    c00b01:
+      hostname: c00b01
+
+
+######################################
+# CLOUD SPECIFICS
+######################################
+
+images:
+  - name: DSR-8.0.0.0.0_80.13.0.ova
+    application: DSR
+    application_release: 8.0
+    image_dir: /var/lib/openstack
+    protocol: nfs
+    source: "sszna01.ssz.tekelec.com:/eng/releases/"
+    nfs_mount_point: "/export/home/eagle/releases"
+    container_format: bare
+    disk_format: vmdk
+  - name: DSR-8.0.0.0.0_80.12.0.ova
+    application: DSR
+    application_release: 8.0
+    image_dir: /var/lib/openstack
+    protocol: nfs
+    source: "sszna01.ssz.tekelec.com:/eng/releases/"
+    nfs_mount_point: "/export/home/eagle/releases"
+    container_format: bare
+    disk_format: vmdk
+  - name: cloud_init_ol7_img
+    application: oracle_linux
+    application_release: 7.0
+    image_dir: /var/lib/openstack
+    protocol: http
+    source: http://10.240.121.66/images/myOL7image.qcow2
+    nfs_mount_point: "/export/home/eagle/releases"
+    container_format: bare
+    disk_format: qcow2
+
+flavors:
+  - name: dsr_soam_flavor
+    ram: 6000
+    disk: 60
+    ephemeral: 0
+    vcpus: 4
+    is_public: true
+    properties: "--property aggregate_instance_extra_specs:soam=true"
+  - name: m1_super_large_flavor
+    ram: 48000
+    disk: 100
+    ephemeral: 0
+    vcpus: 32
+    is_public: true
+    properties: "--property key1=value1 --property key2=value2 --property key3=value3"
+
+host_aggregates:
+  - name: host_agg_x62
+    zone: soam
+    properties: "--property soam=true"
+    hosts:
+     - name: c00b01
+  - name: host_agg_x52
+    zone: noam
+    properties: "--property key1=value1 --property key2=value2 --property key3=value3"
+    hosts:
+     - name: c00b01
+
+server_groups:
+  - name: noa
+    policy: anti-affinity
+  - name: nob
+    policy: anti-affinity
+  - name: soa
+    policy: anti-affinity
+  - name: sob
+    policy: anti-affinity
+  - name: samehost
+    policy: affinity
+
+networks:
+  - name: ext-net
+    provider_network_type: flat
+    provider_physical_network: physnet1        
+    provider_segmentation_id: None
+    shared: yes
+    external: yes
+    subnets:
+      - name: ext-subnet
+        gateway_ip: 10.75.138.1
+        allocation_pool_start: 10.75.138.41
+        allocation_pool_end: 10.75.138.45
+        enable_dhcp: False
+        cidr: 10.75.138.0/23
+        dns_nameserver: 10.209.76.197
+  - name: ext-net2
+    provider_network_type: vlan
+    provider_physical_network: physnet1
+    provider_segmentation_id: 200
+    shared: yes
+    external: yes
+    subnets:
+      - name: ext-subnet2
+        gateway_ip: 200.200.200.1
+        allocation_pool_start: 200.200.200.100
+        allocation_pool_end: 200.200.200.110
+        enable_dhcp: False
+        cidr: 200.200.200.0/24
+        dns_nameserver: 20.20.20.20
+
+projects:
+  - name: smog_project_1
+    quotas: "--server-group-members -1 --instances -1 --cores -1 --ram -1 --networks -1 --subnets -1 --ports -1 --floating-ips -1"
+    user_name: smog_jb
+    user_pass: changeme
+    networks:
+      - name: xmi-1
+        provider_network_type: vxlan
+        subnets:
+            name: xmi-1-subnet
+            network_name: xmi-1
+            gateway_ip: 192.168.1.1
+            allocation_pool_start: 192.168.1.2
+            allocation_pool_end: 192.168.1.254
+            dns_nameserver: 10.75.137.245
+            enable_dhcp: true
+            cidr: 192.168.1.0/24
+      - name: xmi-2
+        provider_network_type: vxlan
+        subnets:
+            name: xmi-2-subnet
+            network_name: xmi-2
+            gateway_ip: 192.168.2.1
+            allocation_pool_start: 192.168.2.2
+            allocation_pool_end: 192.168.2.254
+            dns_nameserver: 10.75.137.245
+            enable_dhcp: true
+            cidr: 192.168.2.0/24
+    routers:
+      - network: ext-net
+        interfaces: xmi-1-subnet
+      - network: ext-net2
+        interfaces: xmi-2-subnet
+
+  - name: smog_project_2
+    quotas: "--server-group-members -1 --instances -1 --cores -1 --ram -1 --networks -1 --subnets -1 --ports -1 --floating-ips -1"
+    user_name: smog_jason
+    user_pass: changeme
+    networks:
+      - name: xmi-1
+        provider_network_type: vxlan
+        subnets:
+            name: xmi-1-subnet
+            network_name: xmi-1
+            gateway_ip: 192.168.1.1
+            allocation_pool_start: 192.168.1.2
+            allocation_pool_end: 192.168.1.254
+            dns_nameserver: 10.75.137.245
+            enable_dhcp: true
+            cidr: 192.168.1.0/24
+      - name: xmi-2
+        provider_network_type: vxlan
+        subnets:
+            name: xmi-2-subnet
+            network_name: xmi-2
+            gateway_ip: 192.168.2.1
+            allocation_pool_start: 192.168.2.2
+            allocation_pool_end: 192.168.2.254
+            dns_nameserver: 10.75.137.245
+            enable_dhcp: true
+            cidr: 192.168.2.0/24
+    routers:
+      - network: ext-net2
+        interfaces: xmi-1-subnet
+      - network: ext-net2
+        interfaces: xmi-2-subnet
+>>>>>>> dced68b14a5fa6e0548d4451e06ad7e5adb7b2fa

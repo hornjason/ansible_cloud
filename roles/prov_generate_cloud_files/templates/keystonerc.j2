@@ -1,0 +1,9 @@
+unset OS_SERVICE_TOKEN
+{% for value in projects %}
+export OS_USERNAME={{ value.user_name }}
+export OS_PASSWORD={{ value.user_pass }}
+export OS_AUTH_URL=http://{{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ext_mgmt_ip }}:5000/v2.0
+export PS1='\[\e[00;37m\][\u@\h \W(keystone_{{ value.user_name }})]$ '
+export OS_TENANT_NAME={{ value.name }}
+export OS_REGION_NAME=RegionOne
+{% endfor %}

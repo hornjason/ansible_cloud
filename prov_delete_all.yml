@@ -1,0 +1,16 @@
+#!/usr/bin/ansible-playbook
+---
+- hosts: [controller]
+  remote_user: root
+  connection: local
+  vars:
+    - state: absent
+  roles:
+    - { role: prov_destroy_all_vms, tags: prov_destroy_all_vms}
+    - { role: prov_project_networking, tags: prov_project_networking }
+    - { role: prov_admin_networking, tags: prov_admin_networking }
+    - { role: prov_images, tags: prov_images }
+    - { role: prov_flavors, tags: prov_flavors }
+    - { role: prov_host_aggregates, tags: prov_host_aggregates }
+    - { role: prov_server_groups, tags: prov_server_groups }
+    - { role: prov_projects, tags: prov_projects }    

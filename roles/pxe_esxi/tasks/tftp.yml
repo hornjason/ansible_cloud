@@ -1,13 +1,16 @@
 ---
 - name: Installing tftp-server
   yum: name=tftp-server state=present
+  run_once: true
 
 - name: Removing syslinux if installed
   yum: name=syslinux state=absent
+  run_once: true
 
 - name: Installing syslinux
   yum: name=syslinux-3.86-1.el7.rf.x86_64 state=installed
   register: syslinux
+  run_once: true
 
 - name: Enabling tftp under xinetd.d
   lineinfile:
@@ -15,18 +18,22 @@
     regexp=disable
     line="        disable                 = no"
     state=present
+  run_once: true
  
 - name: Restarting xinetd
   service: name=tftp state=started enabled=yes
   tags: tftp
+  run_once: true
 
 - name: Creating tftp directory structure
   file: path={{ esxi_nfs_staging_dir }}/pxelinux.cfg state=directory
+  run_once: true
 
 - name: Copying /usr/share/syslinux/pxelinux.0 to {{ esxi_nfs_staging_dir }}
   local_action:
     copy src=/usr/share/syslinux/pxelinux.0 dest={{ esxi_nfs_staging_dir }}
   when: syslinux|success
+  run_once: true
 
-- name: Templating {{ esxi_nfs_staging_dir }}/boot.cfg to perform scripted installation
-  local_action: template src=boot.cfg.j2 dest={{ esxi_nfs_staging_dir }}/boot.cfg owner=root group=root mode=0755
+- name: Templating {{ esxi_nfs_staging_dir }}/inventory_hostname_boot.cfg to perform scripted installation
+  local_action: template src=boot.cfg.j2 dest={{ esxi_nfs_staging_dir }}/{{ inventory_hostname }}_boot.cfg owner=root group=root mode=0755

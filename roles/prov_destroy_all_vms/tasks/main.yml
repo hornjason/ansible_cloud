@@ -1,0 +1,7 @@
+---
+- name: load subnet variables
+  include_vars: "{{ playbook_dir }}/group_vars/lab_specifics.yml"
+  run_once: true
+
+- include: del_vms.yml
+  when: state == 'absent'

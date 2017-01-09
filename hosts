@@ -12,12 +12,9 @@ pxe   ansible_host=172.31.254.254  wipe=false
 [controller1]
 c00b00 ansible_host=172.31.0.110 enclosure=c00 slot=b00 
 
-
-
 [compute1]
 c00b01 ansible_host=172.31.0.111  enclosure=c00 slot=b01
 #c00b02 ansible_host=172.31.0.112 enclosure=c00 slot=b02
-
 [additional_compute:children]
 
 [controller:children]

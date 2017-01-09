@@ -1,0 +1,52 @@
+---
+- name: load subnet variables
+  include_vars: "{{ item }}"
+  run_once: true
+  with_items:
+    - "{{ playbook_dir }}/roles/generate_vars/vars/main.yml"
+
+- name: adding Tennant network interface {{ tenant_interface }}.{{ infrastructure.vlans.openstack_vxlan_tenant.vlan_id }}
+  template: src=tenant_interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ tenant_interface }}.{{ infrastructure.vlans.openstack_vxlan_tenant.vlan_id }} owner=root group=root mode=0644
+  when: infrastructure.vlans.openstack_vxlan_tenant.vlan_id is defined and infrastructure.vlans.openstack_vxlan_tenant.tagged_traffic_needed
+
+- name: adding Tennant network interface {{ tenant_interface }}
+  template: src=tenant_interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ tenant_interface }} owner=root group=root mode=0644
+  when: not infrastructure.vlans.openstack_vxlan_tenant.tagged_traffic_needed
+
+
+- name: adding Storage network interface {{ storage_interface }}.{{ infrastructure.vlans.storage.id }}
+  template: src=storage_interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ storage_interface }}.{{ infrastructure.vlans.storage.id }} owner=root group=root mode=0644
+
+#- debug: var="infrastructure.vlans.ext_management_vlan.tagged_traffic_needed"
+#  tags: labmgmt
+
+# Creating external interface TAGGED ...
+- name: adding labmgmt tagged external interface on {{ ext_management_interface }}.{{ infrastructure.vlans.ext_management_vlan.vlan_id }}
+  template: src=tagged_management_interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ ext_management_interface }}.{{ infrastructure.vlans.ext_management_vlan.vlan_id }} owner=root group=root mode=0644
+  when: infrastructure.vlans.ext_management_vlan.vlan_id is defined and infrastructure.vlans.ext_management_vlan.tagged_traffic_needed
+  tags: labmgmt
+
+# ... or Creating external interface UN-TAGGED
+- name: Adding labmgmt untagged external interface on {{ ext_management_interface }}
+  template: src=untagged_management_interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ ext_management_interface }} owner=root group=root mode=0644
+  when: not infrastructure.vlans.ext_management_vlan.tagged_traffic_needed
+  tags: labmgmt
+
+# Creating internal PXE/DHCP interface UN-TAGGED
+- name: adding labmgmt internal (PXE) interface on {{ management_interface }} when tagged
+  template: src=interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ management_interface }} owner=root group=root mode=0644
+  when: infrastructure.vlans.int_management_vlan.network is defined 
+  tags: labmgmt
+
+- name: Creating the dummy interface
+  template: src=dummy_interface.j2 dest=/etc/sysconfig/network-scripts/ifcfg-{{ dummy_physical_port_for_neutron }} owner=root group=root mode=0644 force=yes
+  tags: labmgmt
+
+- name: Customizing the Hostname
+  hostname: name={{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_hostname }}
+
+- name: restart networking
+  service: name=network state=restarted enabled=yes
+
+- name: restart ntpd
+  service: name=ntpd state=restarted enabled=yes

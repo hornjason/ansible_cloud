@@ -1,0 +1,8 @@
+---
+- name: Creating nova server groups
+  os_server_group:
+    cloud: cloud-admin
+    state: '{{ state }}'
+    name: '{{ item.name }}'
+    policies: '{{ item.policy }}'
+  with_items: "{{ server_groups }}"
