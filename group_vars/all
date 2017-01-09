@@ -26,7 +26,7 @@ provider_interface: eno1
 dummy_physical_port_for_neutron: "{{ provider_interface }}.1"
 
 # MTU for all openstack nodes
-mtu: 9000
+mtu: 1500
 
 #PXE
 pxe_interface: "{{ management_interface }}"
@@ -44,7 +44,7 @@ resolv_pause: 5
 ilom_pause: 10
 reboot_wait_time: 5
 after_epel_pause: 5
-repave_wait_time: 30
+repave_wait_time: 15
 
 
 public_yum_ol7_repo_url: "http://public-yum.oracle.com/public-yum-ol7.repo"

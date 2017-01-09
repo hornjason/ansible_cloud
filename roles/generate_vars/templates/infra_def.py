@@ -36,7 +36,8 @@ def _print_vlans(infra_file, lab_specifics_data):
   infra_file.write(x8sp + "- nem1" + "\n")
   infra_file.write(x8sp + "- es2_72_storage" + "\n")
   
-  vlan_name = ["openstack_vxlan_tenant", "int_management_vlan", "ext_management_vlan", "ilom_vlan", "openstack_provider_vlan"]
+  #vlan_name = ["openstack_vxlan_tenant", "int_management_vlan", "ext_management_vlan", "ilom_vlan", "openstack_provider_vlan"]
+  vlan_name = ["openstack_vxlan_tenant", "int_management_vlan", "ext_management_vlan", "ilom_vlan"]
   net_element = ["vlan_id", "tagged_traffic_needed", "network", "netmask", "broadcast", "host_min", "host_max", "gateway", "ntp_server", "name_server", "name_server_search", "defined"]
   for v in vlan_name:
     infra_file.write(x4sp + v + ":" + "\n")

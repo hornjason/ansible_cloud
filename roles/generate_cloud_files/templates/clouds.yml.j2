@@ -1,0 +1,17 @@
+clouds:
+  cloud-admin:
+    auth:
+      auth_url: http://{{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ext_mgmt_ip }}:5000/v2.0/
+      username: admin
+      password: changeme
+      project_name: admin
+{% if state == 'present' %}
+{% for key,value in tenants.iteritems() %}
+  cloud-{{ key }}:
+    auth:
+      auth_url: http://{{ infrastructure.chassis[enclosure].blades[enclosure+slot].blade_ext_mgmt_ip }}:5000/v2.0/
+      username: {{ key }}
+      password: {{ value.pass }}
+      project_name: {{ value.project }} 
+{% endfor %}
+{% endif %}
