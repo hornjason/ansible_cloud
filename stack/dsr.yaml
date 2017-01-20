@@ -1,34 +1,38 @@
 params:
-    image: DSR-80_12_0.vmdk
+    image: DSR-80_13_0.vmdk
     public_network: ext-net
     ssh_key: dm
     flavors:
-      - name: oam_flavor
-        ram: 4096
-        vcpus: 2
+      - name: noam_flavor
+        ram: 24000
+        vcpus: 12
+        disk: 60
+      - name: soam_flavor
+        ram: 6000
+        vcpus: 4
         disk: 60
       - name: damp_flavor
-        ram: 4096
-        vcpus: 2
+        ram: 16000
+        vcpus: 8
         disk: 60
     noampfunction: DSR (active/standby pair)
-    noampflavor: oam_flavor
+    noampflavor: noam_flavor
     noampprofile: DSR Guest
     networks:
         - name: XMI
-          cidr: 192.168.0.0/24
+          cidr: 172.1.0.0/16
           routed: true
           shared: true
           dns_nameservers: 
             - 192.168.56.180
             - 10.75.137.245
         - name: IMI
-          cidr: 172.168.0.0/24
+          cidr: 172.10.0.0/16
           routed: false
           shared: true
     globalnetworks:
         - name: XSI1
-          cidr: 192.168.100.0/24
+          cidr: 172.100.0.0/16
           routed: false
           shared: false
     interfaces:
@@ -52,18 +56,18 @@ params:
           intraSitePath: IMI
     networkelements:
         - soamfunction: DSR (active/standby pair)
-          soamflavor: oam_flavor
+          soamflavor: soam_flavor
           soamprofile: DSR Guest
           networks:
             - name: XMI
-              cidr: 192.168.0.0/24
+              cidr: 172.1.0.0/16
               routed: true
               shared: true
               dns_nameservers: 
                 - 192.168.56.180
                 - 10.75.137.245
             - name: IMI
-              cidr: 172.168.0.0/24
+              cidr: 172.10.0.0/16
         - name: Signaling
           interSitePath: XMI
           intraSitePath: IMI
@@ -72,18 +76,18 @@ params:
           intraSitePath: IMI
     networkelements:
         - soamfunction: DSR (active/standby pair)
-          soamflavor: oam_flavor
+          soamflavor: damp_flavor
           soamprofile: DSR Guest
           networks:
             - name: XMI
-              cidr: 192.168.0.0/24
+              cidr: 172.1.0.0/16
               routed: true
               shared: true
               dns_nameservers: 
                 - 192.168.56.180
                 - 10.75.137.245
             - name: IMI
-              cidr: 172.168.0.0/24
+              cidr: 172.10.0.0/16
               routed: false
               shared: true
           interfaces:
@@ -93,58 +97,8 @@ params:
             - function: DSR (multi-active cluster)
               mpflavor: damp_flavor
               mpprofile: DSR Guest
-              mpcount: 1
+              mpcount: 2 
               interfaces:
                   - XMI
                   - IMI
                   - XSI1
-          ipfeservergroups:
-            - function: IP Front End
-              ipfeflavor: damp_flavor
-              ipfeprofile: DSR Guest
-              ipfecount: 1
-              interfaces:
-                  - XMI
-                  - IMI
-                  - XSI1
-            - function: IP Front End
-              ipfeflavor: damp_flavor
-              ipfeprofile: DSR Guest
-              ipfecount: 1
-              interfaces:
-                  - XMI
-                  - IMI
-                  - XSI1
-
-
-extras:
-    - name: seagull
-      image: MEATOS6.106.0
-      flavor: oam_flavor
-      interfaces:
-          - nename: NO_NE
-            network: XMI
-          - nename: GLOBAL
-            network: XSI1
-      user-data: |
-          #cloud-config
-
-          runcmd:
-              - ifup eth1
-
-          write_files:
-              - path: /etc/sysconfig/network-scripts/ifcfg-eth1
-                permissions: '0644'
-                owner: root:root
-                content: |
-                    DEVICE=eth1
-                    ONBOOT=yes
-                    TYPE=Ethernet
-                    BOOTPROTO=dhcp
-                    DEFROUTE=no
-                    PEERDNS=no
-
-          packages:
-              - seagull
-              - seafood
-              - flock
