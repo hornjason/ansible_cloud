@@ -20,18 +20,15 @@ As OpenStack Clouds need to be created in our environment, we need to ensure to 
 
 To execute the Ansible Roles provided in this repository, the Cloud Administrator must fulfill the following requirements:
 -	At least 1 Install Server, 1 Controller/Network node and 1 Compute node
--	The Install server must be installed with OL 7.2 (not tested with other version although it may work)
--	<Outdated> All nodes have access to the Internet to pull packages from Oracle Public Yum, EPEL and OpenStack RDO - this should not apply since we are embedding the OpenStack RPMs as part of the deployment package
+-	The Install server must be installed with a RHEL derivative can be a VM.
 -	The Install server is physically connected to the same network as the OpenStack nodes through the External and Internal networks in the same Layer-2 domain - the minimal number of physical NICs must be reached
     -	The interconnect switch shall allow untagged traffic and DHCP traffic
     -	Currently, the first drop on the servers shall be for the external management; the second drop is used for PXE booting
 
 Typical workflow:
-- export https_proxy=adc-proxy.oracle.com:80
-- export http_proxy=adc-proxy.oracle.com:80
 - git config --global http.sslVerify false
-- git clone https://slc10vrt.us.oracle.com/jahorn/ansible_rdo.git
-- cd ansible_rdo
+- git clone 
+- cd ansible_cloud
 - edit bootstrap.sh (enable proxy etc..)
 - ./bootstrap.sh
 - ./deploy_utils_server.yml or ./deploy_utils_server_esxi.yml
@@ -46,13 +43,8 @@ If you recieve a error relating trusted certificates:
   
 ## Contributors
 
-Oracle CGBU - Platform Group
 
-Jason Horn: jason.horn@oracle.com
+Jason Horn: jason.horn@gmail.com
 
-JB Broccard: j.b.broccard@oracle.com
 
-## License
-
-This repository is intended only for Oracle CGBU use. Any use other than Oracle CGBU must be validated by Oracle CGBU Management.
 ***
